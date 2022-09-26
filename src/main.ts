@@ -1,8 +1,50 @@
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import * as Sentry from '@sentry/node'
+import ErrorSerializer from './common/error.serializer'
+import { IUser } from './common/user.model';
+
+declare global {
+  namespace Express {
+    interface Request {
+      user: IUser
+    }
+  }
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
+  app.useGlobalPipes(new ValidationPipe());
+
+  app.use(async (req, res, next) => {
+    try {
+      await next();
+    } catch (inErr: any) {
+      let error = inErr;
+      try {
+        error = JSON.parse(inErr);
+      } catch (e) {
+        Logger.error("Could not parse error message - is it JSON?: ", inErr)
+        error = inErr;
+      }
+      res.status = error.status || res.status || 500;
+      if (res.status >= 500) {
+        //Sentry.captureException(error); // send error to sentry
+        Logger.error(error);
+      } else {
+        Logger.log(error);
+      }
+  
+      res.body = ErrorSerializer.serializeError(res.status, error.message);
+      if (process.env.NODE_ENV === "production" && res.status === 500) {
+        res.body = "Unexpected error";
+      }
+      res.type = "application/vnd.api+json";
+    }
+  });
+
+  await app.listen(process.env.PORT);
+  console.log(`App running on: ${await app.getUrl()}`)
 }
 bootstrap();

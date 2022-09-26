@@ -1,0 +1,8 @@
+{
+  "service": {
+    "port": "0"
+  },
+  "redis": {
+    "url": "REDIS_URL"
+  }
+}

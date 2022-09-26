@@ -1,0 +1,25 @@
+{
+  "service": {
+    "port": "PORT",
+    "token": "MICROSERVICE_TOKEN"
+  },
+  "logger": {
+    "level": "LOGGER_LEVEL"
+  },
+  "areasAPI": {
+    "url": "AREAS_API_URL"
+  },
+  "geostoreAPI": {
+    "url": "GEOSTORE_API_URL"
+  },
+  "layersAPI": {
+    "url": "LAYERS_API_URL"
+  },
+  "auth": {
+    "url": "AUTH_URL"
+  },
+  "redis": {
+    "url": "REDIS_URL"
+  },
+  "alertsSupported": "umd_as_it_happens"
+}

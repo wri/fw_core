@@ -1,0 +1,92 @@
+services:
+  develop:
+    build: .
+    ports:
+      - "4042:4042"
+    container_name: gfw
+    environment:
+      PORT: 4042
+      LOGGER_LEVEL: debug
+      AUTH_URL: https://staging-api.resourcewatch.org
+      AREAS_API_URL: https://staging-api.resourcewatch.org
+      GEOSTORE_API_URL: https://staging-api.resourcewatch.org/v1
+      REDIS_URL: redis://redis:6379
+      MICROSERVICE_TOKEN: ${microservice_token}
+      MONGODB_HOST: mongo
+      MONGODB_PORT: 27017
+      DB_SECRET: '{ "username": "admin", "password": "password" }'
+      DB_DATABASE: gfw_db
+    volumes:
+      - ./app:/opt/gfw/app
+      - ./config:/opt/gfw/config
+      - ./nodemon.json:/opt/gfw/nodemon.json
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - gfw-nest-network
+    command: yarn start:dev
+
+  mongo:
+    image: mongo:3.6
+    container_name: gfw-mongo-develop
+    ports:
+      - "27028:27017"
+    environment:
+      MONGO_INITDB_DATABASE: gfw_db
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_ROOT_USERNAME: admin
+    volumes:
+      - ./data/mongo/001_users.js:/docker-entrypoint-initdb.d/001_users.js:ro
+      - gfw-mongodb-data:/data/db
+    restart: always
+    networks:
+      - gfw-nest-network
+
+  redis:
+    image: bitnami/redis
+    ports:
+      - "6379:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - gfw-nest-network
+
+  test:
+    build: .
+    container_name: gfw-test
+    environment:
+      PORT: 0
+      NODE_ENV: test
+      LOGGER_LEVEL: debug
+      SUPPRESS_NO_CONFIG_WARNING: "true"
+      AUTH_URL: http://127.0.0.1:9000
+      REDIS_URL: redis://redis:6379
+      MONGODB_HOST: mongo
+      MONGODB_PORT: 27017
+      DB_SECRET: '{ "username": "admin", "password": "password" }'
+      DB_DATABASE: gfw_test
+    volumes:
+      - ./app:/opt/gfw/app
+      - ./config:/opt/gfw/config
+      - ./nodemon.json:/opt/gfw/nodemon.json
+      - ./jest.config.js:/opt/gfw/jest.config.js
+    networks:
+      - gfw-nest-network
+    command: yarn test:watch /src/areas/test/areas.e2e.spec.ts
+
+  docs:
+    build: .
+    ports:
+      - "40420:40420"
+    container_name: gfw-docs
+    volumes:
+      - ./docs:/opt/gfw/docs
+    command: yarn run docs -l 40420
+
+volumes:
+  gfw-mongodb-data:
+
+networks:
+  gfw-nest-network:
+    name: gfw-nest-network
