@@ -18,6 +18,7 @@ export class TeamAreaRelationController {
 
   @Post()
   async createTeamAreaRelation(@Body() body: CreateTeamAreaRelationDto): Promise<TeamAreaRelationDocument> {
+    console.log("CREATING")
     const area = await this.areasService.getAreaMICROSERVICE(body.areaId);
     if(!area) throw new HttpException("Area doesn't exist", HttpStatus.NOT_FOUND);
     const team = await this.teamsService.findById(body.teamId);

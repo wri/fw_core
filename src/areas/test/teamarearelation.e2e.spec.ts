@@ -194,7 +194,7 @@ describe('Area Team Relations', () => {
       const relation = await apiDbConnection.collection('teamarearelation').findOne({areaId: constants.testArea.id.toString(), teamId: team.insertedId.toString()})
       expect(relation).toBeNull();
 
-    });
+    }); 
   }); 
 
   afterAll(async () => {

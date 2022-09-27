@@ -6,12 +6,14 @@ import { Request } from "express";
 import { TeamMembersService } from '../services/teamMembers.service';
 import { EMemberRole, TeamMemberDocument } from '../models/teamMember.schema';
 import serializeTeam from '../serializers/team.serializer';
+import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
 
 @Controller('teams')
 export class TeamsController {
   constructor(
     private readonly teamsService: TeamsService,
-    private readonly teamMembersService: TeamMembersService
+    private readonly teamMembersService: TeamMembersService,
+    private readonly teamAreaRelationService: TeamAreaRelationService
   ) { }
   private readonly logger = new Logger(TeamsController.name)
 
@@ -32,10 +34,10 @@ export class TeamsController {
 
       team.members = members;
 
-      // TODO array of area ids
-      /*     const areas = await AreaService.getTeamAreas(teamId);
-          team.areas = [];
-          if (areas) team.areas = areas; */
+      // array of area ids
+      const areas = await this.teamAreaRelationService.find({teamId});
+        if(areas) team.areas = areas.map(area => area.areaId);
+        else team.areas = [];
 
       teamsToSend.push(team);
     }
@@ -82,10 +84,10 @@ export class TeamsController {
 
       team.members = members;
 
-      //TODO array of area ids
-      /*     const areas = await AreaService.getTeamAreas(teamId);
-          team.areas = [];
-          if (areas) team.areas = areas; */
+      // array of area ids
+      const areas = await this.teamAreaRelationService.find({teamId});
+        if(areas) team.areas = areas.map(area => area.areaId);
+        else team.areas = [];
 
       teamsToSend.push(team);
     }

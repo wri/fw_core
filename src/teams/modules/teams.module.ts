@@ -8,16 +8,17 @@ import { TeamMember, TeamMemberSchema } from '../models/teamMember.schema';
 import { IsAdminOrManagerMiddleware } from '../middleware/isAdminOrManager.middleware';
 import { IsAdminMiddleware } from '../middleware/isAdmin.middleware';
 import { UserService } from '../../common/user.service';
-import { DatabaseModule } from '../../common/database/database.module';
-import { DatabaseService } from 'src/common/database/database.service';
+import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
+import { TeamAreaRelation, TeamAreaRelationSchema } from '../../areas/models/teamAreaRelation.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Team.name, schema: TeamSchema }], 'teamsDb'),
-    MongooseModule.forFeature([{ name: TeamMember.name, schema: TeamMemberSchema }], 'teamsDb')
+    MongooseModule.forFeature([{ name: TeamMember.name, schema: TeamMemberSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: TeamAreaRelation.name, schema: TeamAreaRelationSchema }], 'apiDb')
   ],
   controllers: [TeamsController],
-  providers: [TeamsService, TeamMembersService, UserService]
+  providers: [TeamsService, TeamMembersService, UserService, TeamAreaRelationService]
 })
 export class TeamsModule {
   configure(consumer: MiddlewareConsumer) {

@@ -13,6 +13,8 @@ import ROLES from '../../common/testConstants';
 import { Connection } from 'mongoose';
 import { DatabaseService } from '../../common/database/database.service';
 import { TeamsModule } from '../modules/teams.module';
+import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
+import { TeamAreaRelation } from '../../areas/models/teamAreaRelation.schema';
 
 // @ts-ignore
 describe('Teams', () => {
@@ -31,8 +33,10 @@ describe('Teams', () => {
         UserService, 
         TeamMembersService,
         DatabaseService,
+        TeamAreaRelationService,
         {provide: getModelToken(Team.name, 'teamsDb'), useValue: jest.fn()},
-        {provide: getModelToken(TeamMember.name, 'teamsDb'), useValue: jest.fn()}
+        {provide: getModelToken(TeamMember.name, 'teamsDb'), useValue: jest.fn()},
+        {provide: getModelToken(TeamAreaRelation.name, 'apiDb'), useValue: jest.fn()}
       ],
     })
       .overrideProvider(UserService)
