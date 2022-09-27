@@ -5,6 +5,11 @@ import { GeostoreService } from "./geostore.service";
 import config = require('config');
 import { CoverageService } from "./coverage.service";
 import { DatasetService } from "./dataset.service";
+import { TemplateAreaRelationService } from "./templateAreaRelation.service";
+import { TemplatesService } from "../../templates/templates.service";
+import { TeamDocument } from "../../teams/models/team.schema";
+import { TeamsService } from "../../teams/services/teams.service";
+import { TeamAreaRelationService } from "./teamAreaRelation.service";
 
 const ALERTS_SUPPORTED = config.get("alertsSupported");
 
@@ -13,24 +18,16 @@ export class ResponseService {
     constructor(
         private readonly geostoreService: GeostoreService,
         private readonly coverageService: CoverageService,
-        private readonly datasetService: DatasetService
+        private readonly datasetService: DatasetService,
+        private readonly templateAreaRelationService: TemplateAreaRelationService,
+        private readonly teamAreaRelationService: TeamAreaRelationService,
+        private readonly templatesService: TemplatesService,
+        private readonly teamsService: TeamsService
         ) { }
 async buildAreasResponse(areas: IArea[], objects, user: IUser) {
     const { geostoreObj, coverageObj } = objects;
     const areasWithGeostore = areas.filter(area => area.attributes.geostore);
     const promises = [];
-/*     const templatesHash = {}; TODO templates for areas
-
-    let templatesData = [];
-    for await (const area of areasWithGeostore) {
-      const templateIds = await AreaTemplateRelationService.getAllTemplatesForArea(area.id);
-      let templates = [];
-      for await (const id of templateIds) {
-        if (!templatesHash[id]) templatesHash[id] = await TemplatesService.getTemplate(id);
-        templates.push(templatesHash[id]);
-      }
-      templatesData.push(templates);
-    } */
 
     if (!geostoreObj) {
       promises.push(Promise.all(areasWithGeostore.map(area => this.geostoreService.getGeostore(area.attributes.geostore, user.token))));
@@ -48,8 +45,29 @@ async buildAreasResponse(areas: IArea[], objects, user: IUser) {
         )
       );
     }
+    promises.push(
+      Promise.all(
+        areasWithGeostore.map(async area => {
+          const templateIds = await this.templateAreaRelationService.find({areaId: area.id});
+          return this.templatesService.find({'_id': {$in: templateIds.map(templateId => templateId.templateId)}})
+        })
+      )
+    )
+    const userTeams: TeamDocument[] = await this.teamsService.findAllByUserId(user.id); // get list of user's teams
+    promises.push(
+      Promise.all(
+        areasWithGeostore.map(async area => {
+          const areaTeams: string[] = await this.teamAreaRelationService.getAllTeamsForArea(area.id); // get list of teams associated with area
+          const filteredTeams: TeamDocument[] = userTeams.filter(userTeam => areaTeams.includes(userTeam.id)); // match area teams to user teams
+          return filteredTeams.map(filteredTeam => {
+            return { id: filteredTeam.id, name: filteredTeam.name }
+          })
+        })
+      )
+    )
+
     try {
-      const [geostoreData, coverageData] = await Promise.all(promises);
+      const [geostoreData, coverageData, templateData, teamData] = await Promise.all(promises);
       return areasWithGeostore.map((area, index) => {
         let geostore, coverage;
 
@@ -70,7 +88,8 @@ async buildAreasResponse(areas: IArea[], objects, user: IUser) {
             geostore,
             datasets,
             coverage,
-            //reportTemplate TODO templates
+            reportTemplate: templateData[index],
+            teams: teamData[index]
           }
         };
       });

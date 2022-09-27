@@ -7,9 +7,22 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
     imports: [
         MongooseModule.forRootAsync({
             imports: [ConfigModule],
-            useFactory: (configService: ConfigService) => ({ uri: `mongodb://${configService.get('mongodb.secret.username')}:${configService.get('mongodb.secret.password')}@${configService.get('mongodb.host')}:${configService.get('mongodb.port')}/${configService.get('mongodb.database')}?authSource=admin` }),
+            connectionName: 'apiDb',
+            useFactory: (configService: ConfigService) => ({ uri: `mongodb://${configService.get('mongodb.secret.username')}:${configService.get('mongodb.secret.password')}@${configService.get('mongodb.host')}:${configService.get('mongodb.port')}/api?authSource=admin`}),//, connectionName: 'database' }),
             inject: [ConfigService]
         }),
+        MongooseModule.forRootAsync({
+            imports: [ConfigModule],
+            connectionName: 'teamsDb',
+            useFactory: (configService: ConfigService) => ({ uri: `mongodb://${configService.get('mongodb.secret.username')}:${configService.get('mongodb.secret.password')}@${configService.get('mongodb.host')}:${configService.get('mongodb.port')}/teams?authSource=admin`}),//, connectionName: 'database' }),
+            inject: [ConfigService]
+        }),
+        MongooseModule.forRootAsync({
+            imports: [ConfigModule],
+            connectionName: 'formsDb',
+            useFactory: (configService: ConfigService) => ({ uri: `mongodb://${configService.get('mongodb.secret.username')}:${configService.get('mongodb.secret.password')}@${configService.get('mongodb.host')}:${configService.get('mongodb.port')}/forms?authSource=admin`}),//, connectionName: 'database' }),
+            inject: [ConfigService]
+        })
     ],
     providers: [DatabaseService],
     exports: [DatabaseService]

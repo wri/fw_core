@@ -15,7 +15,7 @@ import { UserService } from '../common/user.service';
 @Injectable()
 export class AnswersService {
   constructor(
-    @InjectModel(Answer.name) private answerModel: Model<AnswerDocument>,
+    @InjectModel(Answer.name, 'formsDb') private answerModel: Model<AnswerDocument>,
     private readonly teamMembersService: TeamMembersService,
     private readonly userService: UserService
 ) { }

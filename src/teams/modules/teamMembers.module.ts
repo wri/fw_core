@@ -9,11 +9,13 @@ import { IsAdminMiddleware } from '../middleware/isAdmin.middleware';
 import { IsTeamMemberMiddleware } from '../middleware/isTeamMember.middleware';
 import { IsAdminOrManagerMiddleware } from '../middleware/isAdminOrManager.middleware';
 import { UserService } from '../../common/user.service';
+import { DatabaseModule } from '../../common/database/database.module';
+import { DatabaseService } from 'src/common/database/database.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{name: Team.name, schema: TeamSchema}]),
-    MongooseModule.forFeature([{name: TeamMember.name, schema: TeamMemberSchema}])
+    MongooseModule.forFeature([{name: Team.name, schema: TeamSchema}], 'teamsDb'),
+    MongooseModule.forFeature([{name: TeamMember.name, schema: TeamMemberSchema}], 'teamsDb')
   ],
   controllers: [TeamMembersController],
   providers: [TeamsService, TeamMembersService, UserService]

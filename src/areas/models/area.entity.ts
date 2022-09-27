@@ -1,3 +1,5 @@
+import { ITemplate } from "src/templates/models/template.schema";
+
 export class Area {}
 
 interface IFeature {
@@ -42,8 +44,9 @@ export interface IArea {
         iso: any;
         coverage: any;
         teamId?: string
+        teams?: {id: string, name: string}[];
+        reportTemplate?: ITemplate[];
     }
-    teams?: {id: string, name: string}[];
   }
 
 export interface IDataset {

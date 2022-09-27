@@ -11,6 +11,7 @@ import { IArea, IAreaResponse } from '../models/area.entity';
 import { Request } from "express"
 import { IUser } from '../../common/user.model';
 import { ResponseService } from '../services/response.service';
+import { TemplatesService } from '../../templates/templates.service';
 
 @Controller('forest-watcher/areas')
 export class AreasController {
@@ -18,6 +19,7 @@ export class AreasController {
     private readonly areasService: AreasService,
     private readonly responseService: ResponseService,
     private readonly teamsService: TeamsService,
+    private readonly templatesService: TemplatesService,
     private readonly teamAreaRelationService: TeamAreaRelationService,
     private readonly templateAreaRelationService: TemplateAreaRelationService
   ) { }
@@ -66,18 +68,13 @@ export class AreasController {
         });
         // get a users teams
         const userTeams = await this.teamsService.findAllByUserId(user.id); // get list of user's teams
-        //console.log(userTeams)
         //get areas for each team
         for await (const team of userTeams) {
           let teamAreas: string[] = await this.teamAreaRelationService.getAllAreasForTeam(team.id);
-          //console.log("team areas", teamAreas)
           let fullTeamAreas: Promise<IArea>[] = [];
-          //console.log("full team areas", fullTeamAreas)
           // get full area for each array member and push to user areas array
           for await (const teamAreaId of teamAreas) {
             let area: Promise<IArea> = this.areasService.getAreaMICROSERVICE(teamAreaId);
-            console.log("area", area)
-            console.log(fullTeamAreas)
             fullTeamAreas.push(area)
           }
           let resolvedTeamAreas = await Promise.all(fullTeamAreas);
@@ -87,7 +84,6 @@ export class AreasController {
         // format areas
         data = await this.responseService.buildAreasResponse(userAreas, {}, user);
       } catch (error: any) {
-        console.log(error)
         throw new HttpException('Failed to get user and team areas', error.status);
       }
     }
@@ -99,6 +95,8 @@ export class AreasController {
   @Post()
   @UseInterceptors(FileInterceptor('image', { dest: './tmp' }))
   async createArea(@UploadedFile() image: Express.Multer.File, @Req() request: Request, @Body() body: CreateAreaDto): Promise<IAreaResponse> {
+    if(!body.name) throw new HttpException("Request must contain a name", HttpStatus.BAD_REQUEST);
+    if(!body.geojson) throw new HttpException("Request must contain a geojson", HttpStatus.BAD_REQUEST);
     if(!image) throw new HttpException("Request must contain an image", HttpStatus.BAD_REQUEST);
     const { user }: {user: IUser} = request;
     const { geojson, name } = body;
@@ -123,7 +121,7 @@ export class AreasController {
     return { data };
   }
   
-  // GET /forest-watcher/area/:id TODO build area response
+  // GET /forest-watcher/area/:id
   // get an area user created or that is part of a team
   @Get('/:id')
   async findOneArea(@Req() request: Request, @Param('id') id: string): Promise<IAreaResponse> {
@@ -138,19 +136,9 @@ export class AreasController {
     if (filteredTeams.length > 0) area = await this.areasService.getAreaMICROSERVICE(id); // get the area using the microservice token
     else area = await this.areasService.getArea(id, user); // assume the area is a user area. Throws an error if not allowed
 
-    area.teams = filteredTeams.map(team => {
-      return { id: team.id, name: team.name };
-    });
+    const [ data ] = await this.responseService.buildAreasResponse([ area ], { }, user);
 
-    /* // add templates TODO
-    const templates = await AreaTemplateRelationService.getAllTemplatesForArea(ctx.request.params.id);
-    let reportTemplates = [];
-    for await (const template of templates) {
-      reportTemplates.push(await TemplatesService.getTemplate(template));
-    }
-    area.reportTemplate = reportTemplates; */
-
-    return { data: area };
+    return { data };
   }
 
   @Patch('/:id') // TODO sort out geostore - id or full object?
@@ -160,6 +148,9 @@ export class AreasController {
     // get the area
     let existingArea = await this.areasService.getArea(id, user);
     if (!existingArea) throw new HttpException("Area not found", HttpStatus.NOT_FOUND);
+    if(!updateAreaDto.name) throw new HttpException("Request must contain a name", HttpStatus.BAD_REQUEST);
+    if(!updateAreaDto.geojson) throw new HttpException("Request must contain a geojson", HttpStatus.BAD_REQUEST);
+    if(!image) throw new HttpException("Request must contain an image", HttpStatus.BAD_REQUEST);
     const { geojson, name } = updateAreaDto;
 
     let data = null;
@@ -201,8 +192,8 @@ export class AreasController {
     const deletedArea: IArea = await this.areasService.delete(id, user);
 
     // delete area relations
-    this.teamAreaRelationService.delete({areaId: id});
-    this.templateAreaRelationService.delete({areaId: id});
+    await this.teamAreaRelationService.delete({areaId: id});
+    await this.templateAreaRelationService.delete({areaId: id});
 
     return deletedArea.id
   }

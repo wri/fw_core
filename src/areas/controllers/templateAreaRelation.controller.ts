@@ -7,7 +7,7 @@ import { TemplatesService } from '../../templates/templates.service';
 import { TemplateAreaRelationService } from '../services/templateAreaRelation.service';
 import { TemplateAreaRelationDocument } from '../models/templateAreaRelation.schema';
 
-@Controller('forest-watcher/areas/templates')
+@Controller('forest-watcher/arearelations/templates')
 export class TemplateAreaRelationController {
   constructor(
     private readonly areasService: AreasService,
@@ -24,6 +24,11 @@ export class TemplateAreaRelationController {
     const template = await this.templatesService.getTemplate(body.templateId);
     if(!template) throw new HttpException("Template doesn't exist", HttpStatus.NOT_FOUND);
     return (await this.templateAreaRelationService.create(body))
+  }
+
+  @Delete()
+  async deleteTemplateAreaRelation(@Body() body: CreateTemplateAreaRelationDto): Promise<void> {
+    await this.templateAreaRelationService.delete(body);
   }
 
   // INTERNAL USE ONLY

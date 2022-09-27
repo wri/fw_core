@@ -7,7 +7,7 @@ import { TemplateAreaRelation, TemplateAreaRelationDocument } from "../models/te
 export class TemplateAreaRelationService {
 
     constructor(
-        @InjectModel(TemplateAreaRelation.name) private templateAreaRelationModel: Model<TemplateAreaRelationDocument>
+        @InjectModel(TemplateAreaRelation.name, 'apiDb') private templateAreaRelationModel: Model<TemplateAreaRelationDocument>
         ) { }
 
     async create({areaId, templateId}): Promise<TemplateAreaRelationDocument> {
@@ -20,7 +20,7 @@ export class TemplateAreaRelationService {
         return await this.templateAreaRelationModel.find(filter);
     }
 
-    delete(filter): void {
-        this.templateAreaRelationModel.deleteMany(filter);
+    async delete(filter): Promise<void> {
+       await this.templateAreaRelationModel.deleteMany(filter);
     }
 }

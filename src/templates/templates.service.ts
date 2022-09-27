@@ -8,7 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 @Injectable()
 export class TemplatesService {
   constructor(
-    @InjectModel(Template.name) private templateModel: Model<TemplateDocument>
+    @InjectModel(Template.name, 'formsDb') private templateModel: Model<TemplateDocument>
 ) { }
 
   create(createTemplateDto: CreateTemplateDto) {
@@ -19,7 +19,7 @@ export class TemplatesService {
     return `This action returns all templates`;
   }
 
-  async findSome(filter): Promise<TemplateDocument[]> {
+  async find(filter): Promise<TemplateDocument[]> {
     return await this.templateModel.find(filter);
   }
 

@@ -41,7 +41,7 @@ export class TemplatesController {
       });
     } */
     this.logger.log("Obtaining all user templates");
-    const templates = await this.templatesService.findSome(filter) //  ReportsModel.find(filter);
+    const templates = await this.templatesService.find(filter) //  ReportsModel.find(filter);
 
     // get answer count for each report
     const numReports = templates.length;

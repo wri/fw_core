@@ -17,7 +17,7 @@ import { TeamsModule } from '../modules/teams.module';
 // @ts-ignore
 describe('Teams', () => {
   let app: INestApplication;
-  let dbConnection: Connection;
+  let teamsDbConnection: Connection;
   let userService = {
     authorise: (token) => ROLES[token],
     getNameByIdMICROSERVICE: (id) => 'Full Name'
@@ -31,8 +31,8 @@ describe('Teams', () => {
         UserService, 
         TeamMembersService,
         DatabaseService,
-        {provide: getModelToken(Team.name), useValue: jest.fn()},
-        {provide: getModelToken(TeamMember.name), useValue: jest.fn()}
+        {provide: getModelToken(Team.name, 'teamsDb'), useValue: jest.fn()},
+        {provide: getModelToken(TeamMember.name, 'teamsDb'), useValue: jest.fn()}
       ],
     })
       .overrideProvider(UserService)
@@ -41,13 +41,13 @@ describe('Teams', () => {
 
     app = moduleRef.createNestApplication();
     await app.init();
-    dbConnection = moduleRef.get<DatabaseService>(DatabaseService).getDbHandle();
+    teamsDbConnection = moduleRef.get<DatabaseService>(DatabaseService).getTeamsHandle();
   });
 
   describe('GET /teams/myinvites', () => {
     afterEach(async () => {
-      await dbConnection.collection('teams').deleteMany({});
-      await dbConnection.collection('teammembers').deleteMany({});
+      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('teammembers').deleteMany({});
     })
 
     it('should return a 401 without authorisation', async () => {
@@ -58,10 +58,10 @@ describe('Teams', () => {
 
     it('should return an array of teams', async () => {
       // add a team
-      const team = await dbConnection.collection('teams').insertOne({name: 'Test'});
-      await dbConnection.collection('teams').insertOne({name: 'Test2'});
+      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      await teamsDbConnection.collection('teams').insertOne({name: 'Test2'});
       // add an invited user
-      await dbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), email: ROLES.USER.email, status: EMemberStatus.Invited})
+      await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), email: ROLES.USER.email, status: EMemberStatus.Invited})
       const response = await request(app.getHttpServer())
       .get(`/teams/myinvites`)
       .set('Authorization', 'USER')
@@ -76,18 +76,18 @@ describe('Teams', () => {
   describe('GET /teams/:teamId', () => {
 
     afterEach(async () => {
-      await dbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('teams').deleteMany({});
     })
 
     it('should return a 401 without authorisation', async () => {
-      const doc = await dbConnection.collection('teams').insertOne({name: 'Test'});
+      const doc = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
       return await request(app.getHttpServer())
       .get(`/teams/${doc.insertedId}`)
       .expect(401)
     });
 
     it('should return a team', async () => {
-    const doc = await dbConnection.collection('teams').insertOne({name: 'Test'});
+    const doc = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
     const response = await request(app.getHttpServer())
       .get(`/teams/${doc.insertedId}`)
       .set('Authorization', 'USER')
@@ -103,8 +103,8 @@ describe('Teams', () => {
   describe('GET /teams/user/:id', () => {
 
     afterEach(async () => {
-      await dbConnection.collection('teams').deleteMany({});
-      await dbConnection.collection('teammembers').deleteMany({});
+      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('teammembers').deleteMany({});
     })
 
     it('should return a 401 without authorisation', async () => {
@@ -114,10 +114,10 @@ describe('Teams', () => {
     });
 
     it('should return an array of teams', async () => {
-    const team = await dbConnection.collection('teams').insertOne({name: 'Test'});
-    await dbConnection.collection('teams').insertOne({name: 'Test2'});
+    const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+    await teamsDbConnection.collection('teams').insertOne({name: 'Test2'});
     // add an invited user
-    await dbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor})
+    await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor})
     const response = await request(app.getHttpServer())
     .get(`/teams/user/${ROLES.USER.id}`)
     .set('Authorization', 'USER')
@@ -132,8 +132,8 @@ describe('Teams', () => {
   describe('POST /teams', () => {
 
     afterEach(async () => {
-      await dbConnection.collection('teams').deleteMany({});
-      await dbConnection.collection('teammembers').deleteMany({});
+      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('teammembers').deleteMany({});
     });
 
     it('should return a 401 without authorisation', async () => {
@@ -149,7 +149,7 @@ describe('Teams', () => {
       .set('Authorization', 'USER')
       .expect(201)
 
-      const newTeam = dbConnection.collection('teams').findOne({name: "New Team"})
+      const newTeam = teamsDbConnection.collection('teams').findOne({name: "New Team"})
       expect(newTeam).toBeDefined();
     });
 
@@ -172,7 +172,7 @@ describe('Teams', () => {
       .set('Authorization', 'USER')
       .expect(201)
 
-      const member = await dbConnection.collection('teammembers').findOne({teamId: response.body.data.id, userId: ROLES.USER.id})
+      const member = await teamsDbConnection.collection('teammembers').findOne({teamId: response.body.data.id, userId: ROLES.USER.id})
       expect(member).toBeDefined();
       expect(member).toHaveProperty('role', EMemberRole.Administrator);
     });
@@ -182,8 +182,8 @@ describe('Teams', () => {
   describe('PATCH /teams/:id', () => {
 
     afterEach(async () => {
-      await dbConnection.collection('teams').deleteMany({});
-      await dbConnection.collection('teammembers').deleteMany({});
+      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('teammembers').deleteMany({});
     });
 
     it('should return a 401 without authorisation', async () => {
@@ -193,8 +193,8 @@ describe('Teams', () => {
     });
 
     it('should return a 403 if the user is not an admin or manager of the team', async () => {
-      const team = await dbConnection.collection('teams').insertOne({name: 'Test'});
-      await dbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
       return await request(app.getHttpServer())
       .patch(`/teams/${team.insertedId.toString()}`)
       .set('Authorization', 'USER')
@@ -202,8 +202,8 @@ describe('Teams', () => {
     });
 
     it('should succeed if the user is a manager of the team', async () => {
-      const team = await dbConnection.collection('teams').insertOne({name: 'Test'});
-      await dbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator});
+      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator});
       await request(app.getHttpServer())
       .patch(`/teams/${team.insertedId.toString()}`)
       .send({name: "Update"})
@@ -212,8 +212,8 @@ describe('Teams', () => {
     });
 
     it('should succeed if the user is an admin of the team', async () => {
-      const team = await dbConnection.collection('teams').insertOne({name: 'Test'});
-      await dbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
+      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
       await request(app.getHttpServer())
       .patch(`/teams/${team.insertedId.toString()}`)
       .send({name: "Update"})
@@ -222,21 +222,21 @@ describe('Teams', () => {
     });
 
     it('should update the record', async () => {
-      const team = await dbConnection.collection('teams').insertOne({name: 'Test'});
-      await dbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
+      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
       await request(app.getHttpServer())
       .patch(`/teams/${team.insertedId.toString()}`)
       .send({name: "Update"})
       .set('Authorization', 'USER')
       .expect(200)
 
-      const updatedTeam = await dbConnection.collection('teams').findOne({'_id': team.insertedId});
+      const updatedTeam = await teamsDbConnection.collection('teams').findOne({'_id': team.insertedId});
       expect(updatedTeam.name).toEqual('Update');
     });
 
     it('should return the record', async () => {
-      const team = await dbConnection.collection('teams').insertOne({name: 'Test'});
-      await dbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
+      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
       const response = await request(app.getHttpServer())
       .patch(`/teams/${team.insertedId.toString()}`)
       .send({name: "Update"})
@@ -254,8 +254,8 @@ describe('Teams', () => {
   describe('DELETE /teams/:id', () => {
 
     afterEach(async () => {
-      await dbConnection.collection('teams').deleteMany({});
-      await dbConnection.collection('teammembers').deleteMany({});
+      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('teammembers').deleteMany({});
     });
 
     it('should return a 401 without authorisation', async () => {
@@ -265,8 +265,8 @@ describe('Teams', () => {
     });
 
     it('should return a 403 if the user is a monitor of the team', async () => {
-      const team = await dbConnection.collection('teams').insertOne({name: 'Test'});
-      await dbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
       return await request(app.getHttpServer())
       .delete(`/teams/${team.insertedId.toString()}`)
       .set('Authorization', 'USER')
@@ -274,8 +274,8 @@ describe('Teams', () => {
     });
 
     it('should return a 403 if the user is a manager of the team', async () => {
-      const team = await dbConnection.collection('teams').insertOne({name: 'Test'});
-      await dbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
+      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
       await request(app.getHttpServer())
       .delete(`/teams/${team.insertedId.toString()}`)
       .set('Authorization', 'USER')
@@ -283,8 +283,8 @@ describe('Teams', () => {
     });
 
     it('should succeed if the user is an admin of the team', async () => {
-      const team = await dbConnection.collection('teams').insertOne({name: 'Test'});
-      await dbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator});
+      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator});
       await request(app.getHttpServer())
       .delete(`/teams/${team.insertedId.toString()}`)
       .set('Authorization', 'USER')
@@ -292,34 +292,34 @@ describe('Teams', () => {
     });
 
     it('should delete the team', async () => {
-      const team = await dbConnection.collection('teams').insertOne({name: 'Test'});
-      await dbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator});
+      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator});
       await request(app.getHttpServer())
       .delete(`/teams/${team.insertedId.toString()}`)
       .set('Authorization', 'USER')
       .expect(200)
 
-      const deletedTeam = await dbConnection.collection('teams').findOne({_id: team.insertedId});
+      const deletedTeam = await teamsDbConnection.collection('teams').findOne({_id: team.insertedId});
       expect(deletedTeam).toBeNull();
     });
 
     it('should delete all team users', async () => {
-      const team = await dbConnection.collection('teams').insertOne({name: 'Test'});
-      await dbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator});
+      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator});
       await request(app.getHttpServer())
       .delete(`/teams/${team.insertedId.toString()}`)
       .set('Authorization', 'USER')
       .expect(200)
 
-      const deletedTeamMember = await dbConnection.collection('teammembers').findOne({teamId: team.insertedId.toString()});
+      const deletedTeamMember = await teamsDbConnection.collection('teammembers').findOne({teamId: team.insertedId.toString()});
       expect(deletedTeamMember).toBeNull();
     });
 
   });
 
   afterAll(async () => {
-    await dbConnection.collection('teams').deleteMany({});
-    await dbConnection.collection('teammembers').deleteMany({});
+    await teamsDbConnection.collection('teams').deleteMany({});
+    await teamsDbConnection.collection('teammembers').deleteMany({});
 
     await app.close();
   })

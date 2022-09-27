@@ -7,7 +7,7 @@ import { TeamAreaRelation, TeamAreaRelationDocument } from "../models/teamAreaRe
 export class TeamAreaRelationService {
 
     constructor(
-        @InjectModel(TeamAreaRelation.name) private teamAreaRelationModel: Model<TeamAreaRelationDocument>
+        @InjectModel(TeamAreaRelation.name, 'apiDb') private teamAreaRelationModel: Model<TeamAreaRelationDocument>
         ) { }
 
     async create({areaId, teamId}): Promise<TeamAreaRelationDocument> {
@@ -30,7 +30,7 @@ export class TeamAreaRelationService {
         return await this.teamAreaRelationModel.find(filter);
     }
 
-    delete(filter): void {
-        this.teamAreaRelationModel.deleteMany(filter)
+    async delete(filter): Promise<void> {
+        await this.teamAreaRelationModel.deleteMany(filter)
     }
 }
