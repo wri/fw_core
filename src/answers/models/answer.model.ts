@@ -27,7 +27,7 @@ export interface IAnswer {
 @Schema()
 export class Answer {
     @Prop({required: true})
-    report: mongoose.Schema.Types.ObjectId; // template ID
+    report: string; // template ID
 
     @Prop({required: true})
     reportName: string; // report answer name
@@ -48,7 +48,7 @@ export class Answer {
     areaOfInterestName: string;
 
     @Prop({required: false})
-    areaOfInterest: mongoose.Schema.Types.ObjectId;
+    areaOfInterest: string;
 
     @Prop({required: true})
     language: string; 
@@ -60,7 +60,7 @@ export class Answer {
     clickedPosition: [];
 
     @Prop({required: true})
-    user: mongoose.Schema.Types.ObjectId;
+    user: string;
 
     @Prop()
     responses: [IAnswerResponse];

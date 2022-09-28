@@ -61,13 +61,13 @@ export class TemplateQuestion {
     @Prop({required: true, default: false})
     required: boolean;
 
-    @Prop({required: true, default: false})
+    @Prop()
     order?: number;
 
-    @Prop({required: true})
+    @Prop()
     childQuestions?: ITemplateChildQuestion[]
 
-    @Prop({required: true})
+    @Prop()
     conditions: {name?: string, value?: number}[]
 }
 
@@ -96,6 +96,9 @@ export class Template {
 
     @Prop({required: true, default: Date.now})
     createdAt: string;
+
+    @Prop({required: false})
+    answersCount?: number;
 }
 
 export interface TemplateDocument extends ITemplate, mongoose.Document {}

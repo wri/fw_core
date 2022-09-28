@@ -11,8 +11,9 @@ export class TemplatesService {
     @InjectModel(Template.name, 'formsDb') private templateModel: Model<TemplateDocument>
 ) { }
 
-  create(createTemplateDto: CreateTemplateDto) {
-    return 'This action adds a new template';
+  async create(createTemplateDto: CreateTemplateDto): Promise<TemplateDocument> {
+    const template = await new this.templateModel(createTemplateDto).save();
+    return template
   }
 
   findAll() {

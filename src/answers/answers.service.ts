@@ -10,11 +10,13 @@ import { EMemberRole } from '../teams/models/teamMember.schema';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import { UserService } from '../common/user.service';
+import { Template, TemplateDocument } from '../templates/models/template.schema';
 
 
 @Injectable()
 export class AnswersService {
   constructor(
+    @InjectModel(Template.name, 'formsDb') private templateModel: Model<TemplateDocument>,
     @InjectModel(Answer.name, 'formsDb') private answerModel: Model<AnswerDocument>,
     private readonly teamMembersService: TeamMembersService,
     private readonly userService: UserService

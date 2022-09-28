@@ -6,7 +6,7 @@ import { IUser } from '../common/user.model';
 import { Request } from "express"
 import { AnswersService } from '../answers/answers.service';
 import serializeTemplate from './serializers/template.serializer';
-import { ITemplateResponse } from './models/template.schema';
+import { ITemplateResponse, TemplateDocument } from './models/template.schema';
 import { IAnswerReturn } from '../answers/models/answer.model';
 import { TeamsService } from '../teams/services/teams.service';
 import serializeAnswers from '../answers/serializers/answers.serializer';
@@ -21,8 +21,23 @@ export class TemplatesController {
   private readonly logger = new Logger(TemplatesController.name);
   
   @Post()
-  create(@Body() createTemplateDto: CreateTemplateDto) {
-    return this.templatesService.create(createTemplateDto);
+  async create(@Req() request: Request): Promise<ITemplateResponse> {
+    const {body, user}: {body: CreateTemplateDto, user: IUser} = request
+    if (body.public && user.role !== "ADMIN") throw new HttpException("You must be an administrator to create a public template", HttpStatus.FORBIDDEN);
+
+    const template = {
+      name: body.name,
+      user: user.id,
+      languages: body.languages,
+      defaultLanguage: body.defaultLanguage,
+      questions: body.questions,
+      public: body.public,
+      status: body.status
+    }
+
+    const savedTemplate = await this.templatesService.create(template)
+
+    return {data: serializeTemplate(savedTemplate)};
   }
 
   @Get()
@@ -35,13 +50,9 @@ export class TemplatesController {
         }
       ]
     };
-/*     if (ctx.state.query) {
-      Object.keys(ctx.state.query).forEach(key => {
-        filter.$and.push({ [key]: ctx.state.query[key] });
-      });
-    } */
+
     this.logger.log("Obtaining all user templates");
-    const templates = await this.templatesService.find(filter) //  ReportsModel.find(filter);
+    const templates = await this.templatesService.find(filter);
 
     // get answer count for each report
     const numReports = templates.length;
@@ -57,7 +68,7 @@ export class TemplatesController {
           report: templates[i].id
         };
       }
-      const answers = await this.answersService.findSome(answersFilter); // AnswersModel.count(answersFilter);
+      const answers = await this.answersService.findSome(answersFilter);
       templates[i].answersCount = answers.length || 0;
     }
 
@@ -85,13 +96,32 @@ export class TemplatesController {
 
     if (!answers) {
       throw new HttpException("Answers not found for this user", HttpStatus.NOT_FOUND)
-      return;
     } else return { data: serializeAnswers(answers) };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return null
+  @Get('/:id')
+  async findOne(@Param('id') id: string, @Req() request: Request): Promise<ITemplateResponse> {
+    const { user }: {user: IUser} = request;
+
+    this.logger.log("Obtaining template", id);
+    let template: TemplateDocument = await this.templatesService.findOne({id});
+
+    // get answer count for each report
+    let answersFilter = {};
+    if (user.role === "ADMIN" || user.id === template.user) {
+      answersFilter = {
+        report: template.id
+      };
+    } else {
+      answersFilter = {
+        user: user.id,
+        report: template.id
+      };
+    }
+    const answers = await this.answersService.findSome(answersFilter);
+    template.answersCount = answers.length;
+
+    return {data: serializeTemplate(template)};
   }
 
   @Patch(':id')

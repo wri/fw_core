@@ -10,6 +10,7 @@ import { AreasModule } from './areas/modules/areas.module';
 import { DatabaseModule } from './common/database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './common/configuration';
+import { TemplatesModule } from './templates/templates.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import configuration from './common/configuration';
     TeamMembersModule,
     AreasModule,
     DatabaseModule,
+    TemplatesModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration]
