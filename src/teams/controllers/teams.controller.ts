@@ -99,6 +99,7 @@ export class TeamsController {
   async create(@Req() request: Request): Promise<any> {
 
     const { body } = request
+    if(!body.name) throw new HttpException("Team must have a name", HttpStatus.BAD_REQUEST);
     const team: TeamDocument = await this.teamsService.create(body.name, body.loggedUser);
     return { data: serializeTeam(team) };
   }

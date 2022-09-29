@@ -73,8 +73,7 @@ services:
       - ./jest.config.js:/opt/gfw/jest.config.js
     networks:
       - gfw-nest-network
-    command: yarn test:watch /src/templates/tests/templates.e2e.spec.ts
-
+    command: yarn test:watch src/templates/tests/templates.e2e.spec.ts
   docs:
     build: .
     ports:

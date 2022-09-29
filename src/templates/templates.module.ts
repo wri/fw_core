@@ -11,6 +11,8 @@ import { Answer, AnswerSchema } from '../answers/models/answer.model';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
 import { Team, TeamSchema } from '../teams/models/team.schema';
 import { TeamMember, TeamMemberSchema } from '../teams/models/teamMember.schema';
+import { TemplateAreaRelationService } from '../areas/services/templateAreaRelation.service';
+import { TemplateAreaRelation, TemplateAreaRelationSchema } from '../areas/models/templateAreaRelation.schema';
 
 @Module({
   imports: [
@@ -18,14 +20,17 @@ import { TeamMember, TeamMemberSchema } from '../teams/models/teamMember.schema'
     MongooseModule.forFeature([{ name: Answer.name, schema: AnswerSchema }], 'formsDb'),
     MongooseModule.forFeature([{ name: Team.name, schema: TeamSchema }], 'teamsDb'),
     MongooseModule.forFeature([{ name: TeamMember.name, schema: TeamMemberSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: TemplateAreaRelation.name, schema: TemplateAreaRelationSchema }], 'apiDb'),
   ],
   controllers: [TemplatesController],
   providers: [
-    TemplatesService, 
+    TemplatesService,
+    TemplateAreaRelationService,
     AnswersService, 
     TeamsService,
     TeamMembersService,
-    UserService]
+    UserService
+  ]
 })
 export class TemplatesModule {
   configure(consumer: MiddlewareConsumer) {

@@ -146,6 +146,14 @@ describe('Teams', () => {
       .expect(401)
     });
 
+    it('should return a 400 if no team name supplied', async () => {
+      await request(app.getHttpServer())
+      .post(`/teams`)
+      .send({})    
+      .set('Authorization', 'USER')
+      .expect(400)
+    });
+    
     it('should create a new team', async () => {
       await request(app.getHttpServer())
       .post(`/teams`)

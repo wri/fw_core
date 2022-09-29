@@ -74,6 +74,10 @@ export class AnswersService {
     return `This action removes a #${id} answer`;
   }
 
+  async delete(filter): Promise<void> {
+    await this.answerModel.deleteMany(filter)
+  }
+
   async addUsernameToAnswers(answers: IAnswer[]): Promise<IAnswer[]> {
 
     for await (let answer of answers) {

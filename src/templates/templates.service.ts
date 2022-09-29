@@ -25,15 +25,25 @@ export class TemplatesService {
   }
 
   async findOne(filter): Promise<TemplateDocument> {
-    return await this.templateModel.findOne(filter)
+    return await this.templateModel.findOne(filter);
+  }
+
+  async delete(filter): Promise<void> {
+    await this.templateModel.deleteMany(filter);
   }
 
   getTemplate(id: string) {
     return `This action returns a #${id} template`;
   }
 
-  update(id: number, updateTemplateDto: UpdateTemplateDto) {
-    return `This action updates a #${id} template`;
+  async update(id: string, updateTemplateDto: UpdateTemplateDto): Promise<TemplateDocument> {
+    let template = await this.templateModel.findById(id);
+    if(updateTemplateDto.name) template.name = updateTemplateDto.name
+    if(updateTemplateDto.status) template.status = updateTemplateDto.status
+    if(updateTemplateDto.languages) template.languages = updateTemplateDto.languages
+    if(updateTemplateDto.public) template.public = updateTemplateDto.public
+    const savedTemplate = await template.save();
+    return savedTemplate;
   }
 
   remove(id: number) {
