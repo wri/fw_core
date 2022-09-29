@@ -881,9 +881,67 @@ describe('Areas', () => {
       expect(response.body.data).toHaveProperty('id', template.insertedId.toString());
       expect(response.body.data).toHaveProperty('attributes');
       expect(response.body.data.attributes).toHaveProperty('answersCount', 1);
-      
+    });
+  });
+
+  describe('DELETE /templates/deleteAllAnswers', () => {
+
+    afterEach(async () => {
+      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('teammembers').deleteMany({});
+      await formsDbConnection.collection('templates').deleteMany({});
+      await formsDbConnection.collection('answers').deleteMany({});
+    })
+
+    it('should return a 401 without authorisation', async () => {
+      return await request(app.getHttpServer())
+      .delete(`/templates/deleteAllAnswers`)
+      .expect(401)
     });
 
+    it('should delete all a users answers for all templates', async () => {
+      const template = await formsDbConnection.collection('templates').insertOne(constants.userTemplate)
+      const template2 = await formsDbConnection.collection('templates').insertOne(constants.defaultTemplate)
+      const answer1 = await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId.toString(),
+        reportName: 'answer 1',
+        language: 'en',
+        user: ROLES.USER.id,
+        responses: [{name: "question-1", value: "test"}]
+      })
+      const answer2 =await formsDbConnection.collection('answers').insertOne({
+        report: template2.insertedId.toString(),
+        reportName: 'answer 1',
+        language: 'en',
+        user: ROLES.USER.id,
+        responses: [{name: "question-1", value: "test"}]
+      })
+      const answer3 = await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId.toString(),
+        reportName: 'answer 1',
+        language: 'en',
+        user: ROLES.ADMIN.id,
+        responses: [{name: "question-1", value: "test"}]
+      })
+      const createdAnswer1 = await formsDbConnection.collection('answers').findOne({'_id': answer1.insertedId});
+      expect(createdAnswer1).toBeDefined();
+      const createdAnswer2 = await formsDbConnection.collection('answers').findOne({'_id': answer2.insertedId});
+      expect(createdAnswer2).toBeDefined();
+      const createdAnswer3 = await formsDbConnection.collection('answers').findOne({'_id': answer3.insertedId});
+      expect(createdAnswer3).toBeDefined();
+      await request(app.getHttpServer())
+      .delete(`/templates/deleteAllAnswers`)
+      .set('Authorization', 'USER')
+      .expect(200)
+
+      const deletedAnswer1 = await formsDbConnection.collection('answers').findOne({'_id': answer1.insertedId});
+      expect(deletedAnswer1).toBeNull();
+      const deletedAnswer2 = await formsDbConnection.collection('answers').findOne({'_id': answer2.insertedId});
+      expect(deletedAnswer2).toBeNull();
+      const deletedAnswer3 = await formsDbConnection.collection('answers').findOne({'_id': answer3.insertedId});
+      expect(deletedAnswer3).toBeDefined();
+
+    });
   });
 
   afterAll(async () => {

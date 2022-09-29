@@ -162,6 +162,13 @@ export class TemplatesController {
     return { data: serializeTemplate(template) };
   }
 
+  @Delete('/deleteAllAnswers')
+  async deleteAllAnswers(@Req() request: Request): Promise<void> {
+    const { user }: { user: IUser } = request;
+
+    await this.answersService.delete({user: user.id})
+  }
+
   @Delete('/:id')
   async remove(@Param('id') id: string, @Req() request: Request): Promise<void> {
     const { user }: { user: IUser } = request;
