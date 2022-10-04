@@ -69,4 +69,10 @@ export class TeamsService {
         // Remove all team user relations
         await this.teamMembersService.removeAllUsersOnTeam(id);
     }
+
+    async findAllManagedTeams(userId: string): Promise<string[]> {
+        const teams = await this.teamMembersService.findAllByUserId(userId);
+        const teamsManaged = teams.filter(team => team.role === EMemberRole.Manager || team.role === EMemberRole.Administrator)
+        return teamsManaged.map(team => team.teamId);
+    }
 }

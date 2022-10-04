@@ -4,7 +4,7 @@ import { CreateTemplateDto } from './dto/create-template.dto';
 import { UpdateTemplateDto } from './dto/update-template.dto';
 import { IUser } from '../common/user.model';
 import { Request } from "express"
-import { AnswersService } from '../answers/answers.service';
+import { AnswersService } from '../answers/services/answers.service';
 import serializeTemplate from './serializers/template.serializer';
 import { ETemplateStatus, ITemplateResponse, TemplateDocument } from './models/template.schema';
 import { IAnswerReturn } from '../answers/models/answer.model';

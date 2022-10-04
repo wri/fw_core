@@ -4,11 +4,15 @@ import { AppModule } from './app.module';
 import * as Sentry from '@sentry/node'
 import ErrorSerializer from './common/error.serializer'
 import { IUser } from './common/user.model';
+import { ITemplate, TemplateDocument } from './templates/models/template.schema';
+import { TeamDocument } from './teams/models/team.schema';
 
 declare global {
   namespace Express {
     interface Request {
-      user: IUser
+      user: IUser;
+      template: TemplateDocument;
+      userTeams: TeamDocument[];
     }
   }
 }
