@@ -98,7 +98,7 @@ describe('Area Team Relations', () => {
     formsDbConnection = moduleRef.get<DatabaseService>(DatabaseService).getFormsHandle();
   });
 
-  describe('POST /forest-watcher/arearelations/teams', () => {
+  describe('POST /arearelations/teams', () => {
 
     afterEach(async () => {
       await teamsDbConnection.collection('teams').deleteMany({});
@@ -110,7 +110,7 @@ describe('Area Team Relations', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-      .post(`/forest-watcher/arearelations/teams`)
+      .post(`/arearelations/teams`)
       .expect(401)
     });
 
@@ -119,7 +119,7 @@ describe('Area Team Relations', () => {
         name: 'name',
       })
       await request(app.getHttpServer())
-      .post(`/forest-watcher/arearelations/teams`)
+      .post(`/arearelations/teams`)
       .set("Authorization", `USER`)
       .send({areaId: constants.testArea.id.toString(), teamId: team.insertedId.toString()})
       .expect(201)
@@ -134,7 +134,7 @@ describe('Area Team Relations', () => {
         name: 'name'
       })
       await request(app.getHttpServer())
-      .post(`/forest-watcher/arearelations/teams`)
+      .post(`/arearelations/teams`)
       .set("Authorization", `USER`)
       .send({areaId: constants.testTeamArea.id.toString(), teamId: team.insertedId.toString()})
       .expect(404)
@@ -143,7 +143,7 @@ describe('Area Team Relations', () => {
 
     it('should fail if the team doesnt exist', async () => {
       await request(app.getHttpServer())
-      .post(`/forest-watcher/arearelations/teams`)
+      .post(`/arearelations/teams`)
       .set("Authorization", `USER`)
       .send({areaId: constants.testTeamArea.id.toString(), teamId: constants.testTeamArea.id.toString()})
       .expect(404)
@@ -156,7 +156,7 @@ describe('Area Team Relations', () => {
       });
       await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id.toString(), teamId: team.insertedId.toString()})
       await request(app.getHttpServer())
-      .post(`/forest-watcher/arearelations/teams`)
+      .post(`/arearelations/teams`)
       .set("Authorization", `USER`)
       .send({areaId: constants.testArea.id.toString(), teamId: team.insertedId.toString()})
       .expect(400)
@@ -164,7 +164,7 @@ describe('Area Team Relations', () => {
     });
   });
 
-  describe('DELETE /forest-watcher/arearelations/teams', () => {
+  describe('DELETE /arearelations/teams', () => {
 
     afterEach(async () => {
       await teamsDbConnection.collection('teams').deleteMany({});
@@ -176,7 +176,7 @@ describe('Area Team Relations', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-      .delete(`/forest-watcher/arearelations/teams`)
+      .delete(`/arearelations/teams`)
       .expect(401)
     });
 
@@ -186,7 +186,7 @@ describe('Area Team Relations', () => {
       });
       await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id.toString(), teamId: team.insertedId.toString()})
       await request(app.getHttpServer())
-      .delete(`/forest-watcher/arearelations/teams`)
+      .delete(`/arearelations/teams`)
       .set("Authorization", `USER`)
       .send({areaId: constants.testArea.id.toString(), teamId: team.insertedId.toString()})
       .expect(200)

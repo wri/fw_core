@@ -98,7 +98,7 @@ describe('Area Template Relations', () => {
     formsDbConnection = moduleRef.get<DatabaseService>(DatabaseService).getFormsHandle();
   });
 
-  describe('POST /forest-watcher/arearelations/templates', () => {
+  describe('POST /arearelations/templates', () => {
 
     afterEach(async () => {
       await teamsDbConnection.collection('teams').deleteMany({});
@@ -110,7 +110,7 @@ describe('Area Template Relations', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-      .post(`/forest-watcher/arearelations/templates`)
+      .post(`/arearelations/templates`)
       .expect(401)
     });
 
@@ -125,7 +125,7 @@ describe('Area Template Relations', () => {
         questions: []
       })
       await request(app.getHttpServer())
-      .post(`/forest-watcher/arearelations/templates`)
+      .post(`/arearelations/templates`)
       .set("Authorization", `USER`)
       .send({areaId: constants.testArea.id.toString(), templateId: template.insertedId.toString()})
       .expect(201)
@@ -146,7 +146,7 @@ describe('Area Template Relations', () => {
         questions: []
       })
       await request(app.getHttpServer())
-      .post(`/forest-watcher/arearelations/templates`)
+      .post(`/arearelations/templates`)
       .set("Authorization", `USER`)
       .send({areaId: constants.testTeamArea.id.toString(), templateId: template.insertedId.toString()})
       .expect(404)
@@ -155,7 +155,7 @@ describe('Area Template Relations', () => {
 
     it('should fail if the template doesnt exist', async () => {
       await request(app.getHttpServer())
-      .post(`/forest-watcher/arearelations/templates`)
+      .post(`/arearelations/templates`)
       .set("Authorization", `USER`)
       .send({areaId: constants.testTeamArea.id.toString(), templateId: constants.testTeamArea.id.toString()})
       .expect(404)
@@ -174,7 +174,7 @@ describe('Area Template Relations', () => {
       });
       await apiDbConnection.collection('templatearearelations').insertOne({areaId: constants.testArea.id.toString(), templateId: template.insertedId.toString()})
       await request(app.getHttpServer())
-      .post(`/forest-watcher/arearelations/templates`)
+      .post(`/arearelations/templates`)
       .set("Authorization", `USER`)
       .send({areaId: constants.testArea.id.toString(), templateId: template.insertedId.toString()})
       .expect(400)
@@ -182,7 +182,7 @@ describe('Area Template Relations', () => {
     });
   });
 
-  describe('DELETE /forest-watcher/arearelations/templates', () => {
+  describe('DELETE /arearelations/templates', () => {
 
     afterEach(async () => {
       await teamsDbConnection.collection('teams').deleteMany({});
@@ -194,7 +194,7 @@ describe('Area Template Relations', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-      .delete(`/forest-watcher/arearelations/templates`)
+      .delete(`/arearelations/templates`)
       .expect(401)
     });
 
@@ -210,7 +210,7 @@ describe('Area Template Relations', () => {
       });
       await apiDbConnection.collection('templatearearelations').insertOne({areaId: constants.testArea.id.toString(), templateId: template.insertedId.toString()})
       await request(app.getHttpServer())
-      .delete(`/forest-watcher/arearelations/templates`)
+      .delete(`/arearelations/templates`)
       .set("Authorization", `USER`)
       .send({areaId: constants.testArea.id.toString(), templateId: template.insertedId.toString()})
       .expect(200)

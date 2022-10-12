@@ -13,7 +13,7 @@ import { IUser } from '../../common/user.model';
 import { ResponseService } from '../services/response.service';
 import { TemplatesService } from '../../templates/templates.service';
 
-@Controller('forest-watcher/areas')
+@Controller('areas')
 export class AreasController {
   constructor(
     private readonly areasService: AreasService,
@@ -26,7 +26,7 @@ export class AreasController {
 
   private readonly logger = new Logger(AreasController.name);
 
-  // GET /forest-watcher/areas/user
+  // GET /areas/user
   // Gets all areas the user has created
   @Get('/user')
   async getUserAreas(@Req() request: Request): Promise<IAreaResponse> {
@@ -52,7 +52,7 @@ export class AreasController {
     return { data };
   }
 
-  // GET /forest-watcher/areas/userAndTeam
+  // GET /areas/userAndTeam
   // Gets all areas the user has created and all areas linked to the user's teams
   @Get('/userAndTeam')
   async getUserAndTeamAreas(@Req() request: Request): Promise<IAreaResponse> {
@@ -121,7 +121,7 @@ export class AreasController {
     return { data };
   }
   
-  // GET /forest-watcher/area/:id
+  // GET /area/:id
   // get an area user created or that is part of a team
   @Get('/:id')
   async findOneArea(@Req() request: Request, @Param('id') id: string): Promise<IAreaResponse> {

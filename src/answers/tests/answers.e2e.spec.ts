@@ -744,7 +744,6 @@ describe('Answers', () => {
       expect(response.body.data.length).toBe(1);
       expect(response.body.data[0]).toHaveProperty('id', answer.insertedId.toString());
     });
-
   });
 
   afterAll(async () => {

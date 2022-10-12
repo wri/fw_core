@@ -20,6 +20,7 @@ declare global {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
+  app.setGlobalPrefix('v3/gfw')
 
   app.use(async (req, res, next) => {
     try {

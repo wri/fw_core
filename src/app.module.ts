@@ -13,6 +13,7 @@ import configuration from './common/configuration';
 import { TemplatesModule } from './templates/templates.module';
 import { AnswersModule } from './answers/answers.module';
 import { IdCheckMiddleware } from './common/middleware/idCheck.middleware';
+import { AssignmentsModule } from './assignments/assignments.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { IdCheckMiddleware } from './common/middleware/idCheck.middleware';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration]
-    })
+    }),
+    AssignmentsModule
   ],
   controllers: [AppController],
   providers: [AppService, UserService],

@@ -7,7 +7,7 @@ import { TemplatesService } from '../../templates/templates.service';
 import { TemplateAreaRelationService } from '../services/templateAreaRelation.service';
 import { TemplateAreaRelationDocument } from '../models/templateAreaRelation.schema';
 
-@Controller('forest-watcher/arearelations/templates')
+@Controller('arearelations/templates')
 export class TemplateAreaRelationController {
   constructor(
     private readonly areasService: AreasService,
@@ -32,7 +32,7 @@ export class TemplateAreaRelationController {
   }
 
   // INTERNAL USE ONLY
-  // GET /forest-watcher/areas/templates/areaTemplates/:areaId
+  // GET /areas/templates/areaTemplates/:areaId
   // Returns array of template ids linked to area
   @Get('/areaTemplates/:areaId')
   async getAllTemplatesForArea(@Param('areaId') areaId: string): Promise<string[]> {

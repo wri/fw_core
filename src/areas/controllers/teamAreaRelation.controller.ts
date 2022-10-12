@@ -6,7 +6,7 @@ import { TeamsService } from '../../teams/services/teams.service';
 import { TeamAreaRelationService } from '../services/teamAreaRelation.service';
 import { TeamAreaRelationDocument } from '../models/teamAreaRelation.schema';
 
-@Controller('forest-watcher/arearelations/teams')
+@Controller('arearelations/teams')
 export class TeamAreaRelationController {
   constructor(
     private readonly areasService: AreasService,
@@ -31,7 +31,7 @@ export class TeamAreaRelationController {
   }
 
   // INTERNAL USE ONLY
-  // GET /forest-watcher/arearelations/teams/areaTeams/:areaId
+  // GET /arearelations/teams/areaTeams/:areaId
   // Returns array of team ids linked to area
   @Get('/areaTeams/:areaId')
   async getAllTeamsForArea(@Param('areaId') areaId: string): Promise<string[]> {
@@ -42,7 +42,7 @@ export class TeamAreaRelationController {
   }
 
   // INTERNAL USE ONLY
-  // GET /forest-watcher/arearelations/teams/teamAreas/:teamId
+  // GET /arearelations/teams/teamAreas/:teamId
   // Returns array of area ids linked to team
   @Get('/teamAreas/:teamId')
   async getAllAreasForTeam(@Param('teamId') teamId: string): Promise<string[]> {

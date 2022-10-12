@@ -104,13 +104,13 @@ describe('Areas', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-      .get(`/forest-watcher/areas/user`)
+      .get(`/areas/user`)
       .expect(401)
     });
 
     it('should return an array of areas', async () => {
       const response = await request(app.getHttpServer())
-      .get(`/forest-watcher/areas/user`)
+      .get(`/areas/user`)
       .set('Authorization', 'USER')
       .expect(200)
 
@@ -125,7 +125,7 @@ describe('Areas', () => {
 
     it('should fail with a 503 if the wrong data is received', async () => {
       return await request(app.getHttpServer())
-        .get(`/forest-watcher/areas/user`)
+        .get(`/areas/user`)
         .set('Authorization', 'ADMIN')
         .expect(503)
     })
@@ -142,7 +142,7 @@ describe('Areas', () => {
       })
       const templateAreaRelation = await apiDbConnection.collection('templatearearelations').insertOne({areaId: constants.testArea.id, templateId: template.insertedId.toString()})
       const response = await request(app.getHttpServer())
-      .get(`/forest-watcher/areas/user`)
+      .get(`/areas/user`)
       .set("Authorization", `USER`)
       .expect(200)
 
@@ -157,7 +157,7 @@ describe('Areas', () => {
       const relation = await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id, teamId: team1.insertedId.toString()})
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator})
       const response = await request(app.getHttpServer())
-      .get(`/forest-watcher/areas/user`)
+      .get(`/areas/user`)
       .set("Authorization", `USER`)
       .expect(200)
 
@@ -172,7 +172,7 @@ describe('Areas', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-      .get(`/forest-watcher/areas/userAndTeam`)
+      .get(`/areas/userAndTeam`)
       .expect(401)
     });
 
@@ -183,7 +183,7 @@ describe('Areas', () => {
     await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id, teamId: team1.insertedId.toString()})
 
     const response = await request(app.getHttpServer())
-      .get(`/forest-watcher/areas/userAndTeam`)
+      .get(`/areas/userAndTeam`)
       .set('Authorization', 'USER')
       .expect(200)
     
@@ -193,7 +193,7 @@ describe('Areas', () => {
 
     it('should fail with a 503 if the wrong data is received', async () => {
       return await request(app.getHttpServer())
-        .get(`/forest-watcher/areas/userAndTeam`)
+        .get(`/areas/userAndTeam`)
         .set('Authorization', 'ADMIN')
         .expect(503)
     });
@@ -204,7 +204,7 @@ describe('Areas', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-      .post(`/forest-watcher/areas`)
+      .post(`/areas`)
       .expect(401)
     });
 
@@ -213,7 +213,7 @@ describe('Areas', () => {
       const fileData = Buffer.from("TestFileContent", "utf8");
   
       const response = await request(app.getHttpServer())
-        .post(`/forest-watcher/areas`)
+        .post(`/areas`)
         .attach("image", fileData, filename)
         .set("Authorization", `USER`)
         .expect(400)
@@ -224,7 +224,7 @@ describe('Areas', () => {
       const fileData = Buffer.from("TestFileContent", "utf8");
   
       const response = await request(app.getHttpServer())
-        .post(`/forest-watcher/areas`)
+        .post(`/areas`)
         .attach("image", fileData, filename)
         .field({name: 'name'})
         .set("Authorization", `USER`)
@@ -233,7 +233,7 @@ describe('Areas', () => {
     it("Create an area while being logged without an image value should return an error", async function () {
 
       const response = await request(app.getHttpServer())
-        .post(`/forest-watcher/areas`)
+        .post(`/areas`)
         .send({name: 'name', geojson: {}})
         .set("Authorization", `USER`)
         .expect(400)
@@ -253,13 +253,13 @@ describe('Areas', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-      .get(`/forest-watcher/areas/${1}`)
+      .get(`/areas/${1}`)
       .expect(401)
     });
 
     it('should return the area if the user owns it', async () => {
       const response = await request(app.getHttpServer())
-      .get(`/forest-watcher/areas/${constants.testArea.id}`)
+      .get(`/areas/${constants.testArea.id}`)
       .set("Authorization", `USER`)
       .expect(200)
 
@@ -271,7 +271,7 @@ describe('Areas', () => {
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.ADMIN.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator})
       await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id, teamId: team1.insertedId.toString()})
       const response = await request(app.getHttpServer())
-      .get(`/forest-watcher/areas/${constants.testArea.id}`)
+      .get(`/areas/${constants.testArea.id}`)
       .set("Authorization", `ADMIN`)
       .expect(200)
 
@@ -290,7 +290,7 @@ describe('Areas', () => {
       })
       const templateAreaRelation = await apiDbConnection.collection('templatearearelations').insertOne({areaId: constants.testArea.id, templateId: template.insertedId.toString()})
       const response = await request(app.getHttpServer())
-      .get(`/forest-watcher/areas/${constants.testArea.id}`)
+      .get(`/areas/${constants.testArea.id}`)
       .set("Authorization", `USER`)
       .expect(200)
 
@@ -305,7 +305,7 @@ describe('Areas', () => {
       const relation = await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id, teamId: team1.insertedId.toString()})
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator})
       const response = await request(app.getHttpServer())
-      .get(`/forest-watcher/areas/${constants.testArea.id}`)
+      .get(`/areas/${constants.testArea.id}`)
       .set("Authorization", `USER`)
       .expect(200)
 
@@ -319,7 +319,7 @@ describe('Areas', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-      .patch(`/forest-watcher/areas/${1}`)
+      .patch(`/areas/${1}`)
       .expect(401)
     });
 
@@ -328,7 +328,7 @@ describe('Areas', () => {
       const fileData = Buffer.from("TestFileContent", "utf8");
   
       const response = await request(app.getHttpServer())
-        .patch(`/forest-watcher/areas/${1}`)
+        .patch(`/areas/${1}`)
         .attach("image", fileData, filename)
         .set("Authorization", `USER`)
         .expect(400)
@@ -339,7 +339,7 @@ describe('Areas', () => {
       const fileData = Buffer.from("TestFileContent", "utf8");
   
       const response = await request(app.getHttpServer())
-        .patch(`/forest-watcher/areas/${1}`)
+        .patch(`/areas/${1}`)
         .attach("image", fileData, filename)
         .field({name: 'name'})
         .set("Authorization", `USER`)
@@ -348,7 +348,7 @@ describe('Areas', () => {
     it("Update an area while being logged without an image value should return an error", async function () {
 
       const response = await request(app.getHttpServer())
-        .patch(`/forest-watcher/areas/${1}`)
+        .patch(`/areas/${1}`)
         .send({name: 'name', geojson: {}})
         .set("Authorization", `USER`)
         .expect(400)
@@ -359,20 +359,20 @@ describe('Areas', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-      .delete(`/forest-watcher/areas/${constants.testArea.toString()}`)
+      .delete(`/areas/${constants.testArea.toString()}`)
       .expect(401)
     });
 
     it("should fail when deleting another user's area", async function () {
       return await request(app.getHttpServer())
-      .delete(`/forest-watcher/areas/${constants.testArea.id.toString()}`)
+      .delete(`/areas/${constants.testArea.id.toString()}`)
       .set("Authorization", `ADMIN`)
       .expect(401)
     }); 
 
     it("should succeed when deleting own area", async function () {
       const response = await request(app.getHttpServer())
-      .delete(`/forest-watcher/areas/${constants.testArea.id.toString()}`)
+      .delete(`/areas/${constants.testArea.id.toString()}`)
       .set("Authorization", `USER`)
       .expect(200)
     });
@@ -380,7 +380,7 @@ describe('Areas', () => {
     it("should delete all team relations", async function () {
       const relation = await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id, teamId: new mongoose.Types.ObjectId()})
       const response = await request(app.getHttpServer())
-      .delete(`/forest-watcher/areas/${constants.testArea.id.toString()}`)
+      .delete(`/areas/${constants.testArea.id.toString()}`)
       .set("Authorization", `USER`)
       .expect(200)
 
@@ -391,7 +391,7 @@ describe('Areas', () => {
     it("should delete all template relations", async function () {
       const relation = await apiDbConnection.collection('templatearearelations').insertOne({areaId: constants.testArea.id, templateId: new mongoose.Types.ObjectId()})
       const response = await request(app.getHttpServer())
-      .delete(`/forest-watcher/areas/${constants.testArea.id.toString()}`)
+      .delete(`/areas/${constants.testArea.id.toString()}`)
       .set("Authorization", `USER`)
       .expect(200)
 

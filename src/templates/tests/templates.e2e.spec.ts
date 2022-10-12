@@ -754,7 +754,6 @@ describe('Areas', () => {
       const deletedRelation = await apiDbConnection.collection('templatearearelations').findOne({'_id': relation.insertedId});
       expect(deletedRelation).toBeNull();
     });
-
   });
 
   describe('PATCH /templates/:id', () => {
