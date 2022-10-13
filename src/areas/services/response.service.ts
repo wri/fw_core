@@ -79,7 +79,6 @@ async buildAreasResponse(areas: IArea[], objects, user: IUser) {
         else if (coverageData && coverageData[index]) coverage = coverageData[index].layers;
         else coverage = [];
 
-        //const reportTemplate = templatesData[index] || null; TODO templates
         const datasets = this.datasetService.getDatasetsWithCoverage(area.attributes.datasets, coverage);
         return {
           ...area,
