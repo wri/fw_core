@@ -14,6 +14,7 @@ import { TemplatesModule } from './templates/templates.module';
 import { AnswersModule } from './answers/answers.module';
 import { IdCheckMiddleware } from './common/middleware/idCheck.middleware';
 import { AssignmentsModule } from './assignments/assignments.module';
+import { RoutesModule } from './routes/routes.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { AssignmentsModule } from './assignments/assignments.module';
       isGlobal: true,
       load: [configuration]
     }),
-    AssignmentsModule
+    AssignmentsModule,
+    RoutesModule
   ],
   controllers: [AppController],
   providers: [AppService, UserService],
