@@ -38,6 +38,7 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
     .apply(AuthMiddleware)
+    .exclude('/v3/gfw/healthcheck')
     .forRoutes('*')
   }
 }
