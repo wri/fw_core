@@ -28,6 +28,7 @@ export class AreasService {
 
       const baseURL = this.configService.get("areasAPI.url");
       const url = `${baseURL}/v2/area/${areaId}`
+      this.logger.log("Getting areas using URL", url)
       const getAreasRequestConfig = {
         headers: {
           authorization: user.token
