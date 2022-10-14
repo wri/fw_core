@@ -25,10 +25,8 @@ export class AreasService {
 
   async getArea(areaId: string, user: IUser): Promise<IArea> {
     try {
-
-      const baseURL = this.configService.get("areasAPI.url");
+      const baseURL = this.configService.get("areasApi.url");
       const url = `${baseURL}/v2/area/${areaId}`
-      this.logger.log("Getting areas using URL", url)
       const getAreasRequestConfig = {
         headers: {
           authorization: user.token
@@ -45,7 +43,7 @@ export class AreasService {
 
   async getAreaMICROSERVICE(areaId: string): Promise<IArea> {
     try {
-      const baseURL = this.configService.get("areasAPI.url");
+      const baseURL = this.configService.get("areasApi.url");
       const url = `${baseURL}/v1/area/${areaId}`
       const getAreasRequestConfig = {
         headers: {
@@ -63,7 +61,7 @@ export class AreasService {
 
   async getUserAreas(user: IUser): Promise<IArea[]> {
     try {
-      const baseURL = this.configService.get("areasAPI.url");
+      const baseURL = this.configService.get("areasApi.url");
       const url = `${baseURL}/v2/area`
       const getUserAreasRequestConfig = {
         headers: {
@@ -106,7 +104,7 @@ export class AreasService {
       form.append("geostore", geostore.id);
       form.append("image",fs.createReadStream(image.path));
 
-      const baseURL = this.configService.get('areasAPI.url');
+      const baseURL = this.configService.get('areasApi.url');
       const url = `${baseURL}/v1/area/fw/${user.id}`;
 
       const createAreaRequestConfig = {
@@ -156,7 +154,7 @@ export class AreasService {
       form.append("geostore", geostoreId);
       if(image) form.append("image",fs.createReadStream(image.path));
 
-      const baseURL = this.configService.get('areasAPI.url');
+      const baseURL = this.configService.get('areasApi.url');
       const url = `${baseURL}/v2/area/${existingArea.id}`;
 
       const createAreaRequestConfig = {
@@ -176,7 +174,7 @@ export class AreasService {
 
   async delete(areaId: string, user: IUser): Promise<IArea> {
     try {
-      const baseURL = this.configService.get('areasAPI.url');
+      const baseURL = this.configService.get('areasApi.url');
       const url = `${baseURL}/v2/area/${areaId}`;
       const deleteAreaRequestConfig = {
         headers: {

@@ -21,6 +21,7 @@ import { TemplatesService } from '../../templates/templates.service';
 import { Template, TemplateSchema } from '../../templates/models/template.schema';
 import { TeamAreaRelationController } from '../controllers/teamAreaRelation.controller';
 import { TemplateAreaRelationController } from '../controllers/templateAreaRelation.controller';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { TemplateAreaRelationController } from '../controllers/templateAreaRelat
     MongooseModule.forFeature([{ name: TeamAreaRelation.name, schema: TeamAreaRelationSchema }], 'apiDb'),
     MongooseModule.forFeature([{ name: TemplateAreaRelation.name, schema: TemplateAreaRelationSchema }], 'apiDb'),
     MongooseModule.forFeature([{ name: Template.name, schema: TemplateSchema }], 'formsDb'),
+    ConfigModule
   ],
   controllers: [AreasController, TeamAreaRelationController, TemplateAreaRelationController],
   providers: [

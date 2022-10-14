@@ -15,7 +15,7 @@ export class CoverageService {
   async getCoverage({ geostoreId, slugs }, token: string) {
 
     try {
-      const baseURL = this.configService.get("geostoreAPI.url");
+      const baseURL = this.configService.get("geostoreApi.url");
       const url = `${baseURL}/coverage/intersect?geostore=${geostoreId}${slugs ? `&slugs=${slugs}` : ""}`;
       const getCoverageRequestConfig = {
         headers: {
