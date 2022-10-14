@@ -116,6 +116,7 @@ module "error_rate_alarm" {
 
   project_prefix = var.project_prefix
   httpOkQuery = "[direction=\"-->\", requestType, path, responseCode=200 || responseCode=202 , responseTime, dataSize]" 
+  httpOkLogGroup = aws_cloudwatch_log_group.default.name
   httpErrorsQuery = "[direction=\"-->\", requestType, path, responseCode=4* || responseCode=5* , responseTime, dataSize]"
   httpErrorsLogGroup = aws_cloudwatch_log_group.default.name
   metricsNamespace = "HttpErrorRateAlarms"

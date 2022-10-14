@@ -1,0 +1,192 @@
+openapi: 3.1.0
+info:
+  title: fw_core
+  version: '1.0'
+  summary: Core Services of GFW
+  description: 'Combination of Areas, Teams, Reports, Assignments and Routes'
+servers:
+  - url: 'http://localhost:3000'
+    description: Local
+  - url: 'https://api.globalforestwatch.org'
+    description: Production
+  - url: 'https://staging-fw-api.globalforestwatch.org'
+    description: Staging
+  - url: 'https://dev-fw-api.globalforestwatch.org'
+    description: Dev
+paths:
+  /v3/gfw/assignments:
+    post:
+      summary: Create an Assignment
+      operationId: post-v3-gfw-assignments
+      responses:
+        '201':
+          $ref: '#/components/responses/Assignment-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      requestBody:
+        $ref: '#/components/requestBodies/AssignmentBody'
+      description: Creates an assignment
+      tags:
+        - Assignments
+components:
+  schemas:
+    AssignmentModel:
+      type: object
+      x-examples:
+        example-1:
+          name: string
+          location: IGeojson
+          priority: number;
+          monitors: 'string[];'
+          notes: string;
+          status: string;
+          alert: string;
+          areaId: string;
+          templateId: string;
+          teamIds: 'string[];'
+          createdAt: Date;
+          createdBy: '''string;'''
+          areaName: string;
+      description: ''
+      properties:
+        name:
+          type: string
+        location:
+          type: string
+        priority:
+          type: number
+        monitors:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+        status:
+          type: string
+        alert:
+          type: string
+        areaId:
+          type: string
+        templateId:
+          type: string
+        teamIds:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: number
+        createdBy:
+          type: string
+        areaName:
+          type: string
+      required:
+        - name
+        - location
+        - priority
+        - monitors
+        - notes
+        - status
+        - alert
+        - areaId
+        - templateId
+        - teamIds
+        - createdAt
+        - createdBy
+  securitySchemes:
+    Authorization:
+      type: http
+      scheme: bearer
+  responses:
+    Error:
+      description: Error Response
+      content:
+        application/json:
+          schema:
+            description: ''
+            type: object
+            properties:
+              errors:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  required:
+                    - status
+                    - detail
+                  properties:
+                    status:
+                      type: number
+                    detail:
+                      type: string
+                      minLength: 1
+            required:
+              - errors
+          examples: {}
+    Healthcheck:
+      description: Healthcheck response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              uptime:
+                type: number
+          examples: {}
+    Assignment-Response:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+              attributes:
+                $ref: '#/components/schemas/AssignmentModel'
+  requestBodies:
+    AssignmentBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              location:
+                type: object
+                properties: {}
+              priority:
+                type: integer
+              monitors:
+                type: array
+                items:
+                  type: string
+              notes:
+                type: string
+              status:
+                type: string
+              alert:
+                type: string
+              areaId:
+                type: string
+              templateId:
+                type: string
+              teamIds:
+                type: array
+                items:
+                  type: string
+            x-examples:
+              example-1:
+                location: {}
+                priority: 1
+                monitors:
+                  - ROLES.USER.id
+                notes: some notes
+                status: incomplete
+                alert: some alert
+                areaId: areaConstants.testArea.id
+                templateId: someTemplateId
+                teamIds:
+                  - ''
+security:
+  - Authorization: []
