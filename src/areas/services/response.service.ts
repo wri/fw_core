@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { IUser } from "../../common/user.model";
 import { IArea } from "../models/area.entity";
 import { GeostoreService } from "./geostore.service";
-import config = require('config');
 import { CoverageService } from "./coverage.service";
 import { DatasetService } from "./dataset.service";
 import { TemplateAreaRelationService } from "./templateAreaRelation.service";
@@ -10,8 +9,9 @@ import { TemplatesService } from "../../templates/templates.service";
 import { TeamDocument } from "../../teams/models/team.schema";
 import { TeamsService } from "../../teams/services/teams.service";
 import { TeamAreaRelationService } from "./teamAreaRelation.service";
+import { ConfigService } from "@nestjs/config";
 
-const ALERTS_SUPPORTED = config.get("alertsSupported");
+
 
 @Injectable()
 export class ResponseService {
@@ -22,12 +22,14 @@ export class ResponseService {
         private readonly templateAreaRelationService: TemplateAreaRelationService,
         private readonly teamAreaRelationService: TeamAreaRelationService,
         private readonly templatesService: TemplatesService,
-        private readonly teamsService: TeamsService
+        private readonly teamsService: TeamsService,
+        private readonly configService: ConfigService
         ) { }
 async buildAreasResponse(areas: IArea[], objects, user: IUser) {
     const { geostoreObj, coverageObj } = objects;
     const areasWithGeostore = areas.filter(area => area.attributes.geostore);
     const promises = [];
+    const ALERTS_SUPPORTED = this.configService.get("alertsSupported");
 
     if (!geostoreObj) {
       promises.push(Promise.all(areasWithGeostore.map(area => this.geostoreService.getGeostore(area.attributes.geostore, user.token))));

@@ -40,7 +40,7 @@ describe('Areas', () => {
         TeamMembersService,
         TemplatesService,
         TemplateAreaRelationService,
-        {provide: getModelToken(Team.name, 'teamsDb'), useValue: jest.fn()},
+        {provide: getModelToken("GFWTeam", 'teamsDb'), useValue: jest.fn()},
         {provide: getModelToken(TeamMember.name, 'teamsDb'), useValue: jest.fn()},
         {provide: getModelToken(Template.name, 'formsDb'), useValue: jest.fn()},
         {provide: getModelToken(TemplateAreaRelation.name, 'apiDb'), useValue: jest.fn()},
@@ -60,7 +60,7 @@ describe('Areas', () => {
   describe('POST /templates', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await formsDbConnection.collection('templates').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
@@ -350,7 +350,7 @@ describe('Areas', () => {
   describe('GET /templates', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await formsDbConnection.collection('templates').deleteMany({});
     })
@@ -405,7 +405,7 @@ describe('Areas', () => {
   describe('GET /templates/:id', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await formsDbConnection.collection('templates').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
@@ -520,7 +520,7 @@ describe('Areas', () => {
   describe('GET /templates/getAllAnswersForUser', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await formsDbConnection.collection('templates').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
@@ -573,7 +573,7 @@ describe('Areas', () => {
         responses: [{name: "question-1", value: "test"}]
       })
 
-      const team1 = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      const team1 = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
       const member1 = await teamsDbConnection.collection('teammembers').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, role: EMemberRole.Monitor, status: EMemberStatus.Confirmed})
       const member2 = await teamsDbConnection.collection('teammembers').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.MANAGER.email, role: EMemberRole.Manager, status: EMemberStatus.Confirmed})
       
@@ -632,7 +632,7 @@ describe('Areas', () => {
         responses: [{name: "question-1", value: "test"}]
       })
 
-      const team1 = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      const team1 = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
       const member1 = await teamsDbConnection.collection('teammembers').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, role: EMemberRole.Monitor, status: EMemberStatus.Confirmed})
       const member2 = await teamsDbConnection.collection('teammembers').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.MANAGER.email, role: EMemberRole.Manager, status: EMemberStatus.Confirmed})
       
@@ -652,7 +652,7 @@ describe('Areas', () => {
   describe('DELETE /templates/:id', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await formsDbConnection.collection('templates').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
@@ -759,7 +759,7 @@ describe('Areas', () => {
   describe('PATCH /templates/:id', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await formsDbConnection.collection('templates').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
@@ -886,7 +886,7 @@ describe('Areas', () => {
   describe('DELETE /templates/deleteAllAnswers', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await formsDbConnection.collection('templates').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});

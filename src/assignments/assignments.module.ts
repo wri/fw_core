@@ -8,11 +8,16 @@ import { Team, TeamSchema } from '../teams/models/team.schema';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
 import { TeamMember, TeamMemberSchema } from '../teams/models/teamMember.schema';
 import { UserService } from '../common/user.service';
+import { AreasService } from '../areas/services/areas.service';
+import { GeostoreService } from '../areas/services/geostore.service';
+import { CoverageService } from '../areas/services/coverage.service';
+import { DatasetService } from '../areas/services/dataset.service';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Assignment.name, schema: AssignmentSchema }], 'formsDb'),
-    MongooseModule.forFeature([{ name: Team.name, schema: TeamSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: "GFWTeam", schema: TeamSchema }], 'teamsDb'),
     MongooseModule.forFeature([{ name: TeamMember.name, schema: TeamMemberSchema }], 'teamsDb')
   ],
   controllers: [AssignmentsController],
@@ -20,7 +25,12 @@ import { UserService } from '../common/user.service';
     AssignmentsService, 
     TeamsService, 
     TeamMembersService,
-    UserService
+    UserService,
+    AreasService,
+    GeostoreService,
+    CoverageService,
+    DatasetService,
+    ConfigService
   ]
 })
 export class AssignmentsModule {}

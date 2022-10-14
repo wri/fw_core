@@ -13,7 +13,7 @@ import { TeamAreaRelation, TeamAreaRelationSchema } from '../../areas/models/tea
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Team.name, schema: TeamSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: "GFWTeam", schema: TeamSchema }], 'teamsDb'),
     MongooseModule.forFeature([{ name: TeamMember.name, schema: TeamMemberSchema }], 'teamsDb'),
     MongooseModule.forFeature([{ name: TeamAreaRelation.name, schema: TeamAreaRelationSchema }], 'apiDb')
   ],

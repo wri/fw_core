@@ -1,26 +1,46 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { CreateRouteDto } from './dto/create-route.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
+import { Route, RouteDocument } from './models/route.schema';
+import { Model } from 'mongoose';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class RoutesService {
-  create(createRouteDto: CreateRouteDto) {
-    return 'This action adds a new route';
+
+  constructor(
+    @InjectModel(Route.name, 'formsDb') private routeModel: Model<RouteDocument>,
+  ) { }
+
+  async create(createRouteDto: CreateRouteDto): Promise<RouteDocument> {
+
+    const routeToCreate = new this.routeModel(createRouteDto)
+    const savedRoute = await routeToCreate.save()
+
+    return savedRoute;
+    
   }
 
-  findAll() {
-    return `This action returns all routes`;
+  async findAll(filter): Promise<RouteDocument[]> {
+    return await this.routeModel.find(filter)
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} route`;
+  async findOneById(id: string): Promise<RouteDocument> {
+    return await this.routeModel.findById(new mongoose.Types.ObjectId(id))
+  }
+
+  async findOne(filter): Promise<RouteDocument> {
+    return await this.routeModel.findOne(filter)
   }
 
   update(id: string, updateRouteDto: UpdateRouteDto) {
     return `This action updates a #${id} route`;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} route`;
+  async deactivate(id: string): Promise<void> {
+    const route = await this.findOneById(id)
+    route.active = false;
+    await route.save()
   }
 }

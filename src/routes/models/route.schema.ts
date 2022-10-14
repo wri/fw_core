@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import * as mongoose from "mongoose";
 import { IGeojson } from "../../areas/models/area.entity";
 
-interface ILocation {
+export interface ILocation {
   accuracy: number;
   altitude: number;
   latitude: number;
@@ -10,7 +10,7 @@ interface ILocation {
   timestamp: number;
 }
 
-interface IPoint {
+export interface IPoint {
   latitude: number;
   longitude: number;
 }
@@ -25,6 +25,9 @@ export interface IRoute {
   routeId: string;
   locations: ILocation[]
   name: string;
+  createdBy: string;
+  teamId: string;
+  active: boolean;
 }
 
 @Schema()
@@ -56,6 +59,15 @@ export class Route {
 
     @Prop({required: true})
     routeId: string;
+
+    @Prop({required: true})
+    teamId: string;
+
+    @Prop({required: true})
+    createdBy: string;
+
+    @Prop({required: true})
+    active: boolean;
 
 }
 

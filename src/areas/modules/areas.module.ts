@@ -24,7 +24,7 @@ import { TemplateAreaRelationController } from '../controllers/templateAreaRelat
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Team.name, schema: TeamSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: "GFWTeam", schema: TeamSchema }], 'teamsDb'),
     MongooseModule.forFeature([{ name: TeamMember.name, schema: TeamMemberSchema }], 'teamsDb'),
     MongooseModule.forFeature([{ name: TeamAreaRelation.name, schema: TeamAreaRelationSchema }], 'apiDb'),
     MongooseModule.forFeature([{ name: TemplateAreaRelation.name, schema: TemplateAreaRelationSchema }], 'apiDb'),

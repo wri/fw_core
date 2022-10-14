@@ -1,17 +1,19 @@
 import { Logger, Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import axios from "axios";
-import mongoose from "mongoose";
-import config = require("config");
 import client from './redisClient';
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class UserService {
 
+  constructor(
+    private readonly configService: ConfigService
+    ) { }
   private readonly logger = new Logger(UserService.name)
 
   async authorise(token: string): Promise<any> {
     try {
-      const baseURL = config.get("auth.url");
+      const baseURL = this.configService.get("auth.url");
       const url = `${baseURL}/auth/user/me`
       const getUserDetailsRequestConfig = {
         headers: {
@@ -32,11 +34,11 @@ export class UserService {
     let name: string = await client.get(userId.toString())
     if (!name) {
       try {
-        const baseURL = config.get("auth.url");
+        const baseURL = this.configService.get("auth.url");
         const url = `${baseURL}/user/${userId}`
         const getUserDetailsRequestConfig = {
           headers: {
-            authorization: `Bearer ${config.get("service.token")}`
+            authorization: `Bearer ${this.configService.get("service.token")}`
           }
         };
         const response = await axios.get(url, getUserDetailsRequestConfig);

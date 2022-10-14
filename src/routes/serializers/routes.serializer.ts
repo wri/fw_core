@@ -1,17 +1,16 @@
 const whitelist = [
-    'name',
-    'priority',
-    'monitors',
-    'notes',
-    'status',
-    'areaId',
-    'templateId',
-    'teamIds',
-    'createdBy',
-    'createdAt',
-    'location',
-    'alert',
-    'areaName'
+  "areaId",
+  "destination",
+  "difficulty",
+  "startDate",
+  "endDate",
+  "geostoreId",
+  "routeId",
+  "locations",
+  "name",
+  "createdBy",
+  "active",
+  "teamId"
 ];
 
 const serializeResource = data => {
@@ -21,17 +20,17 @@ const serializeResource = data => {
     if(whitelist.includes(key)) attributes[key] = value;
   }
   return {
-    type: "assignments",
+    type: "routes",
     id: data._id,
     attributes
   };
 }
 
-const serializeAssignments = data => {
+const serializeRoutes = data => {
 
   if(Array.isArray(data)) return data.map(arrayItem => serializeResource(arrayItem));
   else return serializeResource(data);
 
 }
 
-export default serializeAssignments
+export default serializeRoutes

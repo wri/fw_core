@@ -76,7 +76,7 @@ describe('Area Team Relations', () => {
         TemplateAreaRelationService,
         {provide: getModelToken(TeamAreaRelation.name, 'apiDb'), useValue: jest.fn()},
         {provide: getModelToken(TemplateAreaRelation.name, 'apiDb'), useValue: jest.fn()},
-        {provide: getModelToken(Team.name, 'teamsDb'), useValue: jest.fn()},
+        {provide: getModelToken("GFWTeam", 'teamsDb'), useValue: jest.fn()},
         {provide: getModelToken(TeamMember.name, 'teamsDb'), useValue: jest.fn()},
         {provide: getModelToken(Template.name, 'formsDb'), useValue: jest.fn()}
       ],
@@ -101,7 +101,7 @@ describe('Area Team Relations', () => {
   describe('POST /arearelations/teams', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await apiDbConnection.collection('teamarearelations').deleteMany({});
       await apiDbConnection.collection('templatearearelations').deleteMany({});
@@ -115,7 +115,7 @@ describe('Area Team Relations', () => {
     });
 
     it('should create a relation', async () => {
-      const team = await teamsDbConnection.collection('teams').insertOne({
+      const team = await teamsDbConnection.collection('GFWTeam').insertOne({
         name: 'name',
       })
       await request(app.getHttpServer())
@@ -130,7 +130,7 @@ describe('Area Team Relations', () => {
     });
 
     it('should fail if the area doesnt exist', async () => {
-      const team = await teamsDbConnection.collection('teams').insertOne({
+      const team = await teamsDbConnection.collection('GFWTeam').insertOne({
         name: 'name'
       })
       await request(app.getHttpServer())
@@ -151,7 +151,7 @@ describe('Area Team Relations', () => {
     });
 
     it('should fail if the relation already exists', async () => {
-      const team = await teamsDbConnection.collection('teams').insertOne({
+      const team = await teamsDbConnection.collection('GFWTeam').insertOne({
         name: 'name'
       });
       await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id.toString(), teamId: team.insertedId.toString()})
@@ -167,7 +167,7 @@ describe('Area Team Relations', () => {
   describe('DELETE /arearelations/teams', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await apiDbConnection.collection('teamarearelations').deleteMany({});
       await apiDbConnection.collection('templatearearelations').deleteMany({});
@@ -181,7 +181,7 @@ describe('Area Team Relations', () => {
     });
 
     it('should delete a relation', async () => {
-      const team = await teamsDbConnection.collection('teams').insertOne({
+      const team = await teamsDbConnection.collection('GFWTeam').insertOne({
         name: 'name'
       });
       await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id.toString(), teamId: team.insertedId.toString()})

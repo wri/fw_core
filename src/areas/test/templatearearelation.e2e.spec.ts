@@ -76,7 +76,7 @@ describe('Area Template Relations', () => {
         TemplateAreaRelationService,
         {provide: getModelToken(TeamAreaRelation.name, 'apiDb'), useValue: jest.fn()},
         {provide: getModelToken(TemplateAreaRelation.name, 'apiDb'), useValue: jest.fn()},
-        {provide: getModelToken(Team.name, 'teamsDb'), useValue: jest.fn()},
+        {provide: getModelToken("GFWTeam", 'teamsDb'), useValue: jest.fn()},
         {provide: getModelToken(TeamMember.name, 'teamsDb'), useValue: jest.fn()},
         {provide: getModelToken(Template.name, 'formsDb'), useValue: jest.fn()}
       ],
@@ -101,7 +101,7 @@ describe('Area Template Relations', () => {
   describe('POST /arearelations/templates', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await apiDbConnection.collection('teamarearelations').deleteMany({});
       await apiDbConnection.collection('templatearearelations').deleteMany({});
@@ -185,7 +185,7 @@ describe('Area Template Relations', () => {
   describe('DELETE /arearelations/templates', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await apiDbConnection.collection('teamarearelations').deleteMany({});
       await apiDbConnection.collection('templatearearelations').deleteMany({});

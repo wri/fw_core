@@ -15,6 +15,7 @@ templateId: string;
 teamIds: string[];
 createdAt: Date;
 createdBy?: string;
+areaName?: string;
 }
 
 @Schema()
@@ -50,6 +51,9 @@ export class Assignment {
     
     @Prop({required: true})
     teamIds: string[];
+
+    @Prop({required: false})
+    areaName: string;
 
     @Prop({required: true})
     createdBy: string;

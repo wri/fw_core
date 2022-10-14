@@ -69,9 +69,18 @@ data "template_file" "container_definition" {
     container_port = var.container_port
     log_group = aws_cloudwatch_log_group.default.name
     log_level         = var.log_level
+    document_db_endpoint       = data.terraform_remote_state.core.outputs.document_db_endpoint
+    document_db_port           = data.terraform_remote_state.core.outputs.document_db_port
+    areas_api_url           = var.areas_api_url
+    auth_url                = var.auth_url
+    geostore_api_url        = var.geostore_api_url
+    s3_bucket               = var.s3_bucket
+    s3_access_key_id        = var.s3_access_key_id
+    s3_secret_access_key    = var.s3_secret_access_key
     db_secret_arn = data.terraform_remote_state.core.outputs.document_db_secrets_arn
     data_bucket = data.terraform_remote_state.fw_core.outputs.data_bucket
-    redis_endpoint = data.terraform_remote_state.core.outputs.redis_replication_group_primary_endpoint_address
+    redis_endpoint             = data.terraform_remote_state.core.outputs.redis_replication_group_primary_endpoint_address
+    redis_port                 = data.terraform_remote_state.core.outputs.redis_replication_group_port
   }
 
 }

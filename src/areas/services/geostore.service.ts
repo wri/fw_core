@@ -1,20 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import config = require('config')
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
 import client from '../../common/redisClient';
 import deserialize from '../../common/deserlializer';
-import { IGeojson, IGeostore } from '../models/area.entity';
-import { IUser } from '../../common/user.model';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class GeostoreService {
 
+    constructor(
+        private readonly configService: ConfigService
+        ) { }
     private readonly logger = new Logger(GeostoreService.name)
 
     async createGeostore(geojson: any, token: string): Promise<any> {
         try {
-            const baseURL = config.get("geostoreAPI.url")
+            const baseURL = this.configService.get("geostoreAPI.url")
             const url = `${baseURL}/geostore`
             const body = {
                 geojson,
@@ -37,7 +38,7 @@ export class GeostoreService {
         let geostore: any = await client.get(geostoreId.toString())
         if (!geostore) {
             try {
-                const baseURL = config.get("geostoreAPI.url");
+                const baseURL = this.configService.get("geostoreAPI.url");
                 const url = `${baseURL}/geostore/${geostoreId}`
                 const getGeostoreRequestConfig = {
                     headers: {

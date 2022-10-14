@@ -10,7 +10,7 @@ export interface ITeam {
     areas?: string[];
   }
 
-@Schema()
+@Schema({collection: 'GFWTeam'})
 export class Team {
     @Prop({required: false, trim: true})
     name: string;

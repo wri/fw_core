@@ -6,17 +6,18 @@ import { Request } from "express";
 import mongoose from 'mongoose';
 import { IAssignmentResponse } from './models/assignment.schema';
 import serializeAssignments from './serializers/assignments.serializer';
+import { AreasService } from '../areas/services/areas.service';
 
 @Controller('assignments')
 export class AssignmentsController {
-  constructor(private readonly assignmentsService: AssignmentsService) {}
+  constructor(
+      private readonly assignmentsService: AssignmentsService,
+      private readonly areasService: AreasService
+    ) {}
 
   @Post()
   async create(@Req() request: Request, @Body() createAssignmentDto: CreateAssignmentDto): Promise<IAssignmentResponse> {
-    const createdAssignment = await this.assignmentsService.create({
-      ...createAssignmentDto,
-      createdBy: request.user.id
-    });
+    const createdAssignment = await this.assignmentsService.create(createAssignmentDto, request.user);
 
     return { data: serializeAssignments(createdAssignment)}
   }
@@ -37,6 +38,14 @@ export class AssignmentsController {
     return { data: serializeAssignments(assignments)}
   }
 
+  @Get('/open')
+  async findOpenAssignments(@Req() request: Request): Promise<IAssignmentResponse> {
+    const {user} = request
+    const assignments = await this.assignmentsService.findOpen(user.id);
+
+    return { data: serializeAssignments(assignments)}
+  }
+
   @Get('/areas/:areaId')
   async findAreaAssignments(@Req() request: Request, @Param('areaId') areaId: string): Promise<IAssignmentResponse> {
     const { user } = request
@@ -49,6 +58,12 @@ export class AssignmentsController {
   async findOne(@Param('id') id: string): Promise<IAssignmentResponse> {
     const assignment = await this.assignmentsService.findOne({_id: new mongoose.Types.ObjectId(id)});
 
+    if(!assignment) throw new HttpException("Assignment not found", HttpStatus.NOT_FOUND)
+    // get area for area name
+    const area = await this.areasService.getAreaMICROSERVICE(assignment.areaId)
+    if(area) assignment.areaName = area.attributes.name;
+    else assignment.areaName = null;
+
     return { data: serializeAssignments(assignment)}
   }
 
@@ -57,7 +72,7 @@ export class AssignmentsController {
 
     const filter = {
       createdBy: request.user.id,
-      status: "incomplete",
+      status: {$in: ["incomplete", "on hold"]},
       _id: new mongoose.Types.ObjectId(id)
     }
     const assignment = await this.assignmentsService.findOne(filter)

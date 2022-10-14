@@ -20,7 +20,7 @@ import { TeamAreaRelation, TeamAreaRelationSchema } from '../areas/models/teamAr
   imports: [
     MongooseModule.forFeature([{ name: Template.name, schema: TemplateSchema }], 'formsDb'),
     MongooseModule.forFeature([{ name: Answer.name, schema: AnswerSchema }], 'formsDb'),
-    MongooseModule.forFeature([{ name: Team.name, schema: TeamSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: "GFWTeam", schema: TeamSchema }], 'teamsDb'),
     MongooseModule.forFeature([{ name: TeamMember.name, schema: TeamMemberSchema }], 'teamsDb'),
     MongooseModule.forFeature([{ name: TemplateAreaRelation.name, schema: TemplateAreaRelationSchema }], 'apiDb'),
     MongooseModule.forFeature([{ name: TeamAreaRelation.name, schema: TeamAreaRelationSchema }], 'apiDb'),

@@ -3,7 +3,7 @@ const ROLES = {
         "id": "6266c6f798340a001ad51caa",
         "_id": "6266c6f798340a001ad51caa",
         "email": "edward@3sidedcube.com",
-        "name": "Edward",
+        "name": "Edward Martin",
         "provider": "local",
         "role": "USER",
         "extraUserData": {
@@ -15,6 +15,7 @@ const ROLES = {
     MANAGER: {
       id: "1a10d7c6e0a37126611fd7a8",
       role: "MANAGER",
+      name: "Manager Name",
       provider: "local",
       email: "user@control-tower.org",
       extraUserData: {
@@ -24,6 +25,7 @@ const ROLES = {
     ADMIN: {
       id: "1a10d7c6e0a37126611fd7a9",
       role: "ADMIN",
+      name: "Admin Name",
       provider: "local",
       email: "user@control-tower.org",
       extraUserData: {

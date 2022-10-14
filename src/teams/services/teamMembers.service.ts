@@ -92,4 +92,16 @@ export class TeamMembersService {
     });
   }
 
+  async findAllUsersManaged(userId: string): Promise<string[]> {
+    const teams = await this.teamMemberModel.find({userId});
+    const users: string[] = [];
+    for await (const team of teams) {
+      if(team.role === EMemberRole.Administrator || team.role === EMemberRole.Manager) {
+        const teamUsers = await this.teamMemberModel.find({teamId: team.teamId})
+        users.push(...teamUsers.map(user => user.userId))
+      }
+    }
+    return users;
+  }
+
 }

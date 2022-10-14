@@ -51,7 +51,7 @@ describe('Answers', () => {
         TeamAreaRelationService,
         AnswersService,
         S3Service,
-        {provide: getModelToken(Team.name, 'teamsDb'), useValue: jest.fn()},
+        {provide: getModelToken("GFWTeam", 'teamsDb'), useValue: jest.fn()},
         {provide: getModelToken(TeamMember.name, 'teamsDb'), useValue: jest.fn()},
         {provide: getModelToken(Template.name, 'formsDb'), useValue: jest.fn()},
         {provide: getModelToken(Answer.name, 'formsDb'), useValue: jest.fn()},
@@ -74,7 +74,7 @@ describe('Answers', () => {
 
   describe('Permissions Middleware', () => {
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await formsDbConnection.collection('templates').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
@@ -114,7 +114,7 @@ describe('Answers', () => {
 
     it('should succeed if the template is owned by a team manager', async () => {
       const template = await formsDbConnection.collection('templates').insertOne(constants.managerTemplate);
-      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      const team = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
       await request(app.getHttpServer())
@@ -127,7 +127,7 @@ describe('Answers', () => {
   describe('GET /templates/:templateId/answers', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await formsDbConnection.collection('templates').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
@@ -186,7 +186,7 @@ describe('Answers', () => {
     });
 
     it('should return all monitor answers for managers', async () => {
-      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      const team = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
       const template = await formsDbConnection.collection('templates').insertOne(constants.defaultTemplate);
@@ -324,7 +324,7 @@ describe('Answers', () => {
   describe('GET /templates/:templateId/answers/:id', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await formsDbConnection.collection('templates').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
@@ -418,7 +418,7 @@ describe('Answers', () => {
     });
 
     it('should return another users answer if they are in a team with current user', async () => {
-      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      const team = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
       const template = await formsDbConnection.collection('templates').insertOne(constants.defaultTemplate);
@@ -445,7 +445,7 @@ describe('Answers', () => {
   describe('POST /templates/:templateId/answers', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await formsDbConnection.collection('templates').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
@@ -539,7 +539,7 @@ describe('Answers', () => {
   describe('DELETE /templates/:templateId/answers/:id', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await formsDbConnection.collection('templates').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
@@ -594,7 +594,7 @@ describe('Answers', () => {
     it('should delete answer in team area if user is team manager', async () => {
       const areaId = new mongoose.Types.ObjectId();
       const template = await formsDbConnection.collection('templates').insertOne(constants.defaultTemplate);
-      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      const team = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
       await apiDbConnection.collection('teamarearelations').insertOne({teamId: team.insertedId.toString(), areaId: areaId.toString()})
       const answer = await formsDbConnection.collection('answers').insertOne({
@@ -619,7 +619,7 @@ describe('Answers', () => {
     it('should fail to delete answer in team area if user is team monitor', async () => {
       const areaId = new mongoose.Types.ObjectId();
       const template = await formsDbConnection.collection('templates').insertOne(constants.defaultTemplate);
-      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      const team = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
       await apiDbConnection.collection('teamarearelations').insertOne({teamId: team.insertedId.toString(), areaId: areaId.toString()})
       const answer = await formsDbConnection.collection('answers').insertOne({
@@ -645,7 +645,7 @@ describe('Answers', () => {
   describe('GET /templates/:templateId/answers/area/:areaId', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await formsDbConnection.collection('templates').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
@@ -723,7 +723,7 @@ describe('Answers', () => {
     it('should return other users answers related to an area if on the same team', async () => {
       const areaId = new mongoose.Types.ObjectId();
       const template = await formsDbConnection.collection('templates').insertOne(constants.defaultTemplate);
-      const team = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      const team = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
       await apiDbConnection.collection('teamarearelations').insertOne({teamId: team.insertedId.toString(), areaId: areaId.toString()})

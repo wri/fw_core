@@ -70,7 +70,7 @@ describe('Areas', () => {
         TemplateAreaRelationService,
         {provide: getModelToken(TeamAreaRelation.name, 'apiDb'), useValue: jest.fn()},
         {provide: getModelToken(TemplateAreaRelation.name, 'apiDb'), useValue: jest.fn()},
-        {provide: getModelToken(Team.name, 'teamsDb'), useValue: jest.fn()},
+        {provide: getModelToken("GFWTeam", 'teamsDb'), useValue: jest.fn()},
         {provide: getModelToken(TeamMember.name, 'teamsDb'), useValue: jest.fn()},
         {provide: getModelToken(Template.name, 'formsDb'), useValue: jest.fn()}
       ],
@@ -95,7 +95,7 @@ describe('Areas', () => {
   describe('GET /areas/user', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await apiDbConnection.collection('teamarearelations').deleteMany({});
       await apiDbConnection.collection('templatearearelations').deleteMany({});
@@ -153,7 +153,7 @@ describe('Areas', () => {
     });
 
     it('should contain an array of teams linked with the area', async () => {
-      const team1 = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      const team1 = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
       const relation = await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id, teamId: team1.insertedId.toString()})
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator})
       const response = await request(app.getHttpServer())
@@ -178,7 +178,7 @@ describe('Areas', () => {
 
     it('should return an array of areas', async () => {
 
-    const team1 = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+    const team1 = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
     await teamsDbConnection.collection('teammembers').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Invited, role: EMemberRole.Administrator})
     await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id, teamId: team1.insertedId.toString()})
 
@@ -244,7 +244,7 @@ describe('Areas', () => {
   describe('GET /areas/:id', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('teams').deleteMany({});
+      await teamsDbConnection.collection('GFWTeam').deleteMany({});
       await teamsDbConnection.collection('teammembers').deleteMany({});
       await apiDbConnection.collection('teamarearelations').deleteMany({});
       await apiDbConnection.collection('templatearearelations').deleteMany({});
@@ -267,7 +267,7 @@ describe('Areas', () => {
     });
 
     it('should return the area if the user is in a team with the area linked', async () => {
-      const team1 = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      const team1 = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.ADMIN.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator})
       await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id, teamId: team1.insertedId.toString()})
       const response = await request(app.getHttpServer())
@@ -301,7 +301,7 @@ describe('Areas', () => {
     });
  
     it('should contain an array of teams linked with the area', async () => {
-      const team1 = await teamsDbConnection.collection('teams').insertOne({name: 'Test'});
+      const team1 = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
       const relation = await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id, teamId: team1.insertedId.toString()})
       await teamsDbConnection.collection('teammembers').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator})
       const response = await request(app.getHttpServer())

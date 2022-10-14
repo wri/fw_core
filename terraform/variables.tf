@@ -60,3 +60,25 @@ variable "healthcheck_path" {
 variable "healthcheck_sns_emails" {
   type    = list(string)
 }
+variable "s3_bucket" {
+  type = string
+  default = "forest-watcher-files"
+}
+variable "s3_access_key_id" {
+  type = string
+}
+variable "s3_secret_access_key" {
+  type = string
+}
+variable "auth_url" {
+  type    = string
+  default = "https://api.resourcewatch.org"
+}
+variable "geostore_api_url" {
+  type    = string
+  default = "https://api.resourcewatch.org/v1"
+}
+variable "areas_api_url" {
+  type    = string
+  default = "https://api.resourcewatch.org/v1"
+}

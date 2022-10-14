@@ -3,7 +3,6 @@ import { CreateAreaDto } from '../dto/create-area.dto';
 import { UpdateAreaDto } from '../dto/update-area.dto';
 import { GeostoreService } from './geostore.service';
 import { Logger } from '@nestjs/common';
-import config = require('config');
 import fs from "fs";
 import FormData from "form-data";
 import axios from 'axios';
@@ -11,8 +10,7 @@ import { CoverageService } from './coverage.service';
 import { DatasetService } from './dataset.service';
 import { IArea, IGeojson, IGeostore } from '../models/area.entity';
 import { IUser } from '../../common/user.model';
-
-const ALERTS_SUPPORTED = config.get("alertsSupported");
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AreasService {
@@ -20,13 +18,15 @@ export class AreasService {
   constructor(
     private readonly geostoreService: GeostoreService,
     private readonly coverageService: CoverageService,
-    private readonly datasetService: DatasetService
+    private readonly datasetService: DatasetService,
+    private readonly configService: ConfigService
     ) { }
   private readonly logger = new Logger(AreasService.name);
 
   async getArea(areaId: string, user: IUser): Promise<IArea> {
     try {
-      const baseURL = config.get("areasAPI.url");
+
+      const baseURL = this.configService.get("areasAPI.url");
       const url = `${baseURL}/v2/area/${areaId}`
       const getAreasRequestConfig = {
         headers: {
@@ -44,11 +44,11 @@ export class AreasService {
 
   async getAreaMICROSERVICE(areaId: string): Promise<IArea> {
     try {
-      const baseURL = config.get("areasAPI.url");
+      const baseURL = this.configService.get("areasAPI.url");
       const url = `${baseURL}/v1/area/${areaId}`
       const getAreasRequestConfig = {
         headers: {
-          authorization: `Bearer ${config.get("service.token")}`
+          authorization: `Bearer ${this.configService.get("service.token")}`
         }
       }
       const { data } = await axios.get(url, getAreasRequestConfig);
@@ -62,7 +62,7 @@ export class AreasService {
 
   async getUserAreas(user: IUser): Promise<IArea[]> {
     try {
-      const baseURL = config.get("areasAPI.url");
+      const baseURL = this.configService.get("areasAPI.url");
       const url = `${baseURL}/v2/area`
       const getUserAreasRequestConfig = {
         headers: {
@@ -82,6 +82,7 @@ export class AreasService {
   async createAreaWithGeostore({ name, image }, geojson, user): Promise<any> {
     let geostore: IGeostore;
     let coverage;
+    const ALERTS_SUPPORTED = this.configService.get("alertsSupported");
 
     try {
       geostore = await this.geostoreService.createGeostore(geojson, user)
@@ -104,7 +105,7 @@ export class AreasService {
       form.append("geostore", geostore.id);
       form.append("image",fs.createReadStream(image.path));
 
-      const baseURL = config.get('areasAPI.url');
+      const baseURL = this.configService.get('areasAPI.url');
       const url = `${baseURL}/v1/area/fw/${user.id}`;
 
       const createAreaRequestConfig = {
@@ -126,6 +127,7 @@ export class AreasService {
 
     let geostoreId;
     let coverage;
+    const ALERTS_SUPPORTED = this.configService.get("alertsSupported");
 
     if (geojson) {
       try {
@@ -153,7 +155,7 @@ export class AreasService {
       form.append("geostore", geostoreId);
       if(image) form.append("image",fs.createReadStream(image.path));
 
-      const baseURL = config.get('areasAPI.url');
+      const baseURL = this.configService.get('areasAPI.url');
       const url = `${baseURL}/v2/area/${existingArea.id}`;
 
       const createAreaRequestConfig = {
@@ -173,7 +175,7 @@ export class AreasService {
 
   async delete(areaId: string, user: IUser): Promise<IArea> {
     try {
-      const baseURL = config.get('areasAPI.url');
+      const baseURL = this.configService.get('areasAPI.url');
       const url = `${baseURL}/v2/area/${areaId}`;
       const deleteAreaRequestConfig = {
         headers: {
