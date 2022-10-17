@@ -75,7 +75,7 @@ export class TeamMembersService {
   }
 
   async findFullNameForTeamMember(teamMember: TeamMemberDocument): Promise<TeamMemberDocument> {
-    if (teamMember) {
+    if (teamMember && teamMember.userId) {
       const name = await this.userService.getNameByIdMICROSERVICE(teamMember.userId.toString());
       teamMember.name = name
     }
@@ -98,7 +98,7 @@ export class TeamMembersService {
     for await (const team of teams) {
       if(team.role === EMemberRole.Administrator || team.role === EMemberRole.Manager) {
         const teamUsers = await this.teamMemberModel.find({teamId: team.teamId})
-        users.push(...teamUsers.map(user => user.userId.toString()))
+        users.push(...teamUsers.map(user => user.userId ? user.userId.toString() : null))
       }
     }
     return users;
