@@ -12,11 +12,20 @@ export interface ITeam {
 
 @Schema()
 export class Team {
-    @Prop({required: false, trim: true})
+    @Prop({required: true, trim: true})
     name: string;
 
     @Prop({required: true, default: Date.now})
     createdAt: string;
+
+    @Prop({required: false, default: Date.now})
+    userRole: string;
+
+    @Prop({required: false, default: Date.now})
+    members: mongoose.Schema.Types.Mixed;
+
+    @Prop({required: false, default: Date.now})
+    areas: string[];
 }
 
 export interface TeamDocument extends ITeam, mongoose.Document {}
