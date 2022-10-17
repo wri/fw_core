@@ -45,6 +45,7 @@ module "fargate_autoscaling" {
   ]
   task_execution_role_policies = [
     data.terraform_remote_state.core.outputs.document_db_secrets_policy_arn,
+    data.terraform_remote_state.fw_core.outputs.microservice_token_secret_policy_arn,
   ]
   container_definition = data.template_file.container_definition.rendered
 
@@ -71,6 +72,7 @@ data "template_file" "container_definition" {
     log_level         = var.log_level
     document_db_endpoint       = data.terraform_remote_state.core.outputs.document_db_endpoint
     document_db_port           = data.terraform_remote_state.core.outputs.document_db_port
+    microservice_token_secret  = data.terraform_remote_state.fw_core.outputs.microservice_token_secret_arn
     areas_api_url           = var.areas_api_url
     auth_url                = var.auth_url
     geostore_api_url        = var.geostore_api_url
