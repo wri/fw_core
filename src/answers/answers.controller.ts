@@ -37,12 +37,12 @@ export class AnswersController {
     const answer: IAnswer = {
       report: template.id,
       reportName: fields.reportName,
-      areaOfInterest: fields.areaOfInterest,
+      areaOfInterest: new mongoose.Types.ObjectId(fields.areaOfInterest),
       areaOfInterestName: fields.areaOfInterestName,
       language: fields.language,
       userPosition,
       clickedPosition: JSON.parse(fields.clickedPosition),
-      user: user.id,
+      user: new mongoose.Types.ObjectId(user.id),
       createdAt: fields.date,
       responses: []
     };
@@ -145,7 +145,7 @@ export class AnswersController {
     confirmedUsers.push(user.id);
 
     // users can see all answers from their own template or answers made from team members from other templates
-    if (user.role === "ADMIN" || user.id === template.user) {
+    if (user.role === "ADMIN" || user.id === template.user.toString()) {
       filter = {
         _id: new mongoose.Types.ObjectId(id),
         report: template.id

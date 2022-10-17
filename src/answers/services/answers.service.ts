@@ -47,7 +47,7 @@ export class AnswersService {
     }
 
     // Admin users and owners of the report template can check all report answers
-    if (user.role === "ADMIN" || user.id === template.user) {
+    if (user.role === "ADMIN" || user.id.toString() === template.user.toString()) {
       filter = {
         $and: [{ report: template._id }]
       };
@@ -79,7 +79,7 @@ export class AnswersService {
         for await (const team of teamsManaged) {
           // get users of each team and add to users array
           const teamUsers = await this.teamMembersService.findAllTeamMembers(team.id, EMemberRole.Administrator);
-          if (teamUsers) confirmedUsers.push(...teamUsers.map(teamUser => new mongoose.Types.ObjectId(teamUser.userId)));
+          if (teamUsers) confirmedUsers.push(...teamUsers.map(teamUser => teamUser.userId));
         }
       }
     }
@@ -152,7 +152,7 @@ export class AnswersService {
   }
 
   async addUsernameToAnswer(answer: AnswerDocument): Promise<AnswerDocument> {
-    answer.fullName = await this.userService.getNameByIdMICROSERVICE(answer.user)
+    answer.fullName = await this.userService.getNameByIdMICROSERVICE(answer.user.toString())
     return answer
   }
 

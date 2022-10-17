@@ -7,19 +7,19 @@ export interface IAnswerResponse {
 }
 
 export interface IAnswer {
-    report: string;
+    report: mongoose.Types.ObjectId;
     reportName: string;
     templateName?: string;
     fullName?: string;
     username?: string;
     organization?: string;
     teamId?: string;
-    areaOfInterest?: string;
+    areaOfInterest?: mongoose.Types.ObjectId;
     areaOfInterestName?: string;
     language: string;
     userPosition?: any[];
     clickedPosition?: any[];
-    user: string;
+    user: mongoose.Types.ObjectId;
     responses: IAnswerResponse[];
     createdAt: string;
   }
@@ -27,7 +27,7 @@ export interface IAnswer {
 @Schema()
 export class Answer {
     @Prop({required: true})
-    report: string; // template ID
+    report: mongoose.Schema.Types.ObjectId; // template ID
 
     @Prop({required: true})
     reportName: string; // report answer name
@@ -48,7 +48,7 @@ export class Answer {
     areaOfInterestName: string;
 
     @Prop({required: false})
-    areaOfInterest: string;
+    areaOfInterest: mongoose.Schema.Types.ObjectId;
 
     @Prop({required: true})
     language: string; 
@@ -60,7 +60,7 @@ export class Answer {
     clickedPosition: [];
 
     @Prop({required: true})
-    user: string;
+    user: mongoose.Schema.Types.ObjectId;
 
     @Prop()
     responses: [IAnswerResponse];

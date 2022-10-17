@@ -16,8 +16,8 @@ export enum EMemberStatus {
 }
 
 export interface ITeamMember {
-    teamId: mongoose.Schema.Types.ObjectId;
-    userId?: mongoose.Schema.Types.ObjectId;
+    teamId: mongoose.Types.ObjectId;
+    userId?: mongoose.Types.ObjectId;
     email: string;
     role: EMemberRole;
     status: EMemberStatus;

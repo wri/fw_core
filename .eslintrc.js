@@ -5,12 +5,13 @@ module.exports = {
     project: 'tsconfig.json',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint/eslint-plugin'],
+  plugins: ['@typescript-eslint/eslint-plugin', 'nestjs'],
   extends: [
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
     "plugin:jest/recommended",
-    "prettier"
+    "prettier",
+    'plugin:nestjs/recommended'
   ],
   root: true,
   env: {

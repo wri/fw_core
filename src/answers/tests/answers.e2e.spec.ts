@@ -115,8 +115,8 @@ describe('Answers', () => {
     it('should succeed if the template is owned by a team manager', async () => {
       const template = await formsDbConnection.collection('reports').insertOne(constants.managerTemplate);
       const team = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: new mongoose.Types.ObjectId(ROLES.USER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
       await request(app.getHttpServer())
       .get(`/templates/${template.insertedId.toString()}/answers`)
       .set('Authorization', 'USER')
@@ -142,31 +142,31 @@ describe('Answers', () => {
     it('should return an array all user answers', async () => {
       const template = await formsDbConnection.collection('reports').insertOne(constants.defaultTemplate);
       const managerAnswer = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const wrongTemplateAnswer = await formsDbConnection.collection('answers').insertOne({
-        report: (new mongoose.Types.ObjectId()).toString(),
+        report: new mongoose.Types.ObjectId(),
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const userAnswer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const userAnswer2 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 2',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const response = await request(app.getHttpServer())
@@ -187,35 +187,35 @@ describe('Answers', () => {
 
     it('should return all monitor answers for managers', async () => {
       const team = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: new mongoose.Types.ObjectId(ROLES.USER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
       const template = await formsDbConnection.collection('reports').insertOne(constants.defaultTemplate);
       const managerAnswer = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const wrongTemplateAnswer = await formsDbConnection.collection('answers').insertOne({
-        report: (new mongoose.Types.ObjectId()).toString(),
+        report: new mongoose.Types.ObjectId(),
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const userAnswer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const userAnswer2 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 2',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const response = await request(app.getHttpServer())
@@ -235,31 +235,31 @@ describe('Answers', () => {
     it('should return all answers for template creator', async () => {
       const template = await formsDbConnection.collection('reports').insertOne(constants.userTemplate);
       const managerAnswer = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const wrongTemplateAnswer = await formsDbConnection.collection('answers').insertOne({
-        report: (new mongoose.Types.ObjectId()).toString(),
+        report: new mongoose.Types.ObjectId(),
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const userAnswer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const userAnswer2 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 2',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const response = await request(app.getHttpServer())
@@ -279,31 +279,31 @@ describe('Answers', () => {
     it('should return answer objects that contain full name of creator ', async () => {
       const template = await formsDbConnection.collection('reports').insertOne(constants.userTemplate);
       const managerAnswer = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const wrongTemplateAnswer = await formsDbConnection.collection('answers').insertOne({
-        report: (new mongoose.Types.ObjectId()).toString(),
+        report: new mongoose.Types.ObjectId(),
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const userAnswer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const userAnswer2 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 2',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const response = await request(app.getHttpServer())
@@ -339,10 +339,10 @@ describe('Answers', () => {
     it('should return a users answer', async () => {
       const template = await formsDbConnection.collection('reports').insertOne(constants.userTemplate);
       const userAnswer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const response = await request(app.getHttpServer())
@@ -361,10 +361,10 @@ describe('Answers', () => {
     it('should return an answer containing the creators full name', async () => {
       const template = await formsDbConnection.collection('reports').insertOne(constants.userTemplate);
       const userAnswer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const response = await request(app.getHttpServer())
@@ -381,10 +381,10 @@ describe('Answers', () => {
     it('should return another users answer if the current user owns the template', async () => {
       const template = await formsDbConnection.collection('reports').insertOne(constants.userTemplate);
       const userAnswer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const response = await request(app.getHttpServer())
@@ -403,10 +403,10 @@ describe('Answers', () => {
     it('should fail to return another users answer if the current user doesnt own the template', async () => {
       const template = await formsDbConnection.collection('reports').insertOne(constants.defaultTemplate);
       const userAnswer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const response = await request(app.getHttpServer())
@@ -419,14 +419,14 @@ describe('Answers', () => {
 
     it('should return another users answer if they are in a team with current user', async () => {
       const team = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: new mongoose.Types.ObjectId(ROLES.USER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
       const template = await formsDbConnection.collection('reports').insertOne(constants.defaultTemplate);
       const userAnswer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const response = await request(app.getHttpServer())
@@ -470,7 +470,7 @@ describe('Answers', () => {
       })
       .expect(201)
 
-      const answer = await formsDbConnection.collection('answers').findOne({report: template.insertedId.toString()});
+      const answer = await formsDbConnection.collection('answers').findOne({report: template.insertedId});
       expect(answer).toBeDefined()
       expect(answer).toHaveProperty('reportName', 'name');
       expect(answer).toHaveProperty('responses');
@@ -554,10 +554,10 @@ describe('Answers', () => {
     it('should delete a users answer', async () => {
       const template = await formsDbConnection.collection('reports').insertOne(constants.defaultTemplate);
       const answer = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const insertedAnswer = await formsDbConnection.collection('answers').findOne({'_id': answer.insertedId});
@@ -574,10 +574,10 @@ describe('Answers', () => {
     it('should fail to delete someone elses answer', async () => {
       const template = await formsDbConnection.collection('reports').insertOne(constants.defaultTemplate);
       const answer = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const insertedAnswer = await formsDbConnection.collection('answers').findOne({'_id': answer.insertedId});
@@ -595,14 +595,14 @@ describe('Answers', () => {
       const areaId = new mongoose.Types.ObjectId();
       const template = await formsDbConnection.collection('reports').insertOne(constants.defaultTemplate);
       const team = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
       await apiDbConnection.collection('areateamrelations').insertOne({teamId: team.insertedId.toString(), areaId: areaId.toString()})
       const answer = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
-        areaOfInterest: areaId.toString(),
+        areaOfInterest: areaId,
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const insertedAnswer = await formsDbConnection.collection('answers').findOne({'_id': answer.insertedId});
@@ -620,14 +620,14 @@ describe('Answers', () => {
       const areaId = new mongoose.Types.ObjectId();
       const template = await formsDbConnection.collection('reports').insertOne(constants.defaultTemplate);
       const team = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
       await apiDbConnection.collection('areateamrelations').insertOne({teamId: team.insertedId.toString(), areaId: areaId.toString()})
       const answer = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
-        areaOfInterest: areaId.toString(),
+        areaOfInterest: areaId,
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const insertedAnswer = await formsDbConnection.collection('answers').findOne({'_id': answer.insertedId});
@@ -661,11 +661,11 @@ describe('Answers', () => {
       const areaId = new mongoose.Types.ObjectId();
       const template = await formsDbConnection.collection('reports').insertOne(constants.defaultTemplate);
       const answer = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
-        areaOfInterest: areaId.toString(),
+        areaOfInterest: areaId,
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const response = await request(app.getHttpServer())
@@ -682,11 +682,11 @@ describe('Answers', () => {
       const areaId = new mongoose.Types.ObjectId();
       const template = await formsDbConnection.collection('reports').insertOne(constants.userTemplate);
       const answer = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        areaOfInterest: areaId.toString(),
-        user: ROLES.USER.id,
+        areaOfInterest: areaId,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const response = await request(app.getHttpServer())
@@ -704,11 +704,11 @@ describe('Answers', () => {
       const areaId = new mongoose.Types.ObjectId();
       const template = await formsDbConnection.collection('reports').insertOne(constants.defaultTemplate);
       const answer = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
-        areaOfInterest: areaId.toString(),
+        areaOfInterest: areaId,
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const response = await request(app.getHttpServer())
@@ -724,15 +724,15 @@ describe('Answers', () => {
       const areaId = new mongoose.Types.ObjectId();
       const template = await formsDbConnection.collection('reports').insertOne(constants.defaultTemplate);
       const team = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: new mongoose.Types.ObjectId(ROLES.USER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
       await apiDbConnection.collection('areateamrelations').insertOne({teamId: team.insertedId.toString(), areaId: areaId.toString()})
       const answer = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
-        areaOfInterest: areaId.toString(),
+        areaOfInterest: areaId,
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const response = await request(app.getHttpServer())

@@ -269,8 +269,8 @@ describe('Assignments', () => {
       const team = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
       const team2 = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test2'});
       const team3 = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test3'});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team3.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: new mongoose.Types.ObjectId(ROLES.USER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team3.insertedId, userId: new mongoose.Types.ObjectId(ROLES.USER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
       
       const assignment = await formsDbConnection.collection('assignments').insertOne({
         ...assignments.defaultAssignment,
@@ -394,7 +394,7 @@ describe('Assignments', () => {
       const area2 = new mongoose.Types.ObjectId();
       const team = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
       const team2 = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: new mongoose.Types.ObjectId(ROLES.USER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
      
       const assignment = await formsDbConnection.collection('assignments').insertOne({
         ...assignments.defaultAssignment,

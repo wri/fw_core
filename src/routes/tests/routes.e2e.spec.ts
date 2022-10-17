@@ -311,7 +311,7 @@ describe('Routes', () => {
 
     it('should return an array of active routes for teams the user is a member of', async () => {
       const team = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
 
       const route1 = await formsDbConnection.collection('routes').insertOne({
         ...routeConstants.defaultRoute,
@@ -436,7 +436,7 @@ describe('Routes', () => {
 
     it('should allow a team manager to deactivate a team route', async () => {
       const team = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId, userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
 
       const route1 = await formsDbConnection.collection('routes').insertOne({
         ...routeConstants.defaultRoute,

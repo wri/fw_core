@@ -38,7 +38,7 @@ export class TemplatePermissionsMiddleware implements NestMiddleware {
       let teamManagers = teamUsers.filter(
         teamUser => teamUser.role === EMemberRole.Manager || teamUser.role === EMemberRole.Administrator
       );
-      teamManagers.forEach(manager => managers.push({ user: new mongoose.Types.ObjectId(manager.userId) }));
+      teamManagers.forEach(manager => managers.push({ user: manager.userId }));
     }
     let filters = {};
     if (teams.length > 0) {

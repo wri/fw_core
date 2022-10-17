@@ -432,17 +432,17 @@ describe('Areas', () => {
     it('should return a template with user answers count for user', async () => {
       const template3 = await formsDbConnection.collection('reports').insertOne(constants.defaultTemplate)
       await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId.toString(),
+        report: template3.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       })
       await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId.toString(),
+        report: template3.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       })
 
@@ -461,17 +461,17 @@ describe('Areas', () => {
     it('should return a template with every answers count for template creator', async () => {
       const template3 = await formsDbConnection.collection('reports').insertOne(constants.userTemplate)
       await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId.toString(),
+        report: template3.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       })
       await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId.toString(),
+        report: template3.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       })
 
@@ -490,17 +490,17 @@ describe('Areas', () => {
     it('should return a template with every answers count for admin', async () => {
       const template3 = await formsDbConnection.collection('reports').insertOne(constants.userTemplate)
       await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId.toString(),
+        report: template3.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       })
       await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId.toString(),
+        report: template3.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       })
 
@@ -538,44 +538,44 @@ describe('Areas', () => {
       const template3 = await formsDbConnection.collection('reports').insertOne(constants.userTemplate)
       
       const managerAnswer = await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId.toString(),
+        report: template3.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const managerAnswer2 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId.toString(),
+        report: template3.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.ADMIN.id,
+        user: new mongoose.Types.ObjectId(ROLES.ADMIN.id),
         responses: [{name: "question-1", value: "test"}]
       })
       const userAnswer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId.toString(),
+        report: template3.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       })
       const userAnswer2 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       })
 
       const team1 = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-      const member1 = await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, role: EMemberRole.Monitor, status: EMemberStatus.Confirmed})
-      const member2 = await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.MANAGER.email, role: EMemberRole.Manager, status: EMemberStatus.Confirmed})
+      const member1 = await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId, userId: new mongoose.Types.ObjectId(ROLES.USER.id), email: ROLES.USER.email, role: EMemberRole.Monitor, status: EMemberStatus.Confirmed})
+      const member2 = await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId, userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id), email: ROLES.MANAGER.email, role: EMemberRole.Manager, status: EMemberStatus.Confirmed})
       
       const response = await request(app.getHttpServer())
       .get(`/templates/getAllAnswersForUser`)
@@ -597,44 +597,44 @@ describe('Areas', () => {
       const template3 = await formsDbConnection.collection('reports').insertOne(constants.userTemplate)
       
       const managerAnswer = await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId.toString(),
+        report: template3.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       const managerAnswer2 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         responses: [{name: "question-1", value: "test"}]
       });
       await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId.toString(),
+        report: template3.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.ADMIN.id,
+        user: new mongoose.Types.ObjectId(ROLES.ADMIN.id),
         responses: [{name: "question-1", value: "test"}]
       })
       const userAnswer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId.toString(),
+        report: template3.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       })
       const userAnswer2 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       })
 
       const team1 = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-      const member1 = await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, role: EMemberRole.Monitor, status: EMemberStatus.Confirmed})
-      const member2 = await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.MANAGER.email, role: EMemberRole.Manager, status: EMemberStatus.Confirmed})
+      const member1 = await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId, userId: new mongoose.Types.ObjectId(ROLES.USER.id), email: ROLES.USER.email, role: EMemberRole.Monitor, status: EMemberStatus.Confirmed})
+      const member2 = await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId, userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id), email: ROLES.MANAGER.email, role: EMemberRole.Manager, status: EMemberStatus.Confirmed})
       
       const response = await request(app.getHttpServer())
       .get(`/templates/getAllAnswersForUser`)
@@ -696,10 +696,10 @@ describe('Areas', () => {
         status: 'unpublished'
       });
       const userAnswer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       })      
       const createdTemplate = await formsDbConnection.collection('reports').findOne({'_id': template.insertedId});
@@ -713,10 +713,10 @@ describe('Areas', () => {
     it('should succeed to delete an published template with answers and all answers if the user is ADMIN', async () => {
       const template = await formsDbConnection.collection('reports').insertOne(constants.userTemplate);
       const userAnswer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       })      
       const createdTemplate = await formsDbConnection.collection('reports').findOne({'_id': template.insertedId});
@@ -864,10 +864,10 @@ describe('Areas', () => {
     it('should return a template with every answers count', async () => {
       const template = await formsDbConnection.collection('reports').insertOne(constants.userTemplate)
       await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       })
       const response = await request(app.getHttpServer())
@@ -902,24 +902,24 @@ describe('Areas', () => {
       const template = await formsDbConnection.collection('reports').insertOne(constants.userTemplate)
       const template2 = await formsDbConnection.collection('reports').insertOne(constants.defaultTemplate)
       const answer1 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       })
       const answer2 =await formsDbConnection.collection('answers').insertOne({
-        report: template2.insertedId.toString(),
+        report: template2.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{name: "question-1", value: "test"}]
       })
       const answer3 = await formsDbConnection.collection('answers').insertOne({
-        report: template.insertedId.toString(),
+        report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
-        user: ROLES.ADMIN.id,
+        user: new mongoose.Types.ObjectId(ROLES.ADMIN.id),
         responses: [{name: "question-1", value: "test"}]
       })
       const createdAnswer1 = await formsDbConnection.collection('answers').findOne({'_id': answer1.insertedId});

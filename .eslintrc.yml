@@ -14,11 +14,13 @@ parserOptions:
 plugins:
   - jest
   - prettier
+  - nestjs
 extends:
   - eslint:recommended
   - plugin:@typescript-eslint/recommended
   - plugin:jest/recommended
   - plugin:prettier/recommended
+  - plugin:nestjs/recommended
 rules:
   prettier/prettier: error
   "@typescript-eslint/no-var-requires": 0

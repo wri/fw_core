@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserService } from '../../common/user.service';
 import { CreateTeamMemberDto } from '../dto/createTeamMember.dto';
-import { EMemberRole, EMemberStatus, TeamMember, TeamMemberDocument } from '../models/teamMember.schema';
+import { EMemberRole, EMemberStatus, ITeamMember, TeamMember, TeamMemberDocument } from '../models/teamMember.schema';
 import mongoose from 'mongoose';
 
 @Injectable()
@@ -76,7 +76,7 @@ export class TeamMembersService {
 
   async findFullNameForTeamMember(teamMember: TeamMemberDocument): Promise<TeamMemberDocument> {
     if (teamMember) {
-      const name = await this.userService.getNameByIdMICROSERVICE(teamMember.userId);
+      const name = await this.userService.getNameByIdMICROSERVICE(teamMember.userId.toString());
       teamMember.name = name
     }
     return teamMember;
@@ -98,7 +98,7 @@ export class TeamMembersService {
     for await (const team of teams) {
       if(team.role === EMemberRole.Administrator || team.role === EMemberRole.Manager) {
         const teamUsers = await this.teamMemberModel.find({teamId: team.teamId})
-        users.push(...teamUsers.map(user => user.userId))
+        users.push(...teamUsers.map(user => user.userId.toString()))
       }
     }
     return users;

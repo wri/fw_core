@@ -24,7 +24,7 @@ export class TemplatesController {
   private readonly logger = new Logger(TemplatesController.name);
 
   @Post()
-  
+
   async create(@Req() request: Request): Promise<ITemplateResponse> {
     const { body, user }: { body: CreateTemplateDto, user: IUser } = request
     if (body.public && user.role !== "ADMIN") throw new HttpException("You must be an administrator to create a public template", HttpStatus.FORBIDDEN);
@@ -62,7 +62,7 @@ export class TemplatesController {
     const numReports = templates.length;
     for (let i = 1; i < numReports; i++) {
       let answersFilter = {};
-      if (user.role === "ADMIN" || user.id === templates[i].user) {
+      if (user.role === "ADMIN" || user.id === templates[i].user.toString()) {
         answersFilter = {
           report: templates[i].id
         };
@@ -112,7 +112,7 @@ export class TemplatesController {
 
     // get answer count for each report
     let answersFilter = {};
-    if (user.role === "ADMIN" || user.id === template.user) {
+    if (user.role === "ADMIN" || user.id === template.user.toString()) {
       answersFilter = {
         report: template.id
       };
@@ -148,7 +148,7 @@ export class TemplatesController {
 
     // get answer count for each report
     let answersFilter = {};
-    if (user.role === "ADMIN" || user.id === template.user) {
+    if (user.role === "ADMIN" || user.id === template.user.toString()) {
       answersFilter = {
         report: template.id
       };

@@ -1,3 +1,4 @@
+import mongoose from "mongoose"
 import ROLES from "../../common/testConstants"
 
 export default {
@@ -5,7 +6,7 @@ export default {
         name: {
           en: 'Default'
         },
-        user: ROLES.USER.id,
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
         questions: [{
           "type": "text",
           "name": "question-1",
@@ -26,7 +27,7 @@ export default {
         name: {
           en: 'Default'
         },
-        user: ROLES.MANAGER.id,
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
         questions: [{
           "type": "text",
           "name": "question-1",
@@ -47,7 +48,7 @@ export default {
         name: {
           en: 'Default'
         },
-        user: ROLES.ADMIN.id,
+        user: new mongoose.Types.ObjectId(ROLES.ADMIN.id),
         questions: [{
           "type": "text",
           "name": "question-1",

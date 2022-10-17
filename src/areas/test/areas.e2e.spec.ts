@@ -154,8 +154,8 @@ describe('Areas', () => {
 
     it('should contain an array of teams linked with the area', async () => {
       const team1 = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-      const relation = await apiDbConnection.collection('areateamrelations').insertOne({areaId: constants.testArea.id, teamId: team1.insertedId.toString()})
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator})
+      const relation = await apiDbConnection.collection('areateamrelations').insertOne({areaId: constants.testArea.id, teamId: team1.insertedId})
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId, userId: new mongoose.Types.ObjectId(ROLES.USER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator})
       const response = await request(app.getHttpServer())
       .get(`/areas/user`)
       .set("Authorization", `USER`)
@@ -179,7 +179,7 @@ describe('Areas', () => {
     it('should return an array of areas', async () => {
 
     const team1 = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-    await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Invited, role: EMemberRole.Administrator})
+    await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId, userId: new mongoose.Types.ObjectId(ROLES.USER.id), email: ROLES.USER.email, status: EMemberStatus.Invited, role: EMemberRole.Administrator})
     await apiDbConnection.collection('areateamrelations').insertOne({areaId: constants.testArea.id, teamId: team1.insertedId.toString()})
 
     const response = await request(app.getHttpServer())
@@ -302,8 +302,8 @@ describe('Areas', () => {
  
     it('should contain an array of teams linked with the area', async () => {
       const team1 = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
-      const relation = await apiDbConnection.collection('areateamrelations').insertOne({areaId: constants.testArea.id, teamId: team1.insertedId.toString()})
-      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId.toString(), userId: ROLES.USER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator})
+      const relation = await apiDbConnection.collection('areateamrelations').insertOne({areaId: constants.testArea.id, teamId: team1.insertedId})
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId, userId: new mongoose.Types.ObjectId(ROLES.USER.id), email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Administrator})
       const response = await request(app.getHttpServer())
       .get(`/areas/${constants.testArea.id}`)
       .set("Authorization", `USER`)

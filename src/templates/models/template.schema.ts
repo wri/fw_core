@@ -31,7 +31,7 @@ export interface ITemplateQuestion {
 
 export interface ITemplate {
     name: string;
-    user: string;
+    user: mongoose.Types.ObjectId;
     languages: mongoose.Schema.Types.Mixed[];
     defaultLanguage: string;
     public: boolean;
@@ -77,7 +77,7 @@ export class Template {
     name: mongoose.Schema.Types.Mixed;
 
     @Prop({required: true})
-    user: string;
+    user: mongoose.Schema.Types.ObjectId;
 
     @Prop({required: true, default: false})
     languages: mongoose.Schema.Types.Mixed[];
