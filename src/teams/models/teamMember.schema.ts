@@ -16,8 +16,8 @@ export enum EMemberStatus {
 }
 
 export interface ITeamMember {
-    teamId: string;
-    userId?: string;
+    teamId: mongoose.Schema.Types.ObjectId;
+    userId?: mongoose.Schema.Types.ObjectId;
     email: string;
     role: EMemberRole;
     status: EMemberStatus;
@@ -28,10 +28,10 @@ export interface ITeamMember {
 export class TeamMember {
 
     @Prop({ required: true })
-    teamId: string;
+    teamId: mongoose.Schema.Types.ObjectId;
 
     @Prop()
-    userId: string;
+    userId: mongoose.Schema.Types.ObjectId;
 
     @Prop({ required: true })
     email: string

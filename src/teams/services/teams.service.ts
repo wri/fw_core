@@ -39,6 +39,7 @@ export class TeamsService {
     }
 
     async findAllByUserId(userId: string): Promise<TeamDocument[]> {
+        this.logger.log("All teams", await this.teamModel.find({}))
         const teamMembers: TeamMemberDocument[] = await this.teamMembersService.findAllByUserId(userId);
         return await this.findAllByTeamUserRelations(teamMembers);
     }
@@ -52,7 +53,7 @@ export class TeamsService {
         const teams: TeamDocument[] = [];
         for (let i = 0; i < teamMembers.length; i++) {
             const teamMember = teamMembers[i];
-            const team = await this.findById(teamMember.teamId);
+            const team = await this.findById(teamMember.teamId.toString());
             team.userRole = teamMember.role;
             teams.push(team);
         }
@@ -73,6 +74,6 @@ export class TeamsService {
     async findAllManagedTeams(userId: string): Promise<string[]> {
         const teams = await this.teamMembersService.findAllByUserId(userId);
         const teamsManaged = teams.filter(team => team.role === EMemberRole.Manager || team.role === EMemberRole.Administrator)
-        return teamsManaged.map(team => team.teamId);
+        return teamsManaged.map(team => team.teamId.toString());
     }
 }
