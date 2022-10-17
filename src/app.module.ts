@@ -22,8 +22,8 @@ import { RoutesModule } from './routes/routes.module';
     TeamMembersModule,
     AreasModule,
     DatabaseModule,
-    TemplatesModule,
     AnswersModule,
+    TemplatesModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration]

@@ -45,16 +45,6 @@ export class TeamsController {
     return {data: serializeTeam(teamsToSend)};
   }
 
-  // GET /v3/teams/:teamId
-  @Get('/:teamId')
-  async getTeam(@Param() params): Promise<any> {
-    const { teamId } = params;
-
-    const team = await this.teamsService.findById(teamId);
-
-    return {data: serializeTeam(team)};
-  };
-
   // GET /v3/teams/user/:userId
   // Get Teams by user id
   // Return the user's teams that have admin, manager or monitor roles
@@ -94,6 +84,16 @@ export class TeamsController {
 
     return {data: serializeTeam(teamsToSend)};
   };
+
+    // GET /v3/teams/:teamId
+    @Get('/:teamId')
+    async getTeam(@Param() params): Promise<any> {
+      const { teamId } = params;
+  
+      const team = await this.teamsService.findById(teamId);
+  
+      return {data: serializeTeam(team)};
+    };
 
   @Post()
   async create(@Req() request: Request): Promise<any> {
