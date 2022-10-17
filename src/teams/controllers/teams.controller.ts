@@ -57,6 +57,8 @@ export class TeamsController {
     else throw new HttpException('No user found', HttpStatus.NOT_FOUND);
     const { id: userId } = JSON.parse(loggedUser);
 
+    this.logger.log(`Getting all teams for user ${userId}`)
+
     const teams = await this.teamsService.findAllByUserId(id);
     const filteredTeams = teams.filter(team => team.userRole !== EMemberRole.Left);
 
