@@ -24,6 +24,7 @@ export class TemplatesController {
   private readonly logger = new Logger(TemplatesController.name);
 
   @Post()
+  
   async create(@Req() request: Request): Promise<ITemplateResponse> {
     const { body, user }: { body: CreateTemplateDto, user: IUser } = request
     if (body.public && user.role !== "ADMIN") throw new HttpException("You must be an administrator to create a public template", HttpStatus.FORBIDDEN);
