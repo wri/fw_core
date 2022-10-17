@@ -9,7 +9,7 @@ import { TeamMembersService } from './teamMembers.service';
 @Injectable()
 export class TeamsService {
     constructor(
-        @InjectModel("GFWTeam", 'teamsDb') private teamModel: Model<TeamDocument>,
+        @InjectModel("gfwteams", 'teamsDb') private teamModel: Model<TeamDocument>,
         private readonly teamMembersService: TeamMembersService,
     ) { }
 

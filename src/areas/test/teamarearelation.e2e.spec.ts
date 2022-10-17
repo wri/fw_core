@@ -74,11 +74,11 @@ describe('Area Team Relations', () => {
         TemplatesService,
         TeamAreaRelationService,
         TemplateAreaRelationService,
-        {provide: getModelToken(TeamAreaRelation.name, 'apiDb'), useValue: jest.fn()},
-        {provide: getModelToken(TemplateAreaRelation.name, 'apiDb'), useValue: jest.fn()},
-        {provide: getModelToken("GFWTeam", 'teamsDb'), useValue: jest.fn()},
-        {provide: getModelToken(TeamMember.name, 'teamsDb'), useValue: jest.fn()},
-        {provide: getModelToken(Template.name, 'formsDb'), useValue: jest.fn()}
+        {provide: getModelToken('areateamrelations', 'apiDb'), useValue: jest.fn()},
+        {provide: getModelToken('areatemplaterelations', 'apiDb'), useValue: jest.fn()},
+        {provide: getModelToken("gfwteams", 'teamsDb'), useValue: jest.fn()},
+        {provide: getModelToken('teamuserrelations', 'teamsDb'), useValue: jest.fn()},
+        {provide: getModelToken('reports', 'formsDb'), useValue: jest.fn()}
       ],
     })
       .overrideProvider(UserService)
@@ -101,11 +101,11 @@ describe('Area Team Relations', () => {
   describe('POST /arearelations/teams', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('GFWTeam').deleteMany({});
-      await teamsDbConnection.collection('teammembers').deleteMany({});
-      await apiDbConnection.collection('teamarearelations').deleteMany({});
-      await apiDbConnection.collection('templatearearelations').deleteMany({});
-      await formsDbConnection.collection('templates').deleteMany({});
+      await teamsDbConnection.collection('gfwteams').deleteMany({});
+      await teamsDbConnection.collection('teamuserrelations').deleteMany({});
+      await apiDbConnection.collection('areateamrelations').deleteMany({});
+      await apiDbConnection.collection('areatemplaterelations').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
     })
 
     it('should return a 401 without authorisation', async () => {
@@ -115,7 +115,7 @@ describe('Area Team Relations', () => {
     });
 
     it('should create a relation', async () => {
-      const team = await teamsDbConnection.collection('GFWTeam').insertOne({
+      const team = await teamsDbConnection.collection('gfwteams').insertOne({
         name: 'name',
       })
       await request(app.getHttpServer())
@@ -130,7 +130,7 @@ describe('Area Team Relations', () => {
     });
 
     it('should fail if the area doesnt exist', async () => {
-      const team = await teamsDbConnection.collection('GFWTeam').insertOne({
+      const team = await teamsDbConnection.collection('gfwteams').insertOne({
         name: 'name'
       })
       await request(app.getHttpServer())
@@ -151,10 +151,10 @@ describe('Area Team Relations', () => {
     });
 
     it('should fail if the relation already exists', async () => {
-      const team = await teamsDbConnection.collection('GFWTeam').insertOne({
+      const team = await teamsDbConnection.collection('gfwteams').insertOne({
         name: 'name'
       });
-      await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id.toString(), teamId: team.insertedId.toString()})
+      await apiDbConnection.collection('areateamrelations').insertOne({areaId: constants.testArea.id.toString(), teamId: team.insertedId.toString()})
       await request(app.getHttpServer())
       .post(`/arearelations/teams`)
       .set("Authorization", `USER`)
@@ -167,11 +167,11 @@ describe('Area Team Relations', () => {
   describe('DELETE /arearelations/teams', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('GFWTeam').deleteMany({});
-      await teamsDbConnection.collection('teammembers').deleteMany({});
-      await apiDbConnection.collection('teamarearelations').deleteMany({});
-      await apiDbConnection.collection('templatearearelations').deleteMany({});
-      await formsDbConnection.collection('templates').deleteMany({});
+      await teamsDbConnection.collection('gfwteams').deleteMany({});
+      await teamsDbConnection.collection('teamuserrelations').deleteMany({});
+      await apiDbConnection.collection('areateamrelations').deleteMany({});
+      await apiDbConnection.collection('areatemplaterelations').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
     })
 
     it('should return a 401 without authorisation', async () => {
@@ -181,10 +181,10 @@ describe('Area Team Relations', () => {
     });
 
     it('should delete a relation', async () => {
-      const team = await teamsDbConnection.collection('GFWTeam').insertOne({
+      const team = await teamsDbConnection.collection('gfwteams').insertOne({
         name: 'name'
       });
-      await apiDbConnection.collection('teamarearelations').insertOne({areaId: constants.testArea.id.toString(), teamId: team.insertedId.toString()})
+      await apiDbConnection.collection('areateamrelations').insertOne({areaId: constants.testArea.id.toString(), teamId: team.insertedId.toString()})
       await request(app.getHttpServer())
       .delete(`/arearelations/teams`)
       .set("Authorization", `USER`)

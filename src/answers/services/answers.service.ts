@@ -18,7 +18,7 @@ import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.s
 @Injectable()
 export class AnswersService {
   constructor(
-    @InjectModel(Template.name, 'formsDb') private templateModel: Model<TemplateDocument>,
+    @InjectModel('reports', 'formsDb') private templateModel: Model<TemplateDocument>,
     @InjectModel(Answer.name, 'formsDb') private answerModel: Model<AnswerDocument>,
     private readonly teamMembersService: TeamMembersService,
     private readonly teamsService: TeamsService,

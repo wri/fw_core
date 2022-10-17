@@ -19,12 +19,12 @@ import { TeamAreaRelation, TeamAreaRelationSchema } from '../areas/models/teamAr
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Template.name, schema: TemplateSchema }], 'formsDb'),
+    MongooseModule.forFeature([{ name: 'reports', schema: TemplateSchema }], 'formsDb'),
     MongooseModule.forFeature([{ name: Answer.name, schema: AnswerSchema }], 'formsDb'),
-    MongooseModule.forFeature([{ name: "GFWTeam", schema: TeamSchema }], 'teamsDb'),
-    MongooseModule.forFeature([{ name: TeamMember.name, schema: TeamMemberSchema }], 'teamsDb'),
-    MongooseModule.forFeature([{ name: TemplateAreaRelation.name, schema: TemplateAreaRelationSchema }], 'apiDb'),
-    MongooseModule.forFeature([{ name: TeamAreaRelation.name, schema: TeamAreaRelationSchema }], 'apiDb'),
+    MongooseModule.forFeature([{ name: "gfwteams", schema: TeamSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: 'teamuserrelations', schema: TeamMemberSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: 'areatemplaterelations', schema: TemplateAreaRelationSchema }], 'apiDb'),
+    MongooseModule.forFeature([{ name: 'areateamrelations', schema: TeamAreaRelationSchema }], 'apiDb'),
   ],
   controllers: [AnswersController],
   providers: [

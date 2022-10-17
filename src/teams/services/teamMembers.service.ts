@@ -12,7 +12,7 @@ export class TeamMembersService {
     throw new Error('Method not implemented.');
   }
   constructor(
-    @InjectModel(TeamMember.name, 'teamsDb') private teamMemberModel: Model<TeamMemberDocument>,
+    @InjectModel('teamuserrelations', 'teamsDb') private teamMemberModel: Model<TeamMemberDocument>,
     private readonly userService: UserService
     ) { }
 

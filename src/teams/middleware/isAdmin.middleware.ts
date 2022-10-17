@@ -21,8 +21,8 @@ type TParams = {
 export class IsAdminMiddleware implements NestMiddleware {
   constructor(
     private readonly teamMembersService: TeamMembersService,
-    @InjectModel(TeamMember.name, 'teamsDb') private teamMemberModel: Model<TeamMemberDocument>,
-    @InjectModel("GFWTeam", 'teamsDb') private teamModel: Model<TeamDocument>
+    @InjectModel('teamuserrelations', 'teamsDb') private teamMemberModel: Model<TeamMemberDocument>,
+    @InjectModel("gfwteams", 'teamsDb') private teamModel: Model<TeamDocument>
   ) { }
 
   async use(req: Request, res: Response, next: NextFunction) {

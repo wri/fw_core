@@ -13,7 +13,7 @@ export class TeamMembersController {
   constructor(
     private readonly teamsService: TeamsService,
     private readonly teamMembersService: TeamMembersService,
-    @InjectModel(TeamMember.name, 'teamsDb') private teamMemberModel: Model<TeamMemberDocument>
+    @InjectModel('teamuserrelations', 'teamsDb') private teamMemberModel: Model<TeamMemberDocument>
   ) { }
   private readonly logger = new Logger(TeamMembersController.name)
 

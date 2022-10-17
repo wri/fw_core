@@ -25,11 +25,11 @@ import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: "GFWTeam", schema: TeamSchema }], 'teamsDb'),
-    MongooseModule.forFeature([{ name: TeamMember.name, schema: TeamMemberSchema }], 'teamsDb'),
-    MongooseModule.forFeature([{ name: TeamAreaRelation.name, schema: TeamAreaRelationSchema }], 'apiDb'),
-    MongooseModule.forFeature([{ name: TemplateAreaRelation.name, schema: TemplateAreaRelationSchema }], 'apiDb'),
-    MongooseModule.forFeature([{ name: Template.name, schema: TemplateSchema }], 'formsDb'),
+    MongooseModule.forFeature([{ name: "gfwteams", schema: TeamSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: 'teamuserrelations', schema: TeamMemberSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: 'areateamrelations', schema: TeamAreaRelationSchema }], 'apiDb'),
+    MongooseModule.forFeature([{ name: 'areatemplaterelations', schema: TemplateAreaRelationSchema }], 'apiDb'),
+    MongooseModule.forFeature([{ name: 'reports', schema: TemplateSchema }], 'formsDb'),
     ConfigModule
   ],
   controllers: [AreasController, TeamAreaRelationController, TemplateAreaRelationController],

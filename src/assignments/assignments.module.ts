@@ -17,8 +17,8 @@ import { ConfigService } from '@nestjs/config';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Assignment.name, schema: AssignmentSchema }], 'formsDb'),
-    MongooseModule.forFeature([{ name: "GFWTeam", schema: TeamSchema }], 'teamsDb'),
-    MongooseModule.forFeature([{ name: TeamMember.name, schema: TeamMemberSchema }], 'teamsDb')
+    MongooseModule.forFeature([{ name: "gfwteams", schema: TeamSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: 'teamuserrelations', schema: TeamMemberSchema }], 'teamsDb')
   ],
   controllers: [AssignmentsController],
   providers: [

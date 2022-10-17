@@ -8,7 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 @Injectable()
 export class TemplatesService {
   constructor(
-    @InjectModel(Template.name, 'formsDb') private templateModel: Model<TemplateDocument>
+    @InjectModel('reports', 'formsDb') private templateModel: Model<TemplateDocument>
 ) { }
 
   async create(createTemplateDto: CreateTemplateDto): Promise<TemplateDocument> {

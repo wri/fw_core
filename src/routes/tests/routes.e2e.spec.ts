@@ -69,13 +69,13 @@ describe('Routes', () => {
         DatasetService,
         S3Service,
         RoutesService,
-        {provide: getModelToken("GFWTeam", 'teamsDb'), useValue: jest.fn()},
-        {provide: getModelToken(TeamMember.name, 'teamsDb'), useValue: jest.fn()},
-        {provide: getModelToken(Template.name, 'formsDb'), useValue: jest.fn()},
+        {provide: getModelToken("gfwteams", 'teamsDb'), useValue: jest.fn()},
+        {provide: getModelToken('teamuserrelations', 'teamsDb'), useValue: jest.fn()},
+        {provide: getModelToken('reports', 'formsDb'), useValue: jest.fn()},
         {provide: getModelToken(Answer.name, 'formsDb'), useValue: jest.fn()},
         {provide: getModelToken(Route.name, 'formsDb'), useValue: jest.fn()},
-        {provide: getModelToken(TemplateAreaRelation.name, 'apiDb'), useValue: jest.fn()},
-        {provide: getModelToken(TeamAreaRelation.name, 'apiDb'), useValue: jest.fn()},
+        {provide: getModelToken('areatemplaterelations', 'apiDb'), useValue: jest.fn()},
+        {provide: getModelToken('areateamrelations', 'apiDb'), useValue: jest.fn()},
       ],
     })
       .overrideProvider(UserService)
@@ -96,9 +96,9 @@ describe('Routes', () => {
   describe('POST /routes/sync', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('GFWTeam').deleteMany({});
-      await teamsDbConnection.collection('teammembers').deleteMany({});
-      await formsDbConnection.collection('templates').deleteMany({});
+      await teamsDbConnection.collection('gfwteams').deleteMany({});
+      await teamsDbConnection.collection('teamuserrelations').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
       await formsDbConnection.collection('assignments').deleteMany({});
       await formsDbConnection.collection('routes').deleteMany({});
@@ -229,9 +229,9 @@ describe('Routes', () => {
   describe('GET /routes/user', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('GFWTeam').deleteMany({});
-      await teamsDbConnection.collection('teammembers').deleteMany({});
-      await formsDbConnection.collection('templates').deleteMany({});
+      await teamsDbConnection.collection('gfwteams').deleteMany({});
+      await teamsDbConnection.collection('teamuserrelations').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
       await formsDbConnection.collection('assignments').deleteMany({});
       await formsDbConnection.collection('routes').deleteMany({});
@@ -295,9 +295,9 @@ describe('Routes', () => {
   describe('GET /routes/teams', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('GFWTeam').deleteMany({});
-      await teamsDbConnection.collection('teammembers').deleteMany({});
-      await formsDbConnection.collection('templates').deleteMany({});
+      await teamsDbConnection.collection('gfwteams').deleteMany({});
+      await teamsDbConnection.collection('teamuserrelations').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
       await formsDbConnection.collection('assignments').deleteMany({});
       await formsDbConnection.collection('routes').deleteMany({});
@@ -310,8 +310,8 @@ describe('Routes', () => {
     });
 
     it('should return an array of active routes for teams the user is a member of', async () => {
-      const team = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
-      await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
+      const team = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Monitor});
 
       const route1 = await formsDbConnection.collection('routes').insertOne({
         ...routeConstants.defaultRoute,
@@ -364,9 +364,9 @@ describe('Routes', () => {
   describe('GET /routes/:id', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('GFWTeam').deleteMany({});
-      await teamsDbConnection.collection('teammembers').deleteMany({});
-      await formsDbConnection.collection('templates').deleteMany({});
+      await teamsDbConnection.collection('gfwteams').deleteMany({});
+      await teamsDbConnection.collection('teamuserrelations').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
       await formsDbConnection.collection('assignments').deleteMany({});
       await formsDbConnection.collection('routes').deleteMany({});
@@ -402,9 +402,9 @@ describe('Routes', () => {
   describe('DELETE /routes/:id', () => {
 
     afterEach(async () => {
-      await teamsDbConnection.collection('GFWTeam').deleteMany({});
-      await teamsDbConnection.collection('teammembers').deleteMany({});
-      await formsDbConnection.collection('templates').deleteMany({});
+      await teamsDbConnection.collection('gfwteams').deleteMany({});
+      await teamsDbConnection.collection('teamuserrelations').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
       await formsDbConnection.collection('assignments').deleteMany({});
       await formsDbConnection.collection('routes').deleteMany({});
@@ -435,8 +435,8 @@ describe('Routes', () => {
     });
 
     it('should allow a team manager to deactivate a team route', async () => {
-      const team = await teamsDbConnection.collection('GFWTeam').insertOne({name: 'Test'});
-      await teamsDbConnection.collection('teammembers').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
+      const team = await teamsDbConnection.collection('gfwteams').insertOne({name: 'Test'});
+      await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team.insertedId.toString(), userId: ROLES.MANAGER.id, email: ROLES.USER.email, status: EMemberStatus.Confirmed, role: EMemberRole.Manager});
 
       const route1 = await formsDbConnection.collection('routes').insertOne({
         ...routeConstants.defaultRoute,

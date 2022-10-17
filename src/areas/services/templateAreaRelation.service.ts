@@ -7,7 +7,7 @@ import { TemplateAreaRelation, TemplateAreaRelationDocument } from "../models/te
 export class TemplateAreaRelationService {
 
     constructor(
-        @InjectModel(TemplateAreaRelation.name, 'apiDb') private templateAreaRelationModel: Model<TemplateAreaRelationDocument>
+        @InjectModel('areatemplaterelations', 'apiDb') private templateAreaRelationModel: Model<TemplateAreaRelationDocument>
         ) { }
 
     async create({areaId, templateId}): Promise<TemplateAreaRelationDocument> {

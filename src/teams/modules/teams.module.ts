@@ -13,9 +13,9 @@ import { TeamAreaRelation, TeamAreaRelationSchema } from '../../areas/models/tea
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: "GFWTeam", schema: TeamSchema }], 'teamsDb'),
-    MongooseModule.forFeature([{ name: TeamMember.name, schema: TeamMemberSchema }], 'teamsDb'),
-    MongooseModule.forFeature([{ name: TeamAreaRelation.name, schema: TeamAreaRelationSchema }], 'apiDb')
+    MongooseModule.forFeature([{ name: "gfwteams", schema: TeamSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: 'teamuserrelations', schema: TeamMemberSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: 'areateamrelations', schema: TeamAreaRelationSchema }], 'apiDb')
   ],
   controllers: [TeamsController],
   providers: [TeamsService, TeamMembersService, UserService, TeamAreaRelationService]

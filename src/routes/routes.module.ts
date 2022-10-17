@@ -12,8 +12,8 @@ import { UserService } from '../common/user.service';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Route.name, schema: RouteSchema }], 'formsDb'),
-    MongooseModule.forFeature([{ name: "GFWTeam", schema: TeamSchema }], 'teamsDb'),
-    MongooseModule.forFeature([{ name: TeamMember.name, schema: TeamMemberSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: "gfwteams", schema: TeamSchema }], 'teamsDb'),
+    MongooseModule.forFeature([{ name: 'teamuserrelations', schema: TeamMemberSchema }], 'teamsDb'),
   ],
   controllers: [RoutesController],
   providers: [

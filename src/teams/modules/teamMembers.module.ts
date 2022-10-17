@@ -14,8 +14,8 @@ import { DatabaseService } from 'src/common/database/database.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{name: "GFWTeam", schema: TeamSchema}], 'teamsDb'),
-    MongooseModule.forFeature([{name: TeamMember.name, schema: TeamMemberSchema}], 'teamsDb')
+    MongooseModule.forFeature([{name: "gfwteams", schema: TeamSchema}], 'teamsDb'),
+    MongooseModule.forFeature([{name: 'teamuserrelations', schema: TeamMemberSchema}], 'teamsDb')
   ],
   controllers: [TeamMembersController],
   providers: [TeamsService, TeamMembersService, UserService]
