@@ -92,7 +92,7 @@ export class AnswersController {
           if (!childResponse && childQuestion.required && conditionMatches) {
             pushError(childQuestion);
           }
-          if (childResponse && question.type === "blob") {
+          if (childResponse && childQuestion.type === "blob") {
             // upload file
             childResponse = await this.s3Service.uploadFile(response.path, response.filename);
           }
