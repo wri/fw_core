@@ -8,12 +8,15 @@ import { InjectModel } from '@nestjs/mongoose';
 @Injectable()
 export class TemplatesService {
   constructor(
-    @InjectModel('reports', 'formsDb') private templateModel: Model<TemplateDocument>
-) { }
+    @InjectModel('reports', 'formsDb')
+    private templateModel: Model<TemplateDocument>,
+  ) {}
 
-  async create(createTemplateDto: CreateTemplateDto): Promise<TemplateDocument> {
+  async create(
+    createTemplateDto: CreateTemplateDto,
+  ): Promise<TemplateDocument> {
     const template = await new this.templateModel(createTemplateDto).save();
-    return template
+    return template;
   }
 
   findAll() {
@@ -36,17 +39,26 @@ export class TemplatesService {
     return `This action returns a #${id} template`;
   }
 
-  async update(id: string, updateTemplateDto: UpdateTemplateDto): Promise<TemplateDocument> {
-    let template = await this.templateModel.findById(id);
-    if(updateTemplateDto.name) template.name = updateTemplateDto.name
-    if(updateTemplateDto.status) template.status = updateTemplateDto.status
-    if(updateTemplateDto.languages) template.languages = updateTemplateDto.languages
-    if(updateTemplateDto.public) template.public = updateTemplateDto.public
+  async update(
+    id: string,
+    updateTemplateDto: UpdateTemplateDto,
+  ): Promise<TemplateDocument> {
+    const template = await this.templateModel.findById(id);
+    if (updateTemplateDto.name) template.name = updateTemplateDto.name;
+    if (updateTemplateDto.status) template.status = updateTemplateDto.status;
+    if (updateTemplateDto.languages)
+      template.languages = updateTemplateDto.languages;
+    if (updateTemplateDto.public) template.public = updateTemplateDto.public;
     const savedTemplate = await template.save();
     return savedTemplate;
   }
 
   remove(id: number) {
     return `This action removes a #${id} template`;
+  }
+
+  async getAllPublicTemplateIds(): Promise<string[]> {
+    const templates = await this.templateModel.find({ public: true });
+    return templates.map((template) => template.id);
   }
 }

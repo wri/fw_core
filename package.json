@@ -38,6 +38,7 @@
     "mongoose": "^6.2.2",
     "multer": "^1.4.5-lts.1",
     "node-redis": "^0.1.7",
+    "npm": "^8.19.2",
     "redis": "^4.3.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",

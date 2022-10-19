@@ -90,8 +90,6 @@ components:
         - areaId
         - templateId
         - teamIds
-        - createdAt
-        - createdBy
   securitySchemes:
     Authorization:
       type: http
@@ -139,54 +137,20 @@ components:
           schema:
             type: object
             properties:
-              id:
-                type: string
-              type:
-                type: string
-              attributes:
-                $ref: '#/components/schemas/AssignmentModel'
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  attributes:
+                    $ref: '#/components/schemas/AssignmentModel'
   requestBodies:
     AssignmentBody:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              location:
-                type: object
-                properties: {}
-              priority:
-                type: integer
-              monitors:
-                type: array
-                items:
-                  type: string
-              notes:
-                type: string
-              status:
-                type: string
-              alert:
-                type: string
-              areaId:
-                type: string
-              templateId:
-                type: string
-              teamIds:
-                type: array
-                items:
-                  type: string
-            x-examples:
-              example-1:
-                location: {}
-                priority: 1
-                monitors:
-                  - ROLES.USER.id
-                notes: some notes
-                status: incomplete
-                alert: some alert
-                areaId: areaConstants.testArea.id
-                templateId: someTemplateId
-                teamIds:
-                  - ''
+            $ref: '#/components/schemas/AssignmentModel'
 security:
   - Authorization: []
