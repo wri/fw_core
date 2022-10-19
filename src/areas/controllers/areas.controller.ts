@@ -290,7 +290,7 @@ export class AreasController {
     if (area.attributes.userId.toString() !== user.id.toString())
       throw new HttpException(
         'You are not authorised to delete this record',
-        HttpStatus.UNAUTHORIZED,
+        HttpStatus.FORBIDDEN,
       );
 
     const deletedArea: IArea = await this.areasService.delete(id, user);

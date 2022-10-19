@@ -275,7 +275,7 @@ paths:
         in: path
         required: true
     get:
-      summary: Get All Answers
+      summary: Get All Template Answers
       tags:
         - Answers
       responses:
@@ -384,6 +384,105 @@ paths:
       description: Deletes all answers a user has created
       tags:
         - Answers
+  /v3/gfw/areas/user:
+    get:
+      summary: Get User Areas
+      tags:
+        - Areas
+      responses:
+        '200':
+          $ref: '#/components/responses/Areas-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-areas-user
+      description: Gets all areas created by the user
+  /v3/gfw/areas/userAndTeam:
+    get:
+      summary: Get User and Team Areas
+      tags:
+        - Areas
+      responses:
+        '200':
+          $ref: '#/components/responses/Areas-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-areas-userandteam
+      description: Gets all areas created by the user as well as areas linked to their teams
+    parameters: []
+  /v3/gfw/areas/:
+    post:
+      summary: Create a New Area
+      operationId: post-v3-gfw-areas
+      responses:
+        '201':
+          $ref: '#/components/responses/Area-Response'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+      description: Creates a new area
+      tags:
+        - Areas
+      requestBody:
+        $ref: '#/components/requestBodies/AreaBody'
+  '/v3/gfw/areas/{areaId}':
+    parameters:
+      - schema:
+          type: string
+        name: areaId
+        in: path
+        required: true
+    get:
+      summary: Get a Single Area
+      tags:
+        - Areas
+      responses:
+        '200':
+          $ref: '#/components/responses/Area-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-areas-areaId
+      description: Gets an area with the id provided
+    patch:
+      summary: Update an Area
+      operationId: patch-v3-gfw-areas-areaId
+      responses:
+        '200':
+          $ref: '#/components/responses/Area-Response'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Updates an area with the given id
+      requestBody:
+        $ref: '#/components/requestBodies/AreaBody'
+      tags:
+        - Areas
+    delete:
+      summary: Delete an Area
+      operationId: delete-v3-gfw-areas-areaId
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      description: Deletes an area with the given id
+      tags:
+        - Areas
 components:
   schemas:
     AssignmentModel:
@@ -737,6 +836,164 @@ components:
         - user
         - responses
         - createdAt
+    TeamModel:
+      title: TeamModel
+      x-stoplight:
+        id: p9wc4hlscmd8c
+      type: object
+      properties:
+        id:
+          type: string
+    AreaModel:
+      type: object
+      x-examples:
+        example-1:
+          name: string
+          application: string
+          geostore: IGeostore | string
+          userId: string
+          createdAt: string
+          updatedAt: string
+          image: string
+          env: string
+          datasets:
+            - slug: string
+              name: string
+              active: false
+              startDate: string
+              endDate: string
+          use: any
+          iso: any
+          coverage: any
+          teamId: string
+          teams: []
+          reportTemplate: 'ITemplate[];'
+      properties:
+        name:
+          type: string
+        application:
+          type: string
+        geostore:
+          $ref: '#/components/schemas/GeostoreModel'
+        userId:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        image:
+          type: string
+        env:
+          type: string
+        datasets:
+          type: array
+          items:
+            type: object
+            properties:
+              slug:
+                type: string
+              name:
+                type: string
+              active:
+                type: boolean
+              startDate:
+                type: string
+              endDate:
+                type: string
+        use:
+          type: string
+        iso:
+          type: string
+        coverage:
+          type: string
+        teamId:
+          type: string
+        teams:
+          type: array
+          items:
+            type: string
+        reportTemplate:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateModel'
+    FeatureModel:
+      type: object
+      x-examples:
+        example-1:
+          geometry:
+            coordinates:
+              - - 1
+                - 1
+            type: string
+          type: string
+      examples:
+        - geometry:
+            coordinates:
+              - 0
+            type: string
+          type: string
+      properties:
+        geometry:
+          type: object
+          properties:
+            coordinates:
+              type: array
+              items:
+                type: number
+            type:
+              type: string
+        type:
+          type: string
+      description: Geojson Feature
+    GeojsonModel:
+      type: object
+      x-examples:
+        example-1:
+          crs: any
+          type: string
+          features: []
+      properties:
+        crs:
+          type: string
+        type:
+          type: string
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureModel'
+    GeostoreModel:
+      type: object
+      properties:
+        id:
+          type: string
+        geojson:
+          type: string
+        hash:
+          type: string
+        provider:
+          type: string
+        areaHa:
+          type: integer
+        bbox:
+          type: array
+          items:
+            type: integer
+        lock:
+          type: boolean
+        info:
+          type: string
+      x-examples:
+        example-1:
+          id: string
+          geojson: IGeojson
+          hash: string
+          provider: any
+          areaHa: 1
+          bbox:
+            - 1
+          lock: false
+          info: any
+      examples: []
   securitySchemes:
     Authorization:
       type: http
@@ -910,6 +1167,40 @@ components:
                       type: string
                     attributes:
                       $ref: '#/components/schemas/AnswerModel'
+    Area-Response:
+      description: Single area
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  attributes:
+                    $ref: '#/components/schemas/AreaModel'
+    Areas-Response:
+      description: Array of areas
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                    attributes:
+                      $ref: '#/components/schemas/AreaModel'
   requestBodies:
     AssignmentBody:
       content:
@@ -1203,5 +1494,19 @@ components:
               - date
               - responses
       description: ''
+    AreaBody:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              geojson:
+                $ref: '#/components/schemas/GeojsonModel'
+              image:
+                type: 'null'
+                description: Must be image file
+      description: Body for creating area
 security:
   - Authorization: []

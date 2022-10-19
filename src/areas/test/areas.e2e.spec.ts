@@ -480,7 +480,7 @@ describe('Areas', () => {
       return await request(app.getHttpServer())
         .delete(`/areas/${constants.testArea.id.toString()}`)
         .set('Authorization', `ADMIN`)
-        .expect(401);
+        .expect(403);
     });
 
     it('should succeed when deleting own area', async function () {
