@@ -28,6 +28,91 @@ paths:
       description: Creates an assignment
       tags:
         - Assignments
+  /v3/gfw/assignments/user:
+    get:
+      summary: Get User Assignments
+      tags:
+        - Assignments
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignments-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-user
+      description: Returns a user's assignments
+    parameters: []
+  /v3/gfw/assignments/teams:
+    get:
+      summary: Get Team Assignments
+      tags:
+        - Assignments
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignments-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-assignments-teams
+      description: Returns all assignments relating to the user's teams
+  /v3/gfw/assignments/open:
+    get:
+      summary: Get Open User Assignments
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignments-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-assignments-open
+      description: Returns all non-complete user assignments
+      tags:
+        - Assignments
+  '/v3/gfw/assignments/area/:areaId':
+    get:
+      summary: Get Area Assignments
+      tags:
+        - Assignments
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignments-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: 'get-v3-gfw-assignments-area-:areaId'
+      description: Returns all user assignments within an area
+  '/v3/gfw/assignments/:assignmentId':
+    get:
+      summary: Get Assignment
+      tags:
+        - Assignments
+      responses: {}
+      operationId: 'get-v3-gfw-assignments-:assignmentId'
+      description: Gets a single assignment
+    patch:
+      summary: Update Assignment
+      operationId: 'patch-v3-gfw-assignments-:assignmentId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignment-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      description: Updates an assignment
+      tags:
+        - Assignments
+      requestBody:
+        $ref: '#/components/requestBodies/AssignmentBody'
+    delete:
+      summary: Delete Assignment
+      operationId: 'delete-v3-gfw-assignments-:assignmentId'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      tags:
+        - Assignments
+      description: Deletes an assignment
 components:
   schemas:
     AssignmentModel:
@@ -81,15 +166,29 @@ components:
           type: string
       required:
         - name
-        - location
         - priority
         - monitors
         - notes
         - status
-        - alert
         - areaId
         - templateId
         - teamIds
+      examples:
+        - name: string
+          location: string
+          priority: 0
+          monitors:
+            - string
+          notes: string
+          status: string
+          alert: string
+          areaId: string
+          templateId: string
+          teamIds:
+            - string
+          createdAt: 0
+          createdBy: string
+          areaName: string
   securitySchemes:
     Authorization:
       type: http
@@ -146,6 +245,24 @@ components:
                     type: string
                   attributes:
                     $ref: '#/components/schemas/AssignmentModel'
+    Assignments-Response:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                    attributes:
+                      $ref: '#/components/schemas/AssignmentModel'
   requestBodies:
     AssignmentBody:
       content:

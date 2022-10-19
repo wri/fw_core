@@ -4,12 +4,12 @@ import { IGeojson } from "../../areas/models/area.entity";
 
 export interface IAssignment {
 name: string;
-location: IGeojson;
+location?: any;
 priority: number;
 monitors: string[];
 notes: string;
 status: string;
-alert: string;
+alert?: string;
 areaId: string;
 templateId: string;
 teamIds: string[];
@@ -25,7 +25,7 @@ export class Assignment {
     @Prop({required: true})
     name: string;
 
-    @Prop({required: true})
+    @Prop({required: false})
     location: mongoose.Schema.Types.Mixed;
 
     @Prop({required: true})
@@ -40,7 +40,7 @@ export class Assignment {
     @Prop({required: true})
     status: string;
 
-    @Prop({required: true})
+    @Prop({required: false})
     alert: string;
 
     @Prop({required: true})
