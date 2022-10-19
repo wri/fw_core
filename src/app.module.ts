@@ -26,10 +26,10 @@ import { RoutesModule } from './routes/routes.module';
     TemplatesModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [configuration]
+      load: [configuration],
     }),
     AssignmentsModule,
-    RoutesModule
+    RoutesModule,
   ],
   controllers: [AppController],
   providers: [AppService, UserService],
@@ -37,8 +37,8 @@ import { RoutesModule } from './routes/routes.module';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-    .apply(AuthMiddleware)
-    .exclude('/v3/gfw/healthcheck')
-    .forRoutes('*')
+      .apply(AuthMiddleware)
+      .exclude('/v3/gfw/healthcheck')
+      .forRoutes('*');
   }
 }

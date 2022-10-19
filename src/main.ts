@@ -1,10 +1,10 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as Sentry from '@sentry/node'
-import ErrorSerializer from './common/error.serializer'
+import * as Sentry from '@sentry/node';
+import ErrorSerializer from './common/error.serializer';
 import { IUser } from './common/user.model';
-import { ITemplate, TemplateDocument } from './templates/models/template.schema';
+import { TemplateDocument } from './templates/models/template.schema';
 import { TeamDocument } from './teams/models/team.schema';
 
 declare global {
@@ -20,7 +20,7 @@ declare global {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
-  app.setGlobalPrefix('v3/gfw')
+  app.setGlobalPrefix('v3/gfw');
 
   app.use(async (req, res, next) => {
     try {
@@ -30,7 +30,7 @@ async function bootstrap() {
       try {
         error = JSON.parse(inErr);
       } catch (e) {
-        Logger.error("Could not parse error message - is it JSON?: ", inErr)
+        Logger.error('Could not parse error message - is it JSON?: ', inErr);
         error = inErr;
       }
       res.status = error.status || res.status || 500;
@@ -40,16 +40,16 @@ async function bootstrap() {
       } else {
         Logger.log(error);
       }
-  
+
       res.body = ErrorSerializer.serializeError(res.status, error.message);
-      if (process.env.NODE_ENV === "production" && res.status === 500) {
-        res.body = "Unexpected error";
+      if (process.env.NODE_ENV === 'production' && res.status === 500) {
+        res.body = 'Unexpected error';
       }
-      res.type = "application/vnd.api+json";
+      res.type = 'application/vnd.api+json';
     }
   });
 
   await app.listen(process.env.PORT);
-  console.log(`App running on: ${await app.getUrl()}`)
+  console.log(`App running on: ${await app.getUrl()}`);
 }
 bootstrap();

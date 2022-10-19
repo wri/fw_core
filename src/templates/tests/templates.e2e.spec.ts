@@ -517,7 +517,7 @@ describe('Areas', () => {
     });
   });
 
-  describe('GET /templates/getAllAnswersForUser', () => {
+  describe('GET /templates/allAnswers', () => {
 
     afterEach(async () => {
       await teamsDbConnection.collection('gfwteams').deleteMany({});
@@ -528,7 +528,7 @@ describe('Areas', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-      .get(`/templates/getAllAnswersForUser`)
+      .get(`/templates/allAnswers`)
       .expect(401)
     });
 
@@ -578,7 +578,7 @@ describe('Areas', () => {
       const member2 = await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId, userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id), email: ROLES.MANAGER.email, role: EMemberRole.Manager, status: EMemberStatus.Confirmed})
       
       const response = await request(app.getHttpServer())
-      .get(`/templates/getAllAnswersForUser`)
+      .get(`/templates/allAnswers`)
       .set('Authorization', 'MANAGER')
       .expect(200)
 
@@ -637,7 +637,7 @@ describe('Areas', () => {
       const member2 = await teamsDbConnection.collection('teamuserrelations').insertOne({teamId: team1.insertedId, userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id), email: ROLES.MANAGER.email, role: EMemberRole.Manager, status: EMemberStatus.Confirmed})
       
       const response = await request(app.getHttpServer())
-      .get(`/templates/getAllAnswersForUser`)
+      .get(`/templates/allAnswers`)
       .set('Authorization', 'USER')
       .expect(200)
 
@@ -883,7 +883,7 @@ describe('Areas', () => {
     });
   });
 
-  describe('DELETE /templates/deleteAllAnswers', () => {
+  describe('DELETE /templates/allAnswers', () => {
 
     afterEach(async () => {
       await teamsDbConnection.collection('gfwteams').deleteMany({});
@@ -894,7 +894,7 @@ describe('Areas', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-      .delete(`/templates/deleteAllAnswers`)
+      .delete(`/templates/allAnswers`)
       .expect(401)
     });
 
@@ -929,7 +929,7 @@ describe('Areas', () => {
       const createdAnswer3 = await formsDbConnection.collection('answers').findOne({'_id': answer3.insertedId});
       expect(createdAnswer3).toBeDefined();
       await request(app.getHttpServer())
-      .delete(`/templates/deleteAllAnswers`)
+      .delete(`/templates/allAnswers`)
       .set('Authorization', 'USER')
       .expect(200)
 
