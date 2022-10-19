@@ -6,17 +6,17 @@
     {
       value: "production",
       selector: "#switch-prod",
-      docsURL: "https://raw.githubusercontent.com/wri/<...>/production/docs/<...>.yaml"
+      docsURL: "https://raw.githubusercontent.com/wri/fw_core/production/docs/fw_core.yaml"
     },
     {
       value: "staging",
       selector: "#switch-staging",
-      docsURL: "https://raw.githubusercontent.com/wri/<...>/staging/docs/<...>.yaml"
+      docsURL: "https://raw.githubusercontent.com/wri/fw_core/staging/docs/fw_core.yaml"
     },
     {
       value: "dev",
       selector: "#switch-dev",
-      docsURL: "https://raw.githubusercontent.com/wri/<...>/dev/docs/<...>.yaml"
+      docsURL: "https://raw.githubusercontent.com/wri/fw_core/dev/docs/fw_core.yaml"
     }
   ];
 
