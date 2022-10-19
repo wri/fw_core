@@ -113,6 +113,69 @@ paths:
       tags:
         - Assignments
       description: Deletes an assignment
+  /v3/gfw/routes/sync:
+    post:
+      summary: ''
+      operationId: post-v3-gfw-routes-sync
+      responses:
+        '201':
+          $ref: '#/components/responses/Routes-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      description: Syncs an array of routes to the database
+      tags:
+        - Routes
+      requestBody:
+        $ref: '#/components/requestBodies/RouteBody'
+  /v3/gfw/routes/user:
+    get:
+      summary: Get User's Active Routes
+      tags:
+        - Routes
+      responses:
+        '200':
+          $ref: '#/components/responses/Routes-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-routes-user
+      description: Get all active routes made by the user
+  /v3/gfw/routes/teams:
+    get:
+      summary: Get User's Teams Active Routes
+      tags:
+        - Routes
+      responses:
+        '200':
+          $ref: '#/components/responses/Routes-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-routes-teams
+      description: Returns an array of all active routes linked to the user's teams
+  '/v3/gfw/routes/:routeId':
+    get:
+      summary: Get A Single Route
+      tags:
+        - Routes
+      responses:
+        '200':
+          $ref: '#/components/responses/Route-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: 'get-v3-gfw-routes-:routeId'
+      description: Returns the route with the given id
+    delete:
+      summary: Delete Route
+      operationId: 'delete-v3-gfw-routes-:routeId'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Sets a route's status to inactive
 components:
   schemas:
     AssignmentModel:
@@ -189,6 +252,85 @@ components:
           createdAt: 0
           createdBy: string
           areaName: string
+    RouteModel:
+      type: object
+      x-examples:
+        example-1:
+          areaId: string
+          destination: IPoint
+          difficulty: string
+          startDate: 1
+          endDate: 1
+          geostoreId: string
+          routeId: string
+          locations: 'ILocation[]'
+          name: string
+          createdBy: string
+          teamId: string
+          active: true
+      properties:
+        areaId:
+          type: string
+        destination:
+          $ref: '#/components/schemas/PointModel'
+        difficulty:
+          type: string
+        startDate:
+          type: integer
+        endDate:
+          type: integer
+        geostoreId:
+          type: string
+        routeId:
+          type: string
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/RouteLocationModel'
+        name:
+          type: string
+        createdBy:
+          type: string
+        teamId:
+          type: string
+        active:
+          type: boolean
+    PointModel:
+      title: PointModel
+      x-stoplight:
+        id: u128l07xqtgwl
+      type: object
+      properties:
+        latitude:
+          type: number
+        longitude:
+          type: number
+    RouteLocationModel:
+      type: object
+      x-examples:
+        example-1:
+          accuracy: 1
+          altitude: 1
+          latitude: 1
+          longitude: 1
+          timestamp: 1
+      properties:
+        accuracy:
+          type: integer
+        altitude:
+          type: integer
+        latitude:
+          type: integer
+        longitude:
+          type: integer
+        timestamp:
+          type: integer
+      required:
+        - accuracy
+        - altitude
+        - latitude
+        - longitude
+        - timestamp
   securitySchemes:
     Authorization:
       type: http
@@ -230,7 +372,7 @@ components:
                 type: number
           examples: {}
     Assignment-Response:
-      description: Example response
+      description: Single assignment
       content:
         application/json:
           schema:
@@ -246,7 +388,7 @@ components:
                   attributes:
                     $ref: '#/components/schemas/AssignmentModel'
     Assignments-Response:
-      description: Example response
+      description: Array of assignments
       content:
         application/json:
           schema:
@@ -263,11 +405,127 @@ components:
                       type: string
                     attributes:
                       $ref: '#/components/schemas/AssignmentModel'
+    Routes-Response:
+      description: Array of routes
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                    attributes:
+                      $ref: '#/components/schemas/RouteModel'
+    Route-Response:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  attributes:
+                    $ref: '#/components/schemas/RouteModel'
   requestBodies:
     AssignmentBody:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/AssignmentModel'
+    RouteBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            x-examples:
+              example-1:
+                - areaId: 624eb2e03a38cf001b822d95
+                  destination:
+                    latitude: -19.815424793397977
+                    longitude: 48.08241538050228
+                  difficulty: easy
+                  endDate: 1665574170542
+                  geostoreId: d0a7ccc250cb8ead3ea0a7d3730bc085
+                  id: cea34015-bfaf-46c2-a660-db1e9819b515
+                  locations:
+                    - accuracy: 5
+                      altitude: -0.03440846490469818
+                      latitude: 48.0558683
+                      longitude: 41.8379333
+                      timestamp: 1665574109360
+                    - accuracy: 5
+                      altitude: 0
+                      latitude: 48.523696666666666
+                      longitude: 38.32230833333333
+                      timestamp: 1665574119395
+                    - accuracy: 5
+                      altitude: 0
+                      latitude: 45.897461666666665
+                      longitude: 35.86137166666666
+                      timestamp: 1665574139542
+                    - accuracy: 5
+                      altitude: 0
+                      latitude: 41.910246666666666
+                      longitude: 40.607465
+                      timestamp: 1665574149485
+                    - accuracy: 5
+                      altitude: 0
+                      latitude: 44.09527666666666
+                      longitude: 45.44145
+                      timestamp: 1665574158509
+                  name: route
+                  startDate: 1665574109132
+            items:
+              type: object
+              properties:
+                areaId:
+                  type: string
+                destination:
+                  type: object
+                  properties:
+                    latitude:
+                      type: number
+                    longitude:
+                      type: number
+                difficulty:
+                  type: string
+                endDate:
+                  type: integer
+                geostoreId:
+                  type: string
+                id:
+                  type: string
+                locations:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      accuracy:
+                        type: integer
+                      altitude:
+                        type: number
+                      latitude:
+                        type: number
+                      longitude:
+                        type: number
+                      timestamp:
+                        type: integer
+                name:
+                  type: string
+                startDate:
+                  type: integer
 security:
   - Authorization: []
