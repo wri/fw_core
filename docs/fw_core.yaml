@@ -529,7 +529,7 @@ paths:
       tags:
         - Area-Template Relations
     delete:
-      summary: Remove Area-Team Relation
+      summary: Remove Area-Template Relation
       operationId: delete-v3-gfw-arearelations-templates
       responses:
         '200':
@@ -542,6 +542,328 @@ paths:
       tags:
         - Area-Template Relations
     parameters: []
+  /v3/gfw/teams/myinvites:
+    get:
+      summary: Get My Team Invites
+      tags:
+        - Teams
+      responses:
+        '200':
+          $ref: '#/components/responses/Teams-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-teams-myinvites
+      description: Returns all team invites for the user
+  '/v3/gfw/teams/user/{userId}':
+    parameters:
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    get:
+      summary: Get All User Teams
+      tags:
+        - Teams
+      responses:
+        '200':
+          $ref: '#/components/responses/Teams-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-teams-user-userId
+      description: Returns an array of all teams the user is member of
+  '/v3/gfw/teams/{teamId}':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+    get:
+      summary: Get Team Details
+      tags:
+        - Teams
+      responses:
+        '200':
+          $ref: '#/components/responses/Team-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-teams-teamId
+      description: Gets a teams details
+    patch:
+      summary: Update a Team Name
+      operationId: patch-v3-gfw-teams-teamId
+      responses:
+        '200':
+          $ref: '#/components/responses/Team-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Updates the name of the team
+      requestBody:
+        $ref: '#/components/requestBodies/TeamBody'
+      tags:
+        - Teams
+    delete:
+      summary: Delete a Team
+      operationId: delete-v3-gfw-teams-teamId
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Deletes a team and all team members
+      tags:
+        - Teams
+  /v3/gfw/teams:
+    post:
+      summary: Create a New Team
+      operationId: post-v3-gfw-teams
+      responses:
+        '201':
+          $ref: '#/components/responses/Team-Response'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Creates a new team and makes the current user the team admin
+      requestBody:
+        $ref: '#/components/requestBodies/TeamBody'
+      tags:
+        - Teams
+  '/v3/gfw/teams/{teamId}/users':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+    get:
+      summary: Get All Team Members
+      tags:
+        - Teams
+      responses:
+        '200':
+          $ref: '#/components/responses/TeamMembers-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-teams-teamId-users
+      description: Returns the members of the team of the given id
+    post:
+      summary: Add Team Members
+      operationId: post-v3-gfw-teams-teamId-users
+      responses:
+        '201':
+          $ref: '#/components/responses/TeamMembers-Response'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Adds one or more team members
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  email:
+                    type: string
+                  role:
+                    type: string
+                    enum:
+                      - manager
+                      - monitor
+                required:
+                  - email
+                  - role
+      tags:
+        - Teams
+  '/v3/gfw/teams/{teamId}/users/reassignAdmin/{userId}':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    patch:
+      summary: Reassign Team Administrator
+      operationId: patch-v3-gfw-teams-teamId-users-reassignAdmin-userId
+      responses:
+        '200':
+          $ref: '#/components/responses/TeamMember-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Reassigns the team admin to the user with the supplied id
+      tags:
+        - Teams
+  '/v3/gfw/teams/{teamId}/users/{teamMemberRelationId}':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: teamMemberRelationId
+        in: path
+        required: true
+    patch:
+      summary: Update a Team Member's Role
+      operationId: patch-v3-gfw-teams-teamId-users-teamMemberRelationId
+      responses:
+        '200':
+          $ref: '#/components/responses/TeamMember-Response'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: 'Updates the team member''s role. The teamMemberRelationId is the id supplied in a team members record, not the id of the user.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  enum:
+                    - manager
+                    - monitor
+      tags:
+        - Teams
+    delete:
+      summary: ''
+      operationId: delete-v3-gfw-teams-teamId-users-teamMemberRelationId
+      responses:
+        '200':
+          description: OK
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: 'Removed the team member from the team. The teamMemberRelationId is the id supplied in a team members record, not the id of the user.'
+      tags:
+        - Teams
+  '/v3/gfw/teams/{teamId}/users/{userId}/accept':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    patch:
+      summary: Accept Team Invitation
+      operationId: patch-v3-gfw-teams-teamId-users-userId-accept
+      responses:
+        '200':
+          $ref: '#/components/responses/TeamMember-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      description: 'Accepts an invitation to join team with id, for user with id'
+      tags:
+        - Teams
+  '/v3/gfw/teams/{teamId}/users/{userId}/decline':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    patch:
+      summary: Decline Team Invitation
+      operationId: patch-v3-gfw-teams-teamId-users-userId-decline
+      responses:
+        '200':
+          $ref: '#/components/responses/TeamMember-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      description: 'Declines an invitation to join team with id, for user with id'
+      tags:
+        - Teams
+  '/v3/gfw/teams/{teamId}/users/{userId}/leave':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    patch:
+      summary: Leave a Team
+      operationId: patch-v3-gfw-teams-teamId-users-userId-leave
+      responses:
+        '200':
+          $ref: '#/components/responses/TeamMember-Response'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      description: 'Leaves the team with id, for user with id'
+      tags:
+        - Teams
 components:
   schemas:
     AssignmentModel:
@@ -901,8 +1223,28 @@ components:
         id: p9wc4hlscmd8c
       type: object
       properties:
-        id:
+        name:
           type: string
+        userRole:
+          type: string
+          enum:
+            - administrator
+            - manager
+            - monitor
+            - left
+        createdAt:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMemberModel'
+        areas:
+          type: array
+          items:
+            type: string
+      required:
+        - name
+        - createdAt
     AreaModel:
       type: object
       x-examples:
@@ -1079,6 +1421,38 @@ components:
       required:
         - templateId
         - areaId
+    TeamMemberModel:
+      title: TeamMemberModel
+      x-stoplight:
+        id: arp0j9c073kbe
+      type: object
+      properties:
+        teamId:
+          type: string
+        userId:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum:
+            - administrator
+            - manager
+            - monitor
+            - left
+        status:
+          type: string
+          enum:
+            - confirmed
+            - invited
+            - declined
+        name:
+          type: string
+      required:
+        - teamId
+        - email
+        - role
+        - status
   securitySchemes:
     Authorization:
       type: http
@@ -1312,6 +1686,74 @@ components:
                 type: string
               areaId:
                 type: string
+    Team-Response:
+      description: Single Team
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  attributes:
+                    $ref: '#/components/schemas/TeamModel'
+    Teams-Response:
+      description: Array of teams
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                    attributes:
+                      $ref: '#/components/schemas/TeamModel'
+    TeamMember-Response:
+      description: Single team member
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  attributes:
+                    $ref: '#/components/schemas/TeamMemberModel'
+    TeamMembers-Response:
+      description: Array of team members
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                    attributes:
+                      $ref: '#/components/schemas/TeamMemberModel'
   requestBodies:
     AssignmentBody:
       content:
@@ -1642,5 +2084,15 @@ components:
                 type: string
               areaId:
                 type: string
+    TeamBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+            required:
+              - name
 security:
   - Authorization: []

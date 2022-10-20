@@ -1,10 +1,19 @@
-import { HttpException, HttpStatus, Injectable, NestMiddleware } from "@nestjs/common";
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NestMiddleware,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Request, Response, NextFunction } from "express";
-import { TeamMembersService } from "../services/teamMembers.service";
-import { EMemberRole, TeamMember, TeamMemberDocument } from '../models/teamMember.schema';
-import { Team, TeamDocument } from "../models/team.schema";
+import { Request, Response, NextFunction } from 'express';
+import { TeamMembersService } from '../services/teamMembers.service';
+import {
+  EMemberRole,
+  TeamMember,
+  TeamMemberDocument,
+} from '../models/teamMember.schema';
+import { Team, TeamDocument } from '../models/team.schema';
 
 type TRequest = {
   body: {
@@ -21,9 +30,10 @@ type TParams = {
 export class IsAdminOrManagerMiddleware implements NestMiddleware {
   constructor(
     private readonly teamMembersService: TeamMembersService,
-    @InjectModel('teamuserrelations', 'teamsDb') private teamMemberModel: Model<TeamMemberDocument>,
-    @InjectModel("gfwteams", 'teamsDb') private teamModel: Model<TeamDocument>
-  ) { }
+    @InjectModel('teamuserrelations', 'teamsDb')
+    private teamMemberModel: Model<TeamMemberDocument>,
+    @InjectModel('gfwteams', 'teamsDb') private teamModel: Model<TeamDocument>,
+  ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     const { teamId } = <TParams>req.params;
@@ -32,15 +42,27 @@ export class IsAdminOrManagerMiddleware implements NestMiddleware {
 
     // ToDo: move this to a new middleware
     const numOfTeams = await this.teamModel.count({ _id: teamId });
-    if (numOfTeams === 0) throw new HttpException(`Team not found with id: ${teamId}`, HttpStatus.NOT_FOUND);
+    if (numOfTeams === 0)
+      throw new HttpException(
+        `Team not found with id: ${teamId}`,
+        HttpStatus.NOT_FOUND,
+      );
 
-    const teamMember = await this.teamMembersService.findTeamMember(teamId, userId);
+    const teamMember = await this.teamMembersService.findTeamMember(
+      teamId,
+      userId,
+    );
 
     if (
-      teamMember && 
-      (teamMember.role === EMemberRole.Administrator || teamMember.role === EMemberRole.Manager) 
+      teamMember &&
+      (teamMember.role === EMemberRole.Administrator ||
+        teamMember.role === EMemberRole.Manager)
     ) {
       await next();
-    } else throw new HttpException("Authenticated User must be the Administrator or Manager of the team", HttpStatus.FORBIDDEN);
+    } else
+      throw new HttpException(
+        'Authenticated User must be the Administrator or Manager of the team',
+        HttpStatus.FORBIDDEN,
+      );
   }
-};
+}
