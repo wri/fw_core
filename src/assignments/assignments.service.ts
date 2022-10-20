@@ -68,7 +68,7 @@ export class AssignmentsService {
   }
 
   async findOpen(userId: string): Promise<AssignmentDocument[]> {
-    return await this.assignmentModel.find({monitors: userId, status: {$in: ["incomplete", "on hold"]}});
+    return await this.assignmentModel.find({monitors: userId, status: {$in: ["open", "on hold"]}});
   }
 
   async findAreas(userId: string, areaId: string): Promise<AssignmentDocument[]> {

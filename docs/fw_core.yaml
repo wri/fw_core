@@ -884,6 +884,22 @@ components:
           createdBy: '''string;'''
           areaName: string;
       description: ''
+      examples:
+        - name: string
+          location: string
+          priority: 0
+          monitors:
+            - string
+          notes: string
+          status: string
+          alert: string
+          areaId: string
+          templateId: string
+          teamIds:
+            - string
+          createdAt: 0
+          createdBy: string
+          areaName: string
       properties:
         name:
           type: string
@@ -899,6 +915,10 @@ components:
           type: string
         status:
           type: string
+          enum:
+            - open
+            - on hold
+            - completed
         alert:
           type: string
         areaId:
@@ -924,22 +944,6 @@ components:
         - areaId
         - templateId
         - teamIds
-      examples:
-        - name: string
-          location: string
-          priority: 0
-          monitors:
-            - string
-          notes: string
-          status: string
-          alert: string
-          areaId: string
-          templateId: string
-          teamIds:
-            - string
-          createdAt: 0
-          createdBy: string
-          areaName: string
     RouteModel:
       type: object
       x-examples:
@@ -1789,6 +1793,10 @@ components:
                 type: string
               status:
                 type: string
+                enum:
+                  - open
+                  - on hold
+                  - completed
               alert:
                 type: string
               areaId:

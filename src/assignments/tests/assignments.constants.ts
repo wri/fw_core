@@ -7,7 +7,7 @@ export default {
     priority: 1,
     monitors: [ROLES.USER.id],
     notes: "some notes",
-    status: "incomplete",
+    status: "open",
     alert: "some alert",
     areaId: areaConstants.testArea.id,
     templateId: "someTemplateId",

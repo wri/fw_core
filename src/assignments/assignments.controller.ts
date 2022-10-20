@@ -107,7 +107,7 @@ export class AssignmentsController {
   ): Promise<IAssignmentResponse> {
     const filter = {
       createdBy: request.user.id,
-      status: { $in: ['incomplete', 'on hold'] },
+      status: { $in: ['open', 'on hold'] },
       _id: new mongoose.Types.ObjectId(id),
     };
     const assignment = await this.assignmentsService.findOne(filter);
