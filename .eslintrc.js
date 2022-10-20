@@ -29,7 +29,8 @@ module.exports = {
     "@typescript-eslint/no-var-requires": 0,
     "@typescript-eslint/no-unused-vars": 'off',
     'jest/expect-expect': 'off',
-    "@typescript-eslint/no-namespace": "off"
+    "@typescript-eslint/no-namespace": "off",
+    "nestjs/use-validation-pipe": "off"
   },
   settings: {
     "import/resolver": {

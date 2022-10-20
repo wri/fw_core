@@ -12,8 +12,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { AreasService } from '../services/areas.service';
-import { UpdateAreaDto } from '../dto/update-area.dto';
-import { TeamsService } from '../../teams/services/teams.service';
 import { CreateTemplateAreaRelationDto } from '../dto/createTemplateAreaRelation.dto';
 import { TemplatesService } from '../../templates/templates.service';
 import { TemplateAreaRelationService } from '../services/templateAreaRelation.service';

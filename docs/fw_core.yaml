@@ -483,6 +483,65 @@ paths:
       description: Deletes an area with the given id
       tags:
         - Areas
+  /v3/gfw/arearelations/teams/:
+    post:
+      summary: Create Area-Team Relation
+      operationId: post-v3-gfw-arearelations-teams
+      responses:
+        '201':
+          $ref: '#/components/responses/TeamAreaRelation-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Creates an area-team relation
+      tags:
+        - Area-Team Relations
+      requestBody:
+        $ref: '#/components/requestBodies/AreaTeamRelationBody'
+    delete:
+      summary: Remove Area-Team Relation
+      operationId: delete-v3-gfw-arearelations-teams
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+      requestBody:
+        $ref: '#/components/requestBodies/AreaTeamRelationBody'
+      description: Deletes an area-team relation
+      tags:
+        - Area-Team Relations
+  /v3/gfw/arearelations/templates:
+    post:
+      summary: Create Area-Template Relation
+      operationId: post-v3-gfw-arearelations-templates
+      responses:
+        '201':
+          $ref: '#/components/responses/AreaTemplateRelation-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Creates an area-template relation
+      requestBody:
+        $ref: '#/components/requestBodies/AreaTemplateRelationBody'
+      tags:
+        - Area-Template Relations
+    delete:
+      summary: Remove Area-Team Relation
+      operationId: delete-v3-gfw-arearelations-templates
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+      requestBody:
+        $ref: '#/components/requestBodies/AreaTemplateRelationBody'
+      description: Deletes an area-template relation
+      tags:
+        - Area-Template Relations
+    parameters: []
 components:
   schemas:
     AssignmentModel:
@@ -994,6 +1053,32 @@ components:
           lock: false
           info: any
       examples: []
+    AreaTeamRelationModel:
+      title: AreaTeamRelationModel
+      x-stoplight:
+        id: 4un83noxbl6u5
+      type: object
+      properties:
+        teamId:
+          type: string
+        areaId:
+          type: string
+      required:
+        - teamId
+        - areaId
+    AreaTemplateRelationModel:
+      title: AreaTemplateRelationModel
+      x-stoplight:
+        id: 4un83noxbl6u5
+      type: object
+      properties:
+        templateId:
+          type: string
+        areaId:
+          type: string
+      required:
+        - templateId
+        - areaId
   securitySchemes:
     Authorization:
       type: http
@@ -1201,6 +1286,32 @@ components:
                       type: string
                     attributes:
                       $ref: '#/components/schemas/AreaModel'
+    TeamAreaRelation-Response:
+      description: Area-Team Relation object
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              teamId:
+                type: string
+              areaId:
+                type: string
+              _id:
+                type: string
+    AreaTemplateRelation-Response:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              _id:
+                type: string
+              templateId:
+                type: string
+              areaId:
+                type: string
   requestBodies:
     AssignmentBody:
       content:
@@ -1508,5 +1619,28 @@ components:
                 type: 'null'
                 description: Must be image file
       description: Body for creating area
+    AreaTeamRelationBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              areaId:
+                type: string
+              teamId:
+                type: string
+            required:
+              - areaId
+              - teamId
+    AreaTemplateRelationBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              templateId:
+                type: string
+              areaId:
+                type: string
 security:
   - Authorization: []
