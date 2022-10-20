@@ -1759,7 +1759,72 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/AssignmentModel'
+            type: object
+            x-examples:
+              example-1:
+                location: string
+                priority: 0
+                monitors:
+                  - string
+                notes: string
+                status: string
+                alert: string
+                areaId: string
+                templateId: string
+                teamIds:
+                  - string
+                createdAt: 0
+                createdBy: string
+                areaName: string
+            properties:
+              location:
+                type: string
+              priority:
+                type: number
+              monitors:
+                type: array
+                items:
+                  type: string
+              notes:
+                type: string
+              status:
+                type: string
+              alert:
+                type: string
+              areaId:
+                type: string
+              templateId:
+                type: string
+              teamIds:
+                type: array
+                items:
+                  type: string
+            required:
+              - priority
+              - monitors
+              - notes
+              - status
+              - areaId
+              - templateId
+              - teamIds
+          examples:
+            example-1:
+              value:
+                name: string
+                location: string
+                priority: 0
+                monitors:
+                  - string
+                notes: string
+                status: string
+                alert: string
+                areaId: string
+                templateId: string
+                teamIds:
+                  - string
+                createdAt: 0
+                createdBy: string
+                areaName: string
     RouteBody:
       content:
         application/json:
