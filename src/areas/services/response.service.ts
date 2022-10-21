@@ -27,7 +27,6 @@ export class ResponseService {
   async buildAreasResponse(areas: IArea[], objects, user: IUser) {
     const { geostoreObj, coverageObj } = objects;
     const areasWithGeostore = areas.filter((area) => area.attributes.geostore);
-    console.log(geostoreObj, coverageObj, areasWithGeostore)
     const promises = [];
     const ALERTS_SUPPORTED = this.configService.get('alertsSupported');
 
