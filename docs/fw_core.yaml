@@ -65,7 +65,7 @@ paths:
       description: Returns all non-complete user assignments
       tags:
         - Assignments
-  '/v3/gfw/assignments/area/{areaId}':
+  '/v3/gfw/assignments/areas/{areaId}':
     get:
       summary: Get Area Assignments
       tags:
