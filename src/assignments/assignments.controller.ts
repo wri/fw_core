@@ -65,6 +65,11 @@ export class AssignmentsController {
     @Param('areaId') areaId: string,
   ): Promise<IAssignmentResponse> {
     const { user } = request;
+
+    const area = await this.areasService.getAreaMICROSERVICE(areaId);
+    if (!area)
+      throw new HttpException('This area does not exist', HttpStatus.NOT_FOUND);
+
     const assignments = await this.assignmentsService.findOpenForArea(
       user.id,
       areaId,
@@ -89,6 +94,11 @@ export class AssignmentsController {
     @Param('areaId') areaId: string,
   ): Promise<IAssignmentResponse> {
     const { user } = request;
+
+    const area = await this.areasService.getAreaMICROSERVICE(areaId);
+    if (!area)
+      throw new HttpException('This area does not exist', HttpStatus.NOT_FOUND);
+
     const assignments = await this.assignmentsService.findAreas(
       user.id,
       areaId,
