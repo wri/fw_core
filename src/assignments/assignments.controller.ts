@@ -59,6 +59,20 @@ export class AssignmentsController {
     return { data: serializeAssignments(assignments) };
   }
 
+  @Get('/allOpenUserForArea/:areaId')
+  async findAllOpenAssignmentsForArea(
+    @Req() request: Request,
+    @Param('areaId') areaId: string,
+  ): Promise<IAssignmentResponse> {
+    const { user } = request;
+    const assignments = await this.assignmentsService.findOpenForArea(
+      user.id,
+      areaId,
+    );
+
+    return { data: serializeAssignments(assignments) };
+  }
+
   @Get('/open')
   async findOpenAssignments(
     @Req() request: Request,

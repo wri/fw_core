@@ -80,6 +80,19 @@ export class AssignmentsService {
     });
   }
 
+  async findOpenForArea(
+    userId: string,
+    areaId: string,
+  ): Promise<AssignmentDocument[]> {
+    return await this.assignmentModel.find({
+      $and: [
+        { $or: [{ monitors: userId }, { createdBy: userId }] },
+        { status: { $in: ['open', 'on hold'] } },
+        { areaId: areaId },
+      ],
+    });
+  }
+
   async findAreas(
     userId: string,
     areaId: string,

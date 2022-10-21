@@ -88,7 +88,13 @@ paths:
       summary: Get Assignment
       tags:
         - Assignments
-      responses: {}
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignment-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
       operationId: 'get-v3-gfw-assignments-:assignmentId'
       description: Gets a single assignment
     patch:
@@ -864,6 +870,24 @@ paths:
       description: 'Leaves the team with id, for user with id'
       tags:
         - Teams
+  '/v3/gfw/assignments/allOpenUserForArea/{areaId}':
+    parameters:
+      - schema:
+          type: string
+        name: areaId
+        in: path
+        required: true
+    get:
+      summary: Get All Open User Assignments in Area
+      tags:
+        - Assignments
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignments-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-assignments-allOpenUserForArea-areaId
+      description: Returns all assignments the user has created or is assigned to for a given area
 components:
   schemas:
     AssignmentModel:

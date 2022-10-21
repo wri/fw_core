@@ -197,7 +197,7 @@ describe('Assignments', () => {
 
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('attributes');
-      expect(response.body.data.attributes).toHaveProperty('name', `EM-0002`);
+      expect(response.body.data.attributes).toHaveProperty('name', `FN-0002`);
     });
 
     it('should fail if area doesnt exist', async () => {
@@ -525,6 +525,91 @@ describe('Assignments', () => {
       );
       expect(response.body.data[0]).toHaveProperty('attributes');
       expect(response.body.data[0].attributes).toHaveProperty('name', 'name');
+      expect(response.body.data[1]).toHaveProperty(
+        'id',
+        assignment2.insertedId.toString(),
+      );
+    });
+  });
+
+  describe('GET /assignments/allOpenUserForArea/:areaId', () => {
+    afterEach(async () => {
+      await teamsDbConnection.collection('gfwteams').deleteMany({});
+      await teamsDbConnection.collection('teamuserrelations').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
+      await formsDbConnection.collection('answers').deleteMany({});
+      await formsDbConnection.collection('assignments').deleteMany({});
+    });
+
+    it('should return a 401 without authorisation', async () => {
+      return await request(app.getHttpServer())
+        .get(`/assignments/allOpenUserForArea/${1}`)
+        .expect(401);
+    });
+
+    it('should return an array of open user assignments with the area id', async () => {
+      const area1 = new mongoose.Types.ObjectId();
+      const area2 = new mongoose.Types.ObjectId();
+
+      const assignment = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...assignments.defaultAssignment,
+          name: 'name',
+          status: 'open',
+          areaId: area1.toString(),
+          monitors: [ROLES.USER.id],
+          teamIds: [],
+          createdBy: ROLES.ADMIN.id,
+        });
+      const assignment2 = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...assignments.defaultAssignment,
+          name: 'some other name',
+          status: 'on hold',
+          areaId: area1.toString(),
+          monitors: [],
+          teamIds: [],
+          createdBy: ROLES.USER.id,
+        });
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        name: 'some other name',
+        status: 'completed',
+        areaId: area1.toString(),
+        monitors: [],
+        teamIds: [],
+        createdBy: ROLES.USER.id,
+      });
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        name: 'not visible',
+        monitors: [],
+        areaId: area2.toString(),
+        teamIds: [],
+        createdBy: ROLES.USER.id,
+      });
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        name: 'not visible',
+        monitors: [],
+        areaId: area2.toString(),
+        teamIds: [],
+        createdBy: ROLES.USER.id,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/assignments/allOpenUserForArea/${area1.toString()}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data.length).toBe(2);
+      expect(response.body.data[0]).toHaveProperty(
+        'id',
+        assignment.insertedId.toString(),
+      );
       expect(response.body.data[1]).toHaveProperty(
         'id',
         assignment2.insertedId.toString(),
