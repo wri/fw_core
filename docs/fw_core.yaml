@@ -75,6 +75,8 @@ paths:
           $ref: '#/components/responses/Assignments-Response'
         '401':
           $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
       operationId: 'get-v3-gfw-assignments-area-:areaId'
       description: Returns all user assignments within an area
     parameters:
@@ -885,6 +887,8 @@ paths:
         '200':
           $ref: '#/components/responses/Assignments-Response'
         '401':
+          $ref: '#/components/responses/Error'
+        '404':
           $ref: '#/components/responses/Error'
       operationId: get-v3-gfw-assignments-allOpenUserForArea-areaId
       description: Returns all assignments the user has created or is assigned to for a given area
