@@ -1854,9 +1854,6 @@ components:
                 templateId: string
                 teamIds:
                   - string
-                createdAt: 0
-                createdBy: string
-                areaName: string
     RouteBody:
       content:
         application/json:
@@ -2191,5 +2188,40 @@ components:
                 type: string
             required:
               - name
+    UpdateAssignmentBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              priority:
+                type: integer
+              monitors:
+                type: array
+                items:
+                  type: string
+              notes:
+                type: string
+              status:
+                type: string
+              templateId:
+                type: string
+              teamIds:
+                type: array
+                items:
+                  type: string
+            x-examples:
+              example-1:
+                name: string
+                priority: 0
+                monitors:
+                  - string
+                notes: string
+                status: string
+                templateId: string
+                teamIds:
+                  - string
 security:
   - Authorization: []

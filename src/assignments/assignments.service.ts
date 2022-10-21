@@ -15,7 +15,6 @@ const allowedKeys = [
   'monitors',
   'notes',
   'status',
-  'areaId',
   'templateId',
   'teamIds',
 ];
