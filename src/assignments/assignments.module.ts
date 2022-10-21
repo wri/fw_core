@@ -6,7 +6,10 @@ import { Assignment, AssignmentSchema } from './models/assignment.schema';
 import { TeamsService } from '../teams/services/teams.service';
 import { Team, TeamSchema } from '../teams/models/team.schema';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
-import { TeamMember, TeamMemberSchema } from '../teams/models/teamMember.schema';
+import {
+  TeamMember,
+  TeamMemberSchema,
+} from '../teams/models/teamMember.schema';
 import { UserService } from '../common/user.service';
 import { AreasService } from '../areas/services/areas.service';
 import { GeostoreService } from '../areas/services/geostore.service';
@@ -16,21 +19,30 @@ import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Assignment.name, schema: AssignmentSchema }], 'formsDb'),
-    MongooseModule.forFeature([{ name: "gfwteams", schema: TeamSchema }], 'teamsDb'),
-    MongooseModule.forFeature([{ name: 'teamuserrelations', schema: TeamMemberSchema }], 'teamsDb')
+    MongooseModule.forFeature(
+      [{ name: Assignment.name, schema: AssignmentSchema }],
+      'formsDb',
+    ),
+    MongooseModule.forFeature(
+      [{ name: 'gfwteams', schema: TeamSchema }],
+      'teamsDb',
+    ),
+    MongooseModule.forFeature(
+      [{ name: 'teamuserrelations', schema: TeamMemberSchema }],
+      'teamsDb',
+    ),
   ],
   controllers: [AssignmentsController],
   providers: [
-    AssignmentsService, 
-    TeamsService, 
+    AssignmentsService,
+    TeamsService,
     TeamMembersService,
     UserService,
     AreasService,
     GeostoreService,
     CoverageService,
     DatasetService,
-    ConfigService
-  ]
+    ConfigService,
+  ],
 })
 export class AssignmentsModule {}
