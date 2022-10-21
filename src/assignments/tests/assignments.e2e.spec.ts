@@ -42,6 +42,8 @@ describe('Assignments', () => {
   const areaService = {
     getAreaMICROSERVICE: (id) => {
       if (id === areaConstants.testArea.id) return areaConstants.testArea;
+      else if (id === areaConstants.testTeamArea.id)
+        return areaConstants.testTeamArea;
       else return null;
     },
   };
@@ -457,9 +459,14 @@ describe('Assignments', () => {
         .expect(401);
     });
 
+    it('should return a 404 if area doesnt exist', async () => {
+      return await request(app.getHttpServer())
+        .get(`/assignments/areas/${1}`)
+        .set('Authorization', 'USER')
+        .expect(404);
+    });
+
     it('should return an array of team assignments with the area id', async () => {
-      const area1 = new mongoose.Types.ObjectId();
-      const area2 = new mongoose.Types.ObjectId();
       const team = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
@@ -479,7 +486,7 @@ describe('Assignments', () => {
         .insertOne({
           ...assignments.defaultAssignment,
           name: 'name',
-          areaId: area1.toString(),
+          areaId: areaConstants.testArea.id,
           monitors: [],
           teamIds: [team.insertedId.toString()],
           createdBy: ROLES.ADMIN.id,
@@ -489,7 +496,7 @@ describe('Assignments', () => {
         .insertOne({
           ...assignments.defaultAssignment,
           name: 'some other name',
-          areaId: area1.toString(),
+          areaId: areaConstants.testArea.id,
           monitors: [],
           teamIds: [team.insertedId.toString()],
           createdBy: ROLES.ADMIN.id,
@@ -499,7 +506,7 @@ describe('Assignments', () => {
         ...assignments.defaultAssignment,
         name: 'not visible',
         monitors: [],
-        areaId: area2.toString(),
+        areaId: areaConstants.testTeamArea.id,
         teamIds: [team.insertedId.toString()],
         createdBy: ROLES.ADMIN.id,
       });
@@ -507,13 +514,13 @@ describe('Assignments', () => {
         ...assignments.defaultAssignment,
         name: 'not visible',
         monitors: [],
-        areaId: area1.toString(),
+        areaId: areaConstants.testArea.id,
         teamIds: [team2.insertedId.toString()],
         createdBy: ROLES.ADMIN.id,
       });
 
       const response = await request(app.getHttpServer())
-        .get(`/assignments/areas/${area1.toString()}`)
+        .get(`/assignments/areas/${areaConstants.testArea.id}`)
         .set('Authorization', 'USER')
         .expect(200);
 
@@ -547,17 +554,21 @@ describe('Assignments', () => {
         .expect(401);
     });
 
-    it('should return an array of open user assignments with the area id', async () => {
-      const area1 = new mongoose.Types.ObjectId();
-      const area2 = new mongoose.Types.ObjectId();
+    it('should return a 404 if area doesnt exist', async () => {
+      return await request(app.getHttpServer())
+        .get(`/assignments/allOpenUserForArea/${1}`)
+        .set('Authorization', 'USER')
+        .expect(404);
+    });
 
+    it('should return an array of open user assignments with the area id', async () => {
       const assignment = await formsDbConnection
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
           name: 'name',
           status: 'open',
-          areaId: area1.toString(),
+          areaId: areaConstants.testArea.id,
           monitors: [ROLES.USER.id],
           teamIds: [],
           createdBy: ROLES.ADMIN.id,
@@ -568,7 +579,7 @@ describe('Assignments', () => {
           ...assignments.defaultAssignment,
           name: 'some other name',
           status: 'on hold',
-          areaId: area1.toString(),
+          areaId: areaConstants.testArea.id,
           monitors: [],
           teamIds: [],
           createdBy: ROLES.USER.id,
@@ -577,7 +588,7 @@ describe('Assignments', () => {
         ...assignments.defaultAssignment,
         name: 'some other name',
         status: 'completed',
-        areaId: area1.toString(),
+        areaId: areaConstants.testArea.id,
         monitors: [],
         teamIds: [],
         createdBy: ROLES.USER.id,
@@ -586,7 +597,7 @@ describe('Assignments', () => {
         ...assignments.defaultAssignment,
         name: 'not visible',
         monitors: [],
-        areaId: area2.toString(),
+        areaId: areaConstants.testTeamArea.id,
         teamIds: [],
         createdBy: ROLES.USER.id,
       });
@@ -594,13 +605,13 @@ describe('Assignments', () => {
         ...assignments.defaultAssignment,
         name: 'not visible',
         monitors: [],
-        areaId: area2.toString(),
+        areaId: areaConstants.testTeamArea.id,
         teamIds: [],
         createdBy: ROLES.USER.id,
       });
 
       const response = await request(app.getHttpServer())
-        .get(`/assignments/allOpenUserForArea/${area1.toString()}`)
+        .get(`/assignments/allOpenUserForArea/${areaConstants.testArea.id}`)
         .set('Authorization', 'USER')
         .expect(200);
 
