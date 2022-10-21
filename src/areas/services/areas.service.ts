@@ -79,13 +79,17 @@ export class AreasService {
     }
   }
 
-  async createAreaWithGeostore({ name, image }, geojson, user): Promise<any> {
+  async createAreaWithGeostore(
+    { name, image },
+    geojson,
+    user: IUser,
+  ): Promise<any> {
     let geostore: IGeostore;
     let coverage;
     const ALERTS_SUPPORTED = this.configService.get('alertsSupported');
 
     try {
-      geostore = await this.geostoreService.createGeostore(geojson, user);
+      geostore = await this.geostoreService.createGeostore(geojson, user.token);
     } catch (error) {
       this.logger.error('Error while creating geostore', error);
     }
@@ -94,7 +98,7 @@ export class AreasService {
         geostoreId: geostore.id,
         slugs: ALERTS_SUPPORTED,
       };
-      coverage = await this.coverageService.getCoverage(params, user);
+      coverage = await this.coverageService.getCoverage(params, user.token);
     } catch (error) {
       this.logger.error('Error while getting area coverage', error);
       throw error;
