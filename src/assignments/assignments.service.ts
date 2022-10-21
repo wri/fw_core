@@ -40,6 +40,12 @@ export class AssignmentsService {
     if (!area)
       throw new HttpException('Area does not exist', HttpStatus.NOT_FOUND);
 
+    if (!['open', 'on hold', 'completed'].includes(assignment.status))
+      throw new HttpException(
+        "Status must be one of 'open', 'on hold', 'completed'",
+        HttpStatus.BAD_REQUEST,
+      );
+
     const userInitials = user.name
       ? user.name
           .split(' ')
@@ -114,6 +120,15 @@ export class AssignmentsService {
     const assignmentToUpdate = await this.assignmentModel.findOne({
       _id: new mongoose.Types.ObjectId(id),
     });
+
+    if (
+      updateAssignmentDto.status &&
+      !['open', 'on hold', 'completed'].includes(updateAssignmentDto.status)
+    )
+      throw new HttpException(
+        "Status must be one of 'open', 'on hold', 'completed'",
+        HttpStatus.BAD_REQUEST,
+      );
 
     for (const [key, value] of Object.entries(updateAssignmentDto)) {
       if (!allowedKeys.includes(key)) continue;
