@@ -3,7 +3,7 @@ import * as mongoose from 'mongoose';
 
 export interface IAssignment {
   name: string;
-  location?: any;
+  location?: { lat: number; lon: number };
   priority: number;
   monitors: string[];
   notes: string;
@@ -22,8 +22,11 @@ export class Assignment {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: false })
-  location: mongoose.Schema.Types.Mixed;
+  @Prop({ required: false, type: Object })
+  location: {
+    lat: number;
+    lon: number;
+  };
 
   @Prop({ required: true })
   priority: number;

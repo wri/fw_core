@@ -3,7 +3,7 @@ import ROLES from '../../common/testConstants';
 
 export default {
   defaultAssignment: {
-    location: {},
+    location: { lat: 1, lon: 1 },
     priority: 1,
     monitors: [ROLES.USER.id],
     notes: 'some notes',

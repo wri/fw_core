@@ -45,6 +45,15 @@ export class AssignmentsService {
         HttpStatus.BAD_REQUEST,
       );
 
+    if (
+      assignment.location &&
+      !(assignment.location.lat && assignment.location.lon)
+    )
+      throw new HttpException(
+        'location should be in the form {lat: number, lon: number}',
+        HttpStatus.BAD_REQUEST,
+      );
+
     const userInitials = user.name
       ? user.name
           .split(' ')
