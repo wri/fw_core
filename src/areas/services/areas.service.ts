@@ -72,7 +72,12 @@ export class AreasService {
       this.logger.log(
         `Got ${areas.data.length} user areas for user ${user.id}`,
       );
-      return areas && areas.data;
+      if (areas && areas.data) {
+        const filteredAreas = areas.data.filter(
+          (area) => area.attributes.application === 'fw',
+        );
+        return filteredAreas;
+      } else return [];
     } catch (e) {
       this.logger.error('Error while fetching areas', e);
       throw e;
