@@ -40,6 +40,7 @@ export interface ITemplate {
   createdAt: string;
   questions: ITemplateQuestion[];
   answersCount?: number;
+  editGroupId: mongoose.Types.ObjectId;
 }
 
 @Schema()
@@ -100,6 +101,12 @@ export class Template {
 
   @Prop({ required: false })
   answersCount?: number;
+
+  @Prop({ required: true })
+  editGroupId: mongoose.Schema.Types.ObjectId;
+
+  @Prop({ required: true, default: true })
+  isLatest: boolean;
 }
 
 export interface TemplateDocument extends ITemplate, mongoose.Document {}
