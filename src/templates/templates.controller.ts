@@ -143,6 +143,10 @@ export class TemplatesController {
       id,
     });
 
+    if (!template) {
+      throw new NotFoundException();
+    }
+
     // get answer count for each report
     let answersFilter = {};
     if (user.role === 'ADMIN' || user.id === template.user.toString()) {
