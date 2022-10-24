@@ -8,9 +8,9 @@ import {
   Delete,
   Logger,
   Req,
-  HttpCode,
   HttpStatus,
   HttpException,
+  NotFoundException,
 } from '@nestjs/common';
 import { TemplatesService } from './templates.service';
 import { CreateTemplateDto } from './dto/create-template.dto';
@@ -29,6 +29,7 @@ import { TeamsService } from '../teams/services/teams.service';
 import serializeAnswers from '../answers/serializers/answers.serializer';
 import { TemplateAreaRelationService } from '../areas/services/templateAreaRelation.service';
 import mongoose from 'mongoose';
+import { CreateTemplateInput } from './input/create-template.input';
 
 @Controller('templates')
 export class TemplatesController {
@@ -42,26 +43,45 @@ export class TemplatesController {
 
   @Post()
   async create(@Req() request: Request): Promise<ITemplateResponse> {
-    const { body, user }: { body: CreateTemplateDto; user: IUser } = request;
+    const { body, user }: { body: CreateTemplateInput; user: IUser } = request;
     if (body.public && user.role !== 'ADMIN')
       throw new HttpException(
         'You must be an administrator to create a public template',
         HttpStatus.FORBIDDEN,
       );
 
-    const template = {
+    const template: CreateTemplateDto = {
       name: body.name,
-      user: user.id,
+      user: new mongoose.Types.ObjectId(user.id),
       languages: body.languages,
       defaultLanguage: body.defaultLanguage,
       questions: body.questions,
       public: body.public,
       status: body.status,
+      editGroupId: new mongoose.Types.ObjectId(),
+      isLatest: true,
     };
 
     const savedTemplate = await this.templatesService.create(template);
 
     return { data: serializeTemplate(savedTemplate) };
+  }
+
+  @Get('/latest')
+  async findAllLatestByUser(
+    @Req() request: Request,
+  ): Promise<ITemplateResponse> {
+    const user = request.user as IUser;
+
+    this.logger.log(
+      `Obtaining the latest version of all reports owned by user ${user.id}`,
+    );
+
+    const templates = await this.templatesService.findAllByUserId(user.id, {
+      latest: true,
+    });
+
+    return { data: serializeTemplate(templates) };
   }
 
   @Get()

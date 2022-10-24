@@ -41,6 +41,7 @@ export interface ITemplate {
   questions: ITemplateQuestion[];
   answersCount?: number;
   editGroupId: mongoose.Types.ObjectId;
+  isLatest: boolean;
 }
 
 @Schema()
@@ -105,7 +106,7 @@ export class Template {
   @Prop({ required: true })
   editGroupId: mongoose.Schema.Types.ObjectId;
 
-  @Prop({ required: true, default: true })
+  @Prop({ required: true })
   isLatest: boolean;
 }
 
