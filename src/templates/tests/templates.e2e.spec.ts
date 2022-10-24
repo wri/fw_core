@@ -18,8 +18,9 @@ import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import constants from './templates.constants';
 import { TemplateAreaRelationService } from '../../areas/services/templateAreaRelation.service';
+import { faker } from '@faker-js/faker';
 
-describe('Areas', () => {
+describe('Templates', () => {
   let app: INestApplication;
   let teamsDbConnection: Connection;
   let apiDbConnection: Connection;
@@ -1183,6 +1184,90 @@ describe('Areas', () => {
         .collection('answers')
         .findOne({ _id: answer3.insertedId });
       expect(deletedAnswer3).toBeDefined();
+    });
+  });
+
+  describe('GET /templates/latest', () => {
+    beforeEach(async () => {
+      formsDbConnection.collection('reports').deleteMany({});
+    });
+
+    it('should return a 401 without authorisation', async () => {
+      return await request(app.getHttpServer())
+        .get(`/templates/latest`)
+        .expect(401);
+    });
+
+    it('should return empty array if no templates', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/templates/latest')
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response).toBeDefined();
+      expect(response.body).toBeDefined();
+      expect(response.body.data).toBeInstanceOf(Array);
+      expect(response.body.data).toHaveLength(0);
+    });
+
+    it('should return only the latest templates', async () => {
+      const collection = formsDbConnection.collection('reports');
+      const templateBoilerplate = {
+        name: {
+          en: 'Default',
+        },
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        questions: [
+          {
+            type: 'text',
+            name: 'question-1',
+            label: {
+              en: 'test',
+            },
+          },
+        ],
+        languages: ['en'],
+        status: 'published',
+        defaultLanguage: 'en',
+      };
+
+      const groupId1 = new mongoose.Types.ObjectId();
+      const groupId2 = new mongoose.Types.ObjectId();
+      const templates = await collection.insertMany([
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId1,
+          isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId1,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId2,
+          isLatest: true,
+        },
+      ]);
+
+      const latestTemplateIds = [
+        templates.insertedIds[0],
+        templates.insertedIds[2],
+      ].map((t) => t.toString());
+
+      const response = await request(app.getHttpServer())
+        .get('/templates/latest')
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      const data = response?.body?.data;
+      expect(data).toBeDefined();
+      expect(data).toBeInstanceOf(Array);
+      expect(data).toHaveLength(2);
+
+      const dataIds = data.map((d) => d.id);
+      expect(dataIds.sort()).toEqual(latestTemplateIds.sort());
     });
   });
 
