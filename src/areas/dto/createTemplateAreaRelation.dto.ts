@@ -1,10 +1,10 @@
-import { IsDefined, IsNotEmpty } from "class-validator";
+import { IsDefined, IsNotEmpty } from 'class-validator';
 
 export class CreateTemplateAreaRelationDto {
-    @IsDefined()
-    @IsNotEmpty()
-    areaId: string;
-    @IsDefined()
-    @IsNotEmpty()
-    templateId: string;
+  @IsDefined()
+  @IsNotEmpty()
+  areaId: string;
+  @IsDefined()
+  @IsNotEmpty()
+  templateId: string;
 }
