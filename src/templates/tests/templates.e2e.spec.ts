@@ -1210,7 +1210,7 @@ describe('Templates', () => {
       expect(response.body.data).toHaveLength(0);
     });
 
-    it('should return only the latest templates', async () => {
+    it('should return only the latest templates of the user', async () => {
       const collection = formsDbConnection.collection('reports');
       const templateBoilerplate = {
         name: {
@@ -1233,6 +1233,7 @@ describe('Templates', () => {
 
       const groupId1 = new mongoose.Types.ObjectId();
       const groupId2 = new mongoose.Types.ObjectId();
+      const groupId3 = new mongoose.Types.ObjectId();
       const templates = await collection.insertMany([
         {
           ...templateBoilerplate,
@@ -1248,6 +1249,12 @@ describe('Templates', () => {
           ...templateBoilerplate,
           editGroupId: groupId2,
           isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId3,
+          isLatest: true,
+          user: new mongoose.Types.ObjectId(),
         },
       ]);
 
