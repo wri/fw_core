@@ -6,10 +6,8 @@ import { v4 } from 'uuid';
 
 @Injectable()
 export class S3Service {
-  constructor(
-    private readonly configService: ConfigService,
-    private logger: Logger,
-  ) {}
+  private logger = new Logger(S3Service.name);
+  constructor(private readonly configService: ConfigService) {}
 
   getExtension(name: string) {
     const parts = name.split('.');
