@@ -63,7 +63,7 @@ export class AnswersModule {
       .exclude('/templates/:templateId/answers/exports/:id')
       .forRoutes(
         '/templates/:templateId/answers',
-        '/templates/:templateId/answers/*',
+        '/templates/:templateId/answers/areas/:areaId',
         '/templates/:templateId/answers/:id',
       );
 
