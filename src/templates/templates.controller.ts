@@ -11,6 +11,7 @@ import {
   HttpStatus,
   HttpException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { TemplatesService } from './templates.service';
 import { CreateTemplateDto } from './dto/create-template.dto';
@@ -68,7 +69,7 @@ export class TemplatesController {
   }
 
   @Get('/latest')
-  async findAllLatestByUser(
+  async findAllLatestVersionsByUser(
     @Req() request: Request,
   ): Promise<ITemplateResponse> {
     const user = request.user as IUser;
@@ -80,6 +81,28 @@ export class TemplatesController {
     const templates = await this.templatesService.findAllByUserId(user.id, {
       latest: true,
     });
+
+    return { data: serializeTemplate(templates) };
+  }
+
+  @Get('/versions/:id')
+  async findAllVersionsByUser(@Req() request: Request) {
+    const user = request.user as IUser;
+    const editGroupId = request.params.id;
+    if (!editGroupId) {
+      throw new BadRequestException('The id path parameter must be provided');
+    }
+
+    this.logger.log(
+      `Obtaining all template versions of ${editGroupId} for user ${user.id}`,
+    );
+
+    const templates = await this.templatesService.findAllByEditGroupId(
+      editGroupId,
+      {
+        user: user.id,
+      },
+    );
 
     return { data: serializeTemplate(templates) };
   }

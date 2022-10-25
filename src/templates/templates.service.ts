@@ -37,8 +37,17 @@ export class TemplatesService {
    * @param id Edit group id
    * @returns A list of Template documents that belong to the edit group
    */
-  async findAllByEditGroupId(id: string): Promise<TemplateDocument[]> {
-    return this.find({ editGroupId: id });
+  async findAllByEditGroupId(
+    id: string,
+    opts?: Partial<{ user: string }>,
+  ): Promise<TemplateDocument[]> {
+    const filter: mongoose.FilterQuery<TemplateDocument> = { editGroupId: id };
+
+    if (opts?.user) {
+      filter.user = opts.user;
+    }
+
+    return this.templateModel.find(filter);
   }
 
   /**

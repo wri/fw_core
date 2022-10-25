@@ -1278,6 +1278,67 @@ describe('Templates', () => {
     });
   });
 
+  describe('GET /templates/versions/:id', () => {
+    afterEach(async () => {
+      formsDbConnection.collection('reports').deleteMany({});
+    });
+
+    it('should return 401 if not logged in', async () => {
+      return await request(app.getHttpServer())
+        .get(`/templates/versions/fakeid`)
+        .expect(401);
+    });
+
+    it("should return an empty array if the user doesn't own any templates in the group id", async () => {
+      const groupId = new mongoose.Types.ObjectId();
+      const userId = new mongoose.Types.ObjectId();
+
+      const templateBoilerplate = {
+        name: {
+          en: 'Default',
+        },
+        user: userId,
+        questions: [
+          {
+            type: 'text',
+            name: 'question-1',
+            label: {
+              en: 'test',
+            },
+          },
+        ],
+        languages: ['en'],
+        status: 'published',
+        defaultLanguage: 'en',
+      };
+
+      const templates = await formsDbConnection
+        .collection('reports')
+        .insertMany([
+          {
+            ...templateBoilerplate,
+            editGroupId: groupId,
+            isLatest: true,
+          },
+          {
+            ...templateBoilerplate,
+            editGroupId: groupId,
+            isLatest: false,
+          },
+        ]);
+
+      const response = await request(app.getHttpServer())
+        .get(`/templates/versions/${groupId}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      const data = response?.body?.data;
+      expect(data).toBeDefined();
+      expect(data).toBeInstanceOf(Array);
+      expect(data).toHaveLength(0);
+    });
+  });
+
   afterAll(async () => {
     await app.close();
   });
