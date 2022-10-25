@@ -147,7 +147,7 @@ export class AnswersController {
     return { data: serializeAnswers(answerModel) };
   }
 
-  @Get('/area/:areaId')
+  @Get('/areas/:areaId')
   async getAreaAnswers(
     @Req() request: Request,
     @Param('areaId') areaId: string,
