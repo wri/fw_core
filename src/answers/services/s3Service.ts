@@ -30,12 +30,6 @@ export class S3Service {
         const uuid = v4();
         // eslint-disable-next-line no-buffer-constructor
         const base64data = Buffer.from(data);
-        this.logger.log({
-          Bucket: this.configService.get('s3.bucket'),
-          Key: `${this.configService.get('s3.folder')}/${uuid}.${ext}`,
-          Body: base64data,
-          ACL: 'public-read',
-        });
         s3.upload(
           {
             Bucket: this.configService.get('s3.bucket'),
