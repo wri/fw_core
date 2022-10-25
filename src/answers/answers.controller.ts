@@ -181,6 +181,24 @@ export class AnswersController {
       ),
     };
   }
+  
+  @Get('/exports/:id')
+  async findOneForExport(@Param('id') id: string, @Req() request: Request) {
+    const answer = await this.answersService.findOne({
+      _id: new mongoose.Types.ObjectId(id),
+    });
+    if (!answer)
+      throw new HttpException(
+        'No answer found with your permissions',
+        HttpStatus.NOT_FOUND,
+      );
+
+    return {
+      data: serializeAnswers(
+        await this.answersService.addUsernameToAnswer(answer),
+      ),
+    };
+  }
 
   @Get('/:id')
   async findOne(@Param('id') id: string, @Req() request: Request) {
@@ -215,24 +233,6 @@ export class AnswersController {
     }
 
     const answer = await this.answersService.findOne(filter);
-    if (!answer)
-      throw new HttpException(
-        'No answer found with your permissions',
-        HttpStatus.NOT_FOUND,
-      );
-
-    return {
-      data: serializeAnswers(
-        await this.answersService.addUsernameToAnswer(answer),
-      ),
-    };
-  }
-
-  @Get('/exports/:id')
-  async findOneForExport(@Param('id') id: string, @Req() request: Request) {
-    const answer = await this.answersService.findOne({
-      _id: new mongoose.Types.ObjectId(id),
-    });
     if (!answer)
       throw new HttpException(
         'No answer found with your permissions',
