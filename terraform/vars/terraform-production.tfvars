@@ -9,6 +9,7 @@ auth_url                  = "https://api.resourcewatch.org"
 geostore_api_url          = "https://api.resourcewatch.org/v1"
 areas_api_url             = "https://api.resourcewatch.org"
 s3_bucket                 = "forest-watcher-files"
+s3_folder                 = "forms-production"
 s3_access_key_id          = "overridden_in_github_secrets"
 s3_secret_access_key      = "overridden_in_github_secrets"
 
