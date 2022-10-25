@@ -60,8 +60,8 @@ export class AnswersModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(TemplatePermissionsMiddleware)
-      .exclude('/templates/:templateId/answers/exports/:id')
-      .forRoutes();
+      .exclude('/v3/gfw/templates/:templateId/answers/exports/:id')
+      .forRoutes(AnswersController);
 
   }
 }
