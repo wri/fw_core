@@ -135,8 +135,8 @@ export class AnswersController {
           if (childResponse && childQuestion.type === 'blob') {
             // upload file
             childResponse = await this.s3Service.uploadFile(
-              response.path,
-              response.filename,
+              childResponse.path,
+              childResponse.filename,
             );
           }
           pushResponse(childQuestion, childResponse);
