@@ -61,11 +61,7 @@ export class AnswersModule {
     consumer
       .apply(TemplatePermissionsMiddleware)
       .exclude('/templates/:templateId/answers/exports/:id')
-      .forRoutes(
-        '/templates/:templateId/answers',
-        '/templates/:templateId/answers/areas/:areaId',
-        '/templates/:templateId/answers/:id',
-      );
+      .forRoutes();
 
   }
 }
