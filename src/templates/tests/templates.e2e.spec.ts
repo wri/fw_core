@@ -1188,7 +1188,7 @@ describe('Templates', () => {
   });
 
   describe('GET /templates/latest', () => {
-    beforeEach(async () => {
+    afterEach(async () => {
       formsDbConnection.collection('reports').deleteMany({});
     });
 
