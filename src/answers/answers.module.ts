@@ -42,9 +42,6 @@ export class AnswersModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(TemplatePermissionsMiddleware)
-      .forRoutes(
-        '/templates/:templateId/answers',
-        '/templates/:templateId/answers/:id'
-        )
+      .forRoutes()
   }
 }
