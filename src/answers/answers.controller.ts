@@ -135,8 +135,8 @@ export class AnswersController {
           if (childResponse && childQuestion.type === 'blob') {
             // upload file
             childResponse = await this.s3Service.uploadFile(
-              response.path,
-              response.filename,
+              childResponse.path,
+              childResponse.filename,
             );
           }
           pushResponse(childQuestion, childResponse);
@@ -147,7 +147,7 @@ export class AnswersController {
     return { data: serializeAnswers(answerModel) };
   }
 
-  @Get('/area/:areaId')
+  @Get('/areas/:areaId')
   async getAreaAnswers(
     @Req() request: Request,
     @Param('areaId') areaId: string,
@@ -184,7 +184,6 @@ export class AnswersController {
 
   @Get('/exports/:id')
   async findOneForExport(@Param('id') id: string, @Req() request: Request) {
-    console.log('export');
     const answer = await this.answersService.findOne({
       _id: new mongoose.Types.ObjectId(id),
     });

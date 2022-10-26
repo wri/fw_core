@@ -1,28 +1,23 @@
-import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import AWS from "aws-sdk";
-import fs from "fs";
-import { v4 } from "uuid";
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import AWS from 'aws-sdk';
+import fs from 'fs';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class S3Service {
+  private logger = new Logger(S3Service.name);
+  constructor(private readonly configService: ConfigService) {}
 
-  constructor(
-    private readonly configService: ConfigService
-  ) { }
-
-  // eslint-disable-next-line class-methods-use-this
-  getExtension(name) {
-    const parts = name.split(".");
+  getExtension(name: string) {
+    const parts = name.split('.');
     return parts[parts.length - 1];
   }
 
-  // eslint-disable-next-line require-yield
-  async uploadFile(filePath, name) {
-
+  async uploadFile(filePath: string, name: string) {
     AWS.config.update({
-      accessKeyId: this.configService.get("s3.accessKeyId"),
-      secretAccessKey: this.configService.get("s3.secretAccessKey")
+      accessKeyId: this.configService.get('s3.accessKeyId'),
+      secretAccessKey: this.configService.get('s3.secretAccessKey'),
     });
 
     const s3 = new AWS.S3();
@@ -37,18 +32,22 @@ export class S3Service {
         const base64data = Buffer.from(data);
         s3.upload(
           {
-            Bucket: this.configService.get("s3.bucket"),
-            Key: `${this.configService.get("s3.folder")}/${uuid}.${ext}`,
+            Bucket: this.configService.get('s3.bucket'),
+            Key: `${this.configService.get('s3.folder')}/${uuid}.${ext}`,
             Body: base64data,
-            ACL: "public-read"
+            ACL: 'public-read',
           },
-          resp => {
+          (resp) => {
             if (resp) {
               reject(resp);
               return;
             }
-            resolve(`https://s3.amazonaws.com/${this.configService.get("s3.bucket")}/${this.configService.get("s3.folder")}/${uuid}.${ext}`);
-          }
+            resolve(
+              `https://s3.amazonaws.com/${this.configService.get(
+                's3.bucket',
+              )}/${this.configService.get('s3.folder')}/${uuid}.${ext}`,
+            );
+          },
         );
       });
     });
