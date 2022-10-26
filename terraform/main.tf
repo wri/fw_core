@@ -2,7 +2,7 @@
 terraform {
   backend "s3" {
     region  = "us-east-1"
-    key     = "wri__fw_core.tfstate" 
+    key     = "wri__fw_core.tfstate"
     encrypt = true
   }
 }
@@ -53,9 +53,9 @@ module "fargate_autoscaling" {
   lb_target_group_arn = module.fargate_autoscaling.lb_target_group_arn
   listener_arn        = data.terraform_remote_state.fw_core.outputs.lb_listener_arn
   project_prefix      = var.project_prefix
-  path_pattern        = ["/v3/gfw*"] 
+  path_pattern        = ["/v3/gfw*"]
   health_check_path = var.healthcheck_path
-  priority = 10 
+  priority = 10
 }
 
 
@@ -77,6 +77,7 @@ data "template_file" "container_definition" {
     auth_url                = var.auth_url
     geostore_api_url        = var.geostore_api_url
     s3_bucket               = var.s3_bucket
+    s3_folder               = var.s3_folder
     s3_access_key_id        = var.s3_access_key_id
     s3_secret_access_key    = var.s3_secret_access_key
     db_secret_arn = data.terraform_remote_state.core.outputs.document_db_secrets_arn
@@ -117,7 +118,7 @@ module "error_rate_alarm" {
   source = "git::https://github.com/wri/gfw-terraform-modules.git//terraform/modules/http_error_rate_alarm?ref=v0.5.7"
 
   project_prefix = var.project_prefix
-  httpOkQuery = "[direction=\"-->\", requestType, path, responseCode=200 || responseCode=202 , responseTime, dataSize]" 
+  httpOkQuery = "[direction=\"-->\", requestType, path, responseCode=200 || responseCode=202 , responseTime, dataSize]"
   httpOkLogGroup = aws_cloudwatch_log_group.default.name
   httpErrorsQuery = "[direction=\"-->\", requestType, path, responseCode=4* || responseCode=5* , responseTime, dataSize]"
   httpErrorsLogGroup = aws_cloudwatch_log_group.default.name
