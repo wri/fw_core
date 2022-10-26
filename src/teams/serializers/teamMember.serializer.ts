@@ -1,25 +1,22 @@
-const whitelist = ["teamId", "userId", "email", "role", "status", "name"]
+const whitelist = ['teamId', 'userId', 'email', 'role', 'status', 'name'];
 
-const serializeResource = data => {
-
+const serializeResource = (data) => {
   const attributes = {};
-  for(const [key, value] of Object.entries(JSON.parse(JSON.stringify(data)))) {
-    if(whitelist.includes(key)) attributes[key] = value;
+  for (const [key, value] of Object.entries(JSON.parse(JSON.stringify(data)))) {
+    if (whitelist.includes(key)) attributes[key] = value;
   }
 
   return {
-    type: "teamMember",
+    type: 'teamMember',
     id: data._id,
-    attributes
-  }
-}
+    attributes,
+  };
+};
 
-const serializeTeamMember = data => {
+const serializeTeamMember = (data) => {
+  if (Array.isArray(data))
+    return data.map((arrayItem) => serializeResource(arrayItem));
+  else return serializeResource(data);
+};
 
-  if(Array.isArray(data)) return data.map(arrayItem => serializeResource(arrayItem));
-  else return serializeResource(data)
-
-}
-
-export default serializeTeamMember
-
+export default serializeTeamMember;

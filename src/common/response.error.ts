@@ -1,5 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.ResponseError = void 0;
 class ResponseError extends Error {
   statusCode: any;
@@ -7,9 +7,12 @@ class ResponseError extends Error {
   response: any;
   constructor(statusCode, body, response) {
     super();
-    this.name = "ResponseError";
+    this.name = 'ResponseError';
     this.statusCode = statusCode;
-    this.message = statusCode + " - " + (JSON && JSON.stringify ? JSON.stringify(body) : body);
+    this.message =
+      statusCode +
+      ' - ' +
+      (JSON && JSON.stringify ? JSON.stringify(body) : body);
     this.error = body;
     this.response = response;
   }

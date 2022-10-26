@@ -1,36 +1,34 @@
 const whitelist = [
-  "areaId",
-  "destination",
-  "difficulty",
-  "startDate",
-  "endDate",
-  "geostoreId",
-  "routeId",
-  "locations",
-  "name",
-  "createdBy",
-  "active",
-  "teamId"
+  'areaId',
+  'destination',
+  'difficulty',
+  'startDate',
+  'endDate',
+  'geostoreId',
+  'routeId',
+  'locations',
+  'name',
+  'createdBy',
+  'active',
+  'teamId',
 ];
 
-const serializeResource = data => {
-
+const serializeResource = (data) => {
   const attributes = {};
-  for(const [key, value] of Object.entries(JSON.parse(JSON.stringify(data)))) {
-    if(whitelist.includes(key)) attributes[key] = value;
+  for (const [key, value] of Object.entries(JSON.parse(JSON.stringify(data)))) {
+    if (whitelist.includes(key)) attributes[key] = value;
   }
   return {
-    type: "routes",
+    type: 'routes',
     id: data._id,
-    attributes
+    attributes,
   };
-}
+};
 
-const serializeRoutes = data => {
-
-  if(Array.isArray(data)) return data.map(arrayItem => serializeResource(arrayItem));
+const serializeRoutes = (data) => {
+  if (Array.isArray(data))
+    return data.map((arrayItem) => serializeResource(arrayItem));
   else return serializeResource(data);
+};
 
-}
-
-export default serializeRoutes
+export default serializeRoutes;

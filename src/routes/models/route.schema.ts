@@ -1,6 +1,6 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
-import * as mongoose from "mongoose";
-import { IGeojson } from "../../areas/models/area.entity";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import * as mongoose from 'mongoose';
+import { IGeojson } from '../../areas/models/area.entity';
 
 export interface ILocation {
   accuracy: number;
@@ -23,7 +23,7 @@ export interface IRoute {
   endDate: number;
   geostoreId: string;
   routeId: string;
-  locations: ILocation[]
+  locations: ILocation[];
   name: string;
   createdBy: string;
   teamId: string;
@@ -32,49 +32,47 @@ export interface IRoute {
 
 @Schema()
 export class Route {
+  @Prop({ required: true })
+  name: string;
 
-    @Prop({required: true})
-    name: string;
+  @Prop({ required: true })
+  locations: mongoose.Schema.Types.Mixed;
 
-    @Prop({required: true})
-    locations: mongoose.Schema.Types.Mixed;
+  @Prop({ required: true })
+  areaId: string;
 
-    @Prop({required: true})
-    areaId: string;
+  @Prop({ required: true })
+  destination: mongoose.Schema.Types.Mixed;
 
-    @Prop({required: true})
-    destination: mongoose.Schema.Types.Mixed;
+  @Prop({ required: true })
+  difficulty: string;
 
-    @Prop({required: true})
-    difficulty: string;
+  @Prop({ required: true })
+  startDate: number;
 
-    @Prop({required: true})
-    startDate: number;
+  @Prop({ required: true })
+  endDate: number;
 
-    @Prop({required: true})
-    endDate: number;
+  @Prop({ required: true })
+  geostoreId: string;
 
-    @Prop({required: true})
-    geostoreId: string;
+  @Prop({ required: true })
+  routeId: string;
 
-    @Prop({required: true})
-    routeId: string;
+  @Prop({ required: true })
+  teamId: string;
 
-    @Prop({required: true})
-    teamId: string;
+  @Prop({ required: true })
+  createdBy: string;
 
-    @Prop({required: true})
-    createdBy: string;
-
-    @Prop({required: true})
-    active: boolean;
-
+  @Prop({ required: true })
+  active: boolean;
 }
 
 export interface RouteDocument extends IRoute, mongoose.Document {}
 
 export interface IRouteResponse {
-  data: any
+  data: any;
 }
 
 export const RouteSchema = SchemaFactory.createForClass(Route);
