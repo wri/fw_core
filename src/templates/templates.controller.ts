@@ -183,7 +183,7 @@ export class TemplatesController {
 
     this.logger.log('Obtaining template', id);
     const template: TemplateDocument = await this.templatesService.findOne({
-      id,
+      _id: new mongoose.Types.ObjectId(id),
     });
 
     if (!template) {

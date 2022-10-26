@@ -14,8 +14,7 @@ export class S3Service {
     return parts[parts.length - 1];
   }
 
-  // eslint-disable-next-line require-yield
-  async uploadFile(filePath, name) {
+  async uploadFile(filePath: string, name: string) {
     AWS.config.update({
       accessKeyId: this.configService.get('s3.accessKeyId'),
       secretAccessKey: this.configService.get('s3.secretAccessKey'),

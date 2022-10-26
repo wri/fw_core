@@ -2,7 +2,7 @@
   "name": "${container_name}",
   "image": "${image}",
   "networkMode": "awsvpc",
- 
+
   "environment": [
     {
       "name": "ENV",
@@ -55,6 +55,10 @@
     {
       "name" : "S3_BUCKET",
       "value" : "${s3_bucket}"
+    },
+    {
+      "name" : "S3_FOLDER",
+      "value" : "${s3_folder}"
     },
     {
       "name" : "S3_SECRET_ACCESS_KEY",

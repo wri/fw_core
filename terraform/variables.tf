@@ -64,6 +64,10 @@ variable "s3_bucket" {
   type = string
   default = "forest-watcher-files"
 }
+variable "s3_folder" {
+  type = string
+  default = "forms-dev"
+}
 variable "s3_access_key_id" {
   type = string
 }
