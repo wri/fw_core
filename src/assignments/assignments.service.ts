@@ -65,11 +65,12 @@ export class AssignmentsService {
       : 'null';
 
     // create geostore
-    let geostore: IGeostore = assignment.geostore ?
-        await this.geostoreService.createGeostore(
+    const geostore: IGeostore = assignment.geostore
+      ? await this.geostoreService.createGeostore(
           assignment.geostore,
           user.token,
-        ) : null;
+        )
+      : null;
 
     const newAssignment = {
       ...assignment,

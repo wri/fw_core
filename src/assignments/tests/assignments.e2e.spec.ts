@@ -582,7 +582,6 @@ describe('Assignments', () => {
         .set('Authorization', 'USER')
         .expect(200);
 
-
       expect(response.body).toHaveProperty('data');
       expect(response.body.data.length).toBe(2);
       expect(response.body.data[0]).toHaveProperty(
