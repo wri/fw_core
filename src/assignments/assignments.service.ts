@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
@@ -71,7 +76,7 @@ export class AssignmentsService {
     return await assignmentToSave.save();
   }
 
-  async findOne(filter): Promise<AssignmentDocument> {
+  async findOne(filter): Promise<AssignmentDocument | null> {
     return await this.assignmentModel.findOne(filter);
   }
 
@@ -129,6 +134,8 @@ export class AssignmentsService {
       _id: new mongoose.Types.ObjectId(id),
     });
 
+    if (!assignmentToUpdate) throw new NotFoundException();
+
     if (
       updateAssignmentDto.status &&
       !['open', 'on hold', 'completed'].includes(updateAssignmentDto.status)
@@ -151,6 +158,5 @@ export class AssignmentsService {
     await this.assignmentModel.findOneAndDelete({
       _id: new mongoose.Types.ObjectId(id),
     });
-    return null;
   }
 }

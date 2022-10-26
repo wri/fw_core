@@ -41,7 +41,7 @@ export class TeamsService {
     return team;
   }
 
-  async findById(id: string) {
+  async findById(id: string): Promise<TeamDocument | null> {
     return await this.teamModel.findById(id);
   }
 
@@ -62,16 +62,22 @@ export class TeamsService {
     teamMembers: TeamMemberDocument[],
   ): Promise<TeamDocument[]> {
     const teams: TeamDocument[] = [];
-    for (let i = 0; i < teamMembers.length; i++) {
-      const teamMember = teamMembers[i];
-      const team = await this.findById(teamMember.teamId.toString());
-      team.userRole = teamMember.role;
-      teams.push(team);
+
+    for (const member of teamMembers) {
+      const team = await this.findById(member.teamId.toString());
+      if (team) {
+        team.userRole = member.role;
+        teams.push(team);
+      }
     }
+
     return teams;
   }
 
-  async update(id: string, name: TeamDocument['name']): Promise<TeamDocument> {
+  async update(
+    id: string,
+    name: TeamDocument['name'],
+  ): Promise<TeamDocument | null> {
     return await this.teamModel.findByIdAndUpdate(id, { name }, { new: true });
   }
 

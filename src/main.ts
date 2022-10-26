@@ -10,7 +10,7 @@ import { TeamDocument } from './teams/models/team.schema';
 declare global {
   namespace Express {
     interface Request {
-      user: IUser;
+      user?: IUser;
       template: TemplateDocument;
       userTeams: TeamDocument[];
     }
@@ -49,7 +49,7 @@ async function bootstrap() {
     }
   });
 
-  await app.listen(process.env.PORT);
+  await app.listen(process.env.PORT ?? 4042);
   console.log(`App running on: ${await app.getUrl()}`);
 }
 bootstrap();

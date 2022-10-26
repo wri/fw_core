@@ -1,36 +1,36 @@
 class ErrorSerializer {
   static serializeValidationError(data, typeParam) {
     const keys = Object.keys(data);
-    let message = "";
+    let message = '';
     switch (typeParam) {
-      case "body":
-        message = "Invalid body parameter";
+      case 'body':
+        message = 'Invalid body parameter';
         break;
-      case "query":
-        message = "Invalid query parameter";
+      case 'query':
+        message = 'Invalid query parameter';
         break;
       default:
-        message = "";
+        message = '';
     }
     return {
       source: {
-        parameter: keys[0]
+        parameter: keys[0],
       },
-      code: message.replace(/ /g, "_").toLowerCase(),
+      code: message.replace(/ /g, '_').toLowerCase(),
       title: message,
-      detail: data[keys[0]]
+      detail: data[keys[0]],
     };
   }
 
   static serializeValidationBodyErrors(data) {
-    const errors = [];
+    const errors: any[] = [];
     if (data) {
       for (let i = 0, { length } = data; i < length; i++) {
-        errors.push(ErrorSerializer.serializeValidationError(data[i], "body"));
+        errors.push(ErrorSerializer.serializeValidationError(data[i], 'body'));
       }
     }
     return {
-      errors
+      errors,
     };
   }
 
@@ -39,9 +39,9 @@ class ErrorSerializer {
       errors: [
         {
           status,
-          detail: message
-        }
-      ]
+          detail: message,
+        },
+      ],
     };
   }
 }

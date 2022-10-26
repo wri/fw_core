@@ -44,8 +44,8 @@ export class AreasController {
   // Gets all areas the user has created
   @Get('/user')
   async getUserAreas(@Req() request: Request): Promise<IAreaResponse> {
-    const { user }: { user: IUser } = request;
-    let data: IArea[];
+    const user = request.user!;
+    let data: IArea[] = [];
     if (user && user.id) {
       try {
         const areas = await this.areasService.getUserAreas(user);
@@ -80,8 +80,8 @@ export class AreasController {
   // Gets all areas the user has created and all areas linked to the user's teams
   @Get('/userAndTeam')
   async getUserAndTeamAreas(@Req() request: Request): Promise<IAreaResponse> {
-    const { user }: { user: IUser } = request;
-    let data: IArea[];
+    const user = request.user!;
+    let data: IArea[] = [];
 
     if (user && user.id) {
       try {
@@ -92,7 +92,7 @@ export class AreasController {
               'Incorrect areas found',
               HttpStatus.SERVICE_UNAVAILABLE,
             );
-          area.attributes.teamId = null;
+          area.attributes.teamId = undefined;
         });
         // get a users teams
         const userTeams = await this.teamsService.findAllByUserId(user.id); // get list of user's teams
@@ -151,7 +151,7 @@ export class AreasController {
         'Request must contain an image',
         HttpStatus.BAD_REQUEST,
       );
-    const { user }: { user: IUser } = request;
+    const user = request.user!;
     const { geojson, name } = body;
     let data;
     if (user && user.id) {
@@ -189,7 +189,7 @@ export class AreasController {
     let area: IArea;
     // see if area is a team area
     // get user teams
-    const { user }: { user: IUser } = request;
+    const user = request.user!;
     const userTeams: TeamDocument[] = await this.teamsService.findAllByUserId(
       user.id,
     ); // get list of user's teams
@@ -221,7 +221,7 @@ export class AreasController {
     @Req() request: Request,
     @Body() updateAreaDto: UpdateAreaDto,
   ): Promise<IAreaResponse> {
-    const { user }: { user: IUser } = request;
+    const user = request.user!;
     // get the area
     const existingArea = await this.areasService.getArea(id, user);
     if (!existingArea)
@@ -243,7 +243,7 @@ export class AreasController {
       );
     const { geojson, name } = updateAreaDto;
 
-    let data = null;
+    let data: any;
     if (user && user.id) {
       try {
         const { area, geostoreId, coverage } =
@@ -284,7 +284,7 @@ export class AreasController {
     @Param('id') id: string,
     @Req() request: Request,
   ): Promise<string> {
-    const { user }: { user: IUser } = request;
+    const user = request.user!;
     const area = await this.areasService.getArea(id, user);
 
     if (area.attributes.userId.toString() !== user.id.toString())

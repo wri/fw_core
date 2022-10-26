@@ -1,5 +1,5 @@
 export default () => ({
-  port: parseInt(process.env.PORT, 10),
+  port: parseInt(process.env.PORT ?? '4042', 10),
   mongodb: {
     host: process.env.MONGODB_HOST,
     port: process.env.MONGODB_PORT,
