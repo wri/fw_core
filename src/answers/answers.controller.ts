@@ -42,7 +42,7 @@ export class AnswersController {
     @Req() request: Request,
   ) {
     const { template } = request;
-    const user = request.user!;
+    const user = request.user;
     let userPosition: string[] = [];
     const files = {};
     if (fileArray) fileArray.forEach((file) => (files[file.fieldname] = file));
@@ -156,7 +156,7 @@ export class AnswersController {
     @Param('areaId') areaId: string,
   ) {
     const { template, query, userTeams } = request;
-    const user = request.user!;
+    const user = request.user;
     let restricted = false;
     if (query && query.restricted === 'true') restricted = true;
 
@@ -179,7 +179,7 @@ export class AnswersController {
   @Get()
   async findAll(@Req() request: Request) {
     const { template } = request;
-    const user = request.user!;
+    const user = request.user;
     return {
       data: serializeAnswers(
         await this.answersService.getAllTemplateAnswers({ user, template }),
@@ -209,7 +209,7 @@ export class AnswersController {
   async findOne(@Param('id') id: string, @Req() request: Request) {
     let filter: any = {};
     const { template, userTeams = [] } = request;
-    const user = request.user!;
+    const user = request.user;
 
     const confirmedUsers: (mongoose.Types.ObjectId | undefined)[] = [];
     for await (const team of userTeams) {
@@ -262,7 +262,7 @@ export class AnswersController {
     @Param('id') id: string,
     @Req() request: Request,
   ): Promise<void> {
-    const user = request.user!;
+    const user = request.user;
     const userTeams = request.userTeams;
     // only the answer creator OR a manager for the area can delete the answer
     let permitted = false;

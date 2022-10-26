@@ -36,7 +36,7 @@ export class RoutesController {
       });
       if (existingRoute || !route.id) continue;
 
-      const user = request.user!;
+      const user = request.user;
       route.createdBy = user.id;
       route.routeId = route.id;
       route.active = true;
@@ -50,7 +50,7 @@ export class RoutesController {
 
   @Get('/user')
   async findAllUser(@Req() request: Request) {
-    const user = request.user!;
+    const user = request.user;
     // get all active routes
     const filter = {
       createdBy: user.id,
@@ -62,7 +62,7 @@ export class RoutesController {
 
   @Get('/teams')
   async findAllTeams(@Req() request: Request) {
-    const user = request.user!;
+    const user = request.user;
     // find all user teams
     const teams = await this.teamsService.findAllByUserId(user.id);
 
@@ -94,7 +94,7 @@ export class RoutesController {
     const route = await this.routesService.findOneById(id);
     if (!route)
       throw new HttpException("This route doesn't exist", HttpStatus.NOT_FOUND);
-    const user = request.user!;
+    const user = request.user;
     // check user is manager of route team
     const managedTeams = await this.teamsService.findAllManagedTeams(user.id);
     if (!managedTeams.includes(route.teamId) && route.createdBy !== user.id)

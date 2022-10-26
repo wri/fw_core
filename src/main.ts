@@ -10,7 +10,7 @@ import { TeamDocument } from './teams/models/team.schema';
 declare global {
   namespace Express {
     interface Request {
-      user?: IUser;
+      user: IUser;
       template: TemplateDocument;
       userTeams: TeamDocument[];
     }

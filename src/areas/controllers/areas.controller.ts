@@ -45,7 +45,7 @@ export class AreasController {
   // Gets all areas the user has created
   @Get('/user')
   async getUserAreas(@Req() request: Request): Promise<IAreaResponse> {
-    const user = request.user!;
+    const user = request.user;
     let data: IArea[] = [];
     if (user && user.id) {
       try {
@@ -81,7 +81,7 @@ export class AreasController {
   // Gets all areas the user has created and all areas linked to the user's teams
   @Get('/userAndTeam')
   async getUserAndTeamAreas(@Req() request: Request): Promise<IAreaResponse> {
-    const user = request.user!;
+    const user = request.user;
     let data: IArea[] = [];
 
     if (user && user.id) {
@@ -152,7 +152,7 @@ export class AreasController {
         'Request must contain an image',
         HttpStatus.BAD_REQUEST,
       );
-    const user = request.user!;
+    const user = request.user;
     const { geojson, name } = body;
     let data;
     if (user && user.id) {
@@ -189,7 +189,7 @@ export class AreasController {
   ): Promise<IAreaResponse> {
     // see if area is a team area
     // get user teams
-    const user = request.user!;
+    const user = request.user;
     const userTeams: TeamDocument[] = await this.teamsService.findAllByUserId(
       user.id,
     ); // get list of user's teams
@@ -223,7 +223,7 @@ export class AreasController {
     @Req() request: Request,
     @Body() updateAreaDto: UpdateAreaDto,
   ): Promise<IAreaResponse> {
-    const user = request.user!;
+    const user = request.user;
     // get the area
     const existingArea = await this.areasService.getArea(id, user);
     if (!existingArea)
@@ -286,7 +286,7 @@ export class AreasController {
     @Param('id') id: string,
     @Req() request: Request,
   ): Promise<string> {
-    const user = request.user!;
+    const user = request.user;
     const area = await this.areasService.getArea(id, user);
 
     if (area.attributes.userId.toString() !== user.id.toString())

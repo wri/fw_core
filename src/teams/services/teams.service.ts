@@ -28,7 +28,7 @@ export class TeamsService {
     const team = await new this.teamModel({ name }).save();
     const teamMember: CreateTeamMemberDto = {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      teamId: team.id!,
+      teamId: team.id,
       userId: userId,
       email: userEmail,
       role: EMemberRole.Administrator,

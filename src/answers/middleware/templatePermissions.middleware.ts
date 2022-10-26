@@ -30,7 +30,7 @@ export class TemplatePermissionsMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const user = req.user!;
+    const user = req.user;
     const params = req.params;
     // creates a filter to get the report if the user is allowed to see it
     // looks like a monitor can see reports made by their team manager(s)

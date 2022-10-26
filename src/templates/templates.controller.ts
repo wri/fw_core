@@ -44,7 +44,7 @@ export class TemplatesController {
   @Post()
   async create(@Req() request: Request): Promise<ITemplateResponse> {
     const body: CreateTemplateDto = request.body;
-    const user = request.user!;
+    const user = request.user;
 
     if (body.public && user.role !== 'ADMIN')
       throw new HttpException(
@@ -69,7 +69,7 @@ export class TemplatesController {
 
   @Get()
   async findAll(@Req() request: Request): Promise<ITemplateResponse> {
-    const user = request.user!;
+    const user = request.user;
     const filter = {
       $and: [
         {
@@ -109,7 +109,7 @@ export class TemplatesController {
   async getAllAnswers(@Req() request: Request): Promise<IAnswerReturn> {
     this.logger.log(`Obtaining all answers for user`);
 
-    const user = request.user!;
+    const user = request.user;
 
     // get teams the user is part of
     const userTeams = await this.teamsService.findAllByUserId(user.id);
@@ -139,7 +139,7 @@ export class TemplatesController {
     @Param('id') id: string,
     @Req() request: Request,
   ): Promise<ITemplateResponse> {
-    const user = request.user!;
+    const user = request.user;
 
     this.logger.log('Obtaining template', id);
     const template = await this.templatesService.findOne({
@@ -172,7 +172,7 @@ export class TemplatesController {
     @Body() body: UpdateTemplateDto,
     @Req() request: Request,
   ): Promise<ITemplateResponse> {
-    const user = request.user!;
+    const user = request.user;
 
     // create filter to grab existing template
     const filter: any = {
@@ -212,7 +212,7 @@ export class TemplatesController {
 
   @Delete('/allAnswers')
   async deleteAllAnswers(@Req() request: Request): Promise<void> {
-    const user = request.user!;
+    const user = request.user;
 
     await this.answersService.delete({ user: user.id });
   }
@@ -222,7 +222,7 @@ export class TemplatesController {
     @Param('id') id: string,
     @Req() request: Request,
   ): Promise<void> {
-    const user = request.user!;
+    const user = request.user;
 
     const answers = await this.answersService.findSome({ report: id });
     if (answers.length > 0 && user.role !== 'ADMIN') {

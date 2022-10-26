@@ -37,7 +37,7 @@ export class AssignmentsController {
     @Req() request: Request,
     @Body() createAssignmentDto: CreateAssignmentDto,
   ): Promise<IAssignmentResponse> {
-    const user = request.user!;
+    const user = request.user;
     const createdAssignment = await this.assignmentsService.create(
       createAssignmentDto,
       user,
@@ -55,7 +55,7 @@ export class AssignmentsController {
   async findUserAssignments(
     @Req() request: Request,
   ): Promise<IAssignmentResponse> {
-    const user = request.user!;
+    const user = request.user;
     const assignments = await this.assignmentsService.findUser(user.id);
 
     const assignmentResponse = await this.buildAssignmentResponse(
@@ -70,7 +70,7 @@ export class AssignmentsController {
   async findTeamAssignments(
     @Req() request: Request,
   ): Promise<IAssignmentResponse> {
-    const user = request.user!;
+    const user = request.user;
     const assignments = await this.assignmentsService.findTeams(user.id);
 
     const assignmentResponse = await this.buildAssignmentResponse(
@@ -86,7 +86,7 @@ export class AssignmentsController {
     @Req() request: Request,
     @Param('areaId') areaId: string,
   ): Promise<IAssignmentResponse> {
-    const user = request.user!;
+    const user = request.user;
 
     const area = await this.areasService.getAreaMICROSERVICE(areaId);
     if (!area)
@@ -109,7 +109,7 @@ export class AssignmentsController {
   async findOpenAssignments(
     @Req() request: Request,
   ): Promise<IAssignmentResponse> {
-    const user = request.user!;
+    const user = request.user;
     const assignments = await this.assignmentsService.findOpen(user.id);
 
     const assignmentResponse = await this.buildAssignmentResponse(
@@ -125,7 +125,7 @@ export class AssignmentsController {
     @Req() request: Request,
     @Param('areaId') areaId: string,
   ): Promise<IAssignmentResponse> {
-    const user = request.user!;
+    const user = request.user;
 
     const area = await this.areasService.getAreaMICROSERVICE(areaId);
     if (!area)
@@ -149,7 +149,7 @@ export class AssignmentsController {
     @Req() request: Request,
     @Param('id') id: string,
   ): Promise<IAssignmentResponse> {
-    const user = request.user!;
+    const user = request.user;
     const assignment = await this.assignmentsService.findOne({
       _id: new mongoose.Types.ObjectId(id),
     });
@@ -174,7 +174,7 @@ export class AssignmentsController {
     @Param('id') id: string,
     @Body() updateAssignmentDto: UpdateAssignmentDto,
   ): Promise<IAssignmentResponse> {
-    const user = request.user!;
+    const user = request.user;
     const filter = {
       createdBy: user.id,
       status: { $in: ['open', 'on hold'] },
@@ -205,7 +205,7 @@ export class AssignmentsController {
     @Req() request: Request,
     @Param('id') id: string,
   ): Promise<void> {
-    const user = request.user!;
+    const user = request.user;
     const filter = {
       createdBy: user.id,
       _id: new mongoose.Types.ObjectId(id),
