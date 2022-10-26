@@ -28,7 +28,7 @@ export class RoutesController {
     @Req() request: Request,
     @Body() routesToSync: CreateRouteDto[],
   ) {
-    let syncedRoutes = [];
+    const syncedRoutes = [];
 
     for await (const route of routesToSync) {
       const existingRoute = await this.routesService.findOne({
