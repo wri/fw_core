@@ -19,12 +19,12 @@ services:
       S3_ACCESS_KEY_ID: ${myS3Key}
       S3_SECRET_ACCESS_KEY: ${myS3Secret}
       S3_BUCKET: ${S3_BUCKET}
-      S3_FOLDER: £{S3_FOLDER}
+      S3_FOLDER: ${S3_FOLDER}
     volumes:
-      - ./app:/opt/gfw/app
+      - ./src:/usr/src/src
       - ./config:/opt/gfw/config
       - ./nodemon.json:/opt/gfw/nodemon.json
-      - ./:/usr/src/app
+      - ./:/usr/src
     depends_on:
       - mongo
       - redis

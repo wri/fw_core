@@ -1,6 +1,7 @@
 const whitelist = [
   'name',
   'priority',
+  'geostore',
   'monitors',
   'notes',
   'status',
