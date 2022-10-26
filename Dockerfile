@@ -13,11 +13,11 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-COPY package*.json /usr/src
-COPY ./app /usr/src/app
-COPY ./.babelrc /usr/src/.babelrc
-COPY .eslintrc /usr/src/.eslintrc
-COPY ./tsconfig.json /usr/src/tsconfig.json
+#COPY package*.json /usr/src
+#COPY ./app /usr/src/app
+#COPY ./.babelrc /usr/src/.babelrc
+#COPY .eslintrc /usr/src/.eslintrc
+#COPY ./tsconfig.json /usr/src/tsconfig.json
 
 # Creates a "dist" folder with the production build
 RUN npm run build
