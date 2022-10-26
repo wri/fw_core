@@ -45,7 +45,7 @@ export class AssignmentsController {
 
     const [assignmentResponse] = await this.buildAssignmentResponse(
       [createdAssignment],
-      request.user,
+      user,
     );
 
     return { data: serializeAssignments(assignmentResponse) };
@@ -60,7 +60,7 @@ export class AssignmentsController {
 
     const assignmentResponse = await this.buildAssignmentResponse(
       assignments,
-      request.user,
+      user,
     );
 
     return { data: serializeAssignments(assignmentResponse) };
@@ -75,7 +75,7 @@ export class AssignmentsController {
 
     const assignmentResponse = await this.buildAssignmentResponse(
       assignments,
-      request.user,
+      user,
     );
 
     return { data: serializeAssignments(assignmentResponse) };
@@ -99,7 +99,7 @@ export class AssignmentsController {
 
     const assignmentResponse = await this.buildAssignmentResponse(
       assignments,
-      request.user,
+      user,
     );
 
     return { data: serializeAssignments(assignmentResponse) };
@@ -114,7 +114,7 @@ export class AssignmentsController {
 
     const assignmentResponse = await this.buildAssignmentResponse(
       assignments,
-      request.user,
+      user,
     );
 
     return { data: serializeAssignments(assignmentResponse) };
@@ -138,7 +138,7 @@ export class AssignmentsController {
 
     const assignmentResponse = await this.buildAssignmentResponse(
       assignments,
-      request.user,
+      user,
     );
 
     return { data: serializeAssignments(assignmentResponse) };
@@ -149,6 +149,7 @@ export class AssignmentsController {
     @Req() request: Request,
     @Param('id') id: string,
   ): Promise<IAssignmentResponse> {
+    const user = request.user!;
     const assignment = await this.assignmentsService.findOne({
       _id: new mongoose.Types.ObjectId(id),
     });
@@ -161,7 +162,7 @@ export class AssignmentsController {
 
     const [assignmentResponse] = await this.buildAssignmentResponse(
       [assignment],
-      request.user,
+      user,
     );
 
     return { data: serializeAssignments(assignmentResponse) };
@@ -193,7 +194,7 @@ export class AssignmentsController {
 
     const [assignmentResponse] = await this.buildAssignmentResponse(
       [updatedAssignment],
-      request.user,
+      user,
     );
 
     return { data: serializeAssignments(assignmentResponse) };
@@ -227,7 +228,7 @@ export class AssignmentsController {
       assignments.map(async (assignment) => {
         assignment.geostore = await this.geostoreService.getGeostore(
           assignment.geostore,
-          user.token,
+          user.token ?? '',
         );
         return assignment;
       }),

@@ -73,7 +73,7 @@ export class AssignmentsService {
     const geostore: IGeostore = assignment.geostore
       ? await this.geostoreService.createGeostore(
           assignment.geostore,
-          user.token,
+          user.token ?? '',
         )
       : null;
 
