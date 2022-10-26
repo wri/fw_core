@@ -15,15 +15,21 @@ import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import { Request } from 'express';
 import mongoose from 'mongoose';
-import { IAssignmentResponse } from './models/assignment.schema';
+import {
+  AssignmentDocument,
+  IAssignmentResponse,
+} from './models/assignment.schema';
 import serializeAssignments from './serializers/assignments.serializer';
 import { AreasService } from '../areas/services/areas.service';
+import { IUser } from '../common/user.model';
+import { GeostoreService } from '../areas/services/geostore.service';
 
 @Controller('assignments')
 export class AssignmentsController {
   constructor(
     private readonly assignmentsService: AssignmentsService,
     private readonly areasService: AreasService,
+    private readonly geostoreService: GeostoreService,
   ) {}
 
   @Post()
@@ -36,11 +42,10 @@ export class AssignmentsController {
       request.user,
     );
 
-    const [assignmentResponse] =
-      await this.assignmentsService.buildAssignmentResponse(
-        [createdAssignment],
-        request.user,
-      );
+    const [assignmentResponse] = await this.buildAssignmentResponse(
+      [createdAssignment],
+      request.user,
+    );
 
     return { data: serializeAssignments(assignmentResponse) };
   }
@@ -52,11 +57,10 @@ export class AssignmentsController {
     const { user } = request;
     const assignments = await this.assignmentsService.findUser(user.id);
 
-    const assignmentResponse =
-      await this.assignmentsService.buildAssignmentResponse(
-        assignments,
-        request.user,
-      );
+    const assignmentResponse = await this.buildAssignmentResponse(
+      assignments,
+      request.user,
+    );
 
     return { data: serializeAssignments(assignmentResponse) };
   }
@@ -68,11 +72,10 @@ export class AssignmentsController {
     const { user } = request;
     const assignments = await this.assignmentsService.findTeams(user.id);
 
-    const assignmentResponse =
-      await this.assignmentsService.buildAssignmentResponse(
-        assignments,
-        request.user,
-      );
+    const assignmentResponse = await this.buildAssignmentResponse(
+      assignments,
+      request.user,
+    );
 
     return { data: serializeAssignments(assignmentResponse) };
   }
@@ -93,11 +96,10 @@ export class AssignmentsController {
       areaId,
     );
 
-    const assignmentResponse =
-      await this.assignmentsService.buildAssignmentResponse(
-        assignments,
-        request.user,
-      );
+    const assignmentResponse = await this.buildAssignmentResponse(
+      assignments,
+      request.user,
+    );
 
     return { data: serializeAssignments(assignmentResponse) };
   }
@@ -109,11 +111,10 @@ export class AssignmentsController {
     const { user } = request;
     const assignments = await this.assignmentsService.findOpen(user.id);
 
-    const assignmentResponse =
-      await this.assignmentsService.buildAssignmentResponse(
-        assignments,
-        request.user,
-      );
+    const assignmentResponse = await this.buildAssignmentResponse(
+      assignments,
+      request.user,
+    );
 
     return { data: serializeAssignments(assignmentResponse) };
   }
@@ -134,11 +135,10 @@ export class AssignmentsController {
       areaId,
     );
 
-    const assignmentResponse =
-      await this.assignmentsService.buildAssignmentResponse(
-        assignments,
-        request.user,
-      );
+    const assignmentResponse = await this.buildAssignmentResponse(
+      assignments,
+      request.user,
+    );
 
     return { data: serializeAssignments(assignmentResponse) };
   }
@@ -159,11 +159,10 @@ export class AssignmentsController {
     if (area) assignment.areaName = area.attributes.name;
     else assignment.areaName = null;
 
-    const [assignmentResponse] =
-      await this.assignmentsService.buildAssignmentResponse(
-        [assignment],
-        request.user,
-      );
+    const [assignmentResponse] = await this.buildAssignmentResponse(
+      [assignment],
+      request.user,
+    );
 
     return { data: serializeAssignments(assignmentResponse) };
   }
@@ -191,11 +190,10 @@ export class AssignmentsController {
       updateAssignmentDto,
     );
 
-    const [assignmentResponse] =
-      await this.assignmentsService.buildAssignmentResponse(
-        [updatedAssignment],
-        request.user,
-      );
+    const [assignmentResponse] = await this.buildAssignmentResponse(
+      [updatedAssignment],
+      request.user,
+    );
 
     return { data: serializeAssignments(assignmentResponse) };
   }
@@ -217,5 +215,22 @@ export class AssignmentsController {
       );
 
     return await this.assignmentsService.remove(id);
+  }
+
+  async buildAssignmentResponse(
+    assignments: AssignmentDocument[],
+    user: IUser,
+  ): Promise<AssignmentDocument[]> {
+    const assignmentsToReturn = Promise.all(
+      assignments.map(async (assignment) => {
+        assignment.geostore = await this.geostoreService.getGeostore(
+          assignment.geostore,
+          user.token,
+        );
+        return assignment;
+      }),
+    );
+
+    return assignmentsToReturn;
   }
 }

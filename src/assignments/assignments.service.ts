@@ -165,21 +165,4 @@ export class AssignmentsService {
     });
     return null;
   }
-
-  async buildAssignmentResponse(
-    assignments: AssignmentDocument[],
-    user: IUser,
-  ): Promise<AssignmentDocument[]> {
-    const assignmentsToReturn = Promise.all(
-      assignments.map(async (assignment) => {
-        assignment.geostore = await this.geostoreService.getGeostore(
-          assignment.geostore,
-          user.token,
-        );
-        return assignment;
-      }),
-    );
-
-    return assignmentsToReturn;
-  }
 }
