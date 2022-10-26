@@ -582,7 +582,6 @@ describe('Assignments', () => {
         .set('Authorization', 'USER')
         .expect(200);
 
-      console.log('*****', response.body.data[1].attributes.geostore);
 
       expect(response.body).toHaveProperty('data');
       expect(response.body.data.length).toBe(2);
