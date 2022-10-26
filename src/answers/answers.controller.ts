@@ -135,8 +135,8 @@ export class AnswersController {
           if (childResponse && childQuestion.type === 'blob') {
             // upload file
             childResponse = await this.s3Service.uploadFile(
-              response.path,
-              response.filename,
+              childResponse.path,
+              childResponse.filename,
             );
           }
           pushResponse(childQuestion, childResponse);
@@ -147,7 +147,7 @@ export class AnswersController {
     return { data: serializeAnswers(answerModel) };
   }
 
-  @Get('/area/:areaId')
+  @Get('/areas/:areaId')
   async getAreaAnswers(
     @Req() request: Request,
     @Param('areaId') areaId: string,
@@ -178,6 +178,24 @@ export class AnswersController {
     return {
       data: serializeAnswers(
         await this.answersService.getAllTemplateAnswers({ user, template }),
+      ),
+    };
+  }
+  
+  @Get('/exports/:id')
+  async findOneForExport(@Param('id') id: string, @Req() request: Request) {
+    const answer = await this.answersService.findOne({
+      _id: new mongoose.Types.ObjectId(id),
+    });
+    if (!answer)
+      throw new HttpException(
+        'No answer found with your permissions',
+        HttpStatus.NOT_FOUND,
+      );
+
+    return {
+      data: serializeAnswers(
+        await this.answersService.addUsernameToAnswer(answer),
       ),
     };
   }

@@ -2,7 +2,7 @@ services:
   develop:
     build: .
     ports:
-      - "4042:4042"
+      - '4042:4042'
     container_name: gfw
     environment:
       PORT: 4042
@@ -18,6 +18,8 @@ services:
       DB_DATABASE: gfw_db
       S3_ACCESS_KEY_ID: ${myS3Key}
       S3_SECRET_ACCESS_KEY: ${myS3Secret}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_FOLDER: £{S3_FOLDER}
     volumes:
       - ./app:/opt/gfw/app
       - ./config:/opt/gfw/config
@@ -34,7 +36,7 @@ services:
     image: mongo:3.6
     container_name: gfw-mongo-develop
     ports:
-      - "27028:27017"
+      - '27028:27017'
     environment:
       MONGO_INITDB_DATABASE: gfw_db
       MONGO_INITDB_ROOT_PASSWORD: password
@@ -49,7 +51,7 @@ services:
   redis:
     image: bitnami/redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     networks:
@@ -62,7 +64,7 @@ services:
       PORT: 0
       NODE_ENV: test
       LOGGER_LEVEL: debug
-      SUPPRESS_NO_CONFIG_WARNING: "true"
+      SUPPRESS_NO_CONFIG_WARNING: 'true'
       AUTH_URL: http://127.0.0.1:9000
       REDIS_URL: redis://redis:6379
       MONGODB_HOST: mongo
@@ -76,13 +78,14 @@ services:
       - ./config:/opt/gfw/config
       - ./nodemon.json:/opt/gfw/nodemon.json
       - ./jest.config.js:/opt/gfw/jest.config.js
+      - ./:/usr/src/app
     networks:
       - gfw-nest-network
     command: yarn test:watch
   docs:
     build: .
     ports:
-      - "40420:40420"
+      - '40420:40420'
     container_name: gfw-docs
     volumes:
       - ./docs:/opt/gfw/docs
