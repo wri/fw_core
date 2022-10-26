@@ -13,8 +13,8 @@ jobs:
       with:
         ref: ${{ github.head_ref }}
 
-    - name: Start containers
-      run: make up-and-build
+    - name: Install dependencies
+      run: npm install
 
     - name: Run eslint
       run : make lint
