@@ -21,10 +21,10 @@ services:
       S3_BUCKET: ${S3_BUCKET}
       S3_FOLDER: ${S3_FOLDER}
     volumes:
-      - ./app:/opt/gfw/app
+      - ./src:/usr/src/src
       - ./config:/opt/gfw/config
       - ./nodemon.json:/opt/gfw/nodemon.json
-      - ./:/usr/src/app
+      - ./:/usr/src
     depends_on:
       - mongo
       - redis

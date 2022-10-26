@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { CreateRouteDto } from './dto/create-route.dto';
-import { UpdateRouteDto } from './dto/update-route.dto';
 import { Request } from 'express';
 import serializeRoutes from './serializers/routes.serializer';
 import { TeamsService } from '../teams/services/teams.service';
@@ -29,7 +28,7 @@ export class RoutesController {
     @Req() request: Request,
     @Body() routesToSync: CreateRouteDto[],
   ) {
-    let syncedRoutes = [];
+    const syncedRoutes = [];
 
     for await (const route of routesToSync) {
       const existingRoute = await this.routesService.findOne({
