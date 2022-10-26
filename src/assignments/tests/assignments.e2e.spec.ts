@@ -832,7 +832,7 @@ describe('Assignments', () => {
       expect(updatedAssignment).toBeDefined();
       expect(updatedAssignment).toHaveProperty('name', 'different name');
       expect(updatedAssignment).toHaveProperty('monitors');
-      expect(updatedAssignment.monitors.length).toBe(2);
+      expect(updatedAssignment?.monitors.length).toBe(2);
     });
 
     it('should return the updated assignment', async () => {

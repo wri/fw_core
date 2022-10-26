@@ -40,7 +40,7 @@ export class AreasService {
     }
   }
 
-  async getAreaMICROSERVICE(areaId: string): Promise<IArea> {
+  async getAreaMICROSERVICE(areaId: string): Promise<IArea | null> {
     try {
       const baseURL = this.configService.get('areasApi.url');
       const url = `${baseURL}/v1/area/${areaId}`;

@@ -158,7 +158,7 @@ export class AssignmentsController {
       throw new HttpException('Assignment not found', HttpStatus.NOT_FOUND);
     // get area for area name
     const area = await this.areasService.getAreaMICROSERVICE(assignment.areaId);
-    assignment.areaName = area.attributes.name;
+    assignment.areaName = area?.attributes.name;
 
     const [assignmentResponse] = await this.buildAssignmentResponse(
       [assignment],
