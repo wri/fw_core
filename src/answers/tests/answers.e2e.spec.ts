@@ -914,7 +914,7 @@ describe('Answers', () => {
     });
   });
 
-  describe('GET /templates/:templateId/answers/area/:areaId', () => {
+  describe('GET /templates/:templateId/answers/areas/:areaId', () => {
     afterEach(async () => {
       await teamsDbConnection.collection('gfwteams').deleteMany({});
       await teamsDbConnection.collection('teamuserrelations').deleteMany({});
@@ -924,7 +924,7 @@ describe('Answers', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-        .get(`/templates/${2}/answers/area/${1}`)
+        .get(`/templates/${2}/answers/areas/${1}`)
         .expect(401);
     });
 
@@ -943,7 +943,7 @@ describe('Answers', () => {
       });
       const response = await request(app.getHttpServer())
         .get(
-          `/templates/${template.insertedId.toString()}/answers/area/${areaId.toString()}`,
+          `/templates/${template.insertedId.toString()}/answers/areas/${areaId.toString()}`,
         )
         .set('Authorization', 'USER')
         .expect(200);
@@ -971,7 +971,7 @@ describe('Answers', () => {
       });
       const response = await request(app.getHttpServer())
         .get(
-          `/templates/${template.insertedId.toString()}/answers/area/${areaId.toString()}`,
+          `/templates/${template.insertedId.toString()}/answers/areas/${areaId.toString()}`,
         )
         .set('Authorization', 'USER')
         .expect(200);
@@ -999,7 +999,7 @@ describe('Answers', () => {
       });
       const response = await request(app.getHttpServer())
         .get(
-          `/templates/${template.insertedId.toString()}/answers/area/${areaId.toString()}`,
+          `/templates/${template.insertedId.toString()}/answers/areas/${areaId.toString()}`,
         )
         .set('Authorization', 'USER')
         .expect(200);
@@ -1044,7 +1044,7 @@ describe('Answers', () => {
       });
       const response = await request(app.getHttpServer())
         .get(
-          `/templates/${template.insertedId.toString()}/answers/area/${areaId.toString()}`,
+          `/templates/${template.insertedId.toString()}/answers/areas/${areaId.toString()}`,
         )
         .set('Authorization', 'USER')
         .expect(200);

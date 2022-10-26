@@ -181,7 +181,7 @@ export class AnswersController {
       ),
     };
   }
-  
+
   @Get('/exports/:id')
   async findOneForExport(@Param('id') id: string, @Req() request: Request) {
     const answer = await this.answersService.findOne({
