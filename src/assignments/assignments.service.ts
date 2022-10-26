@@ -7,7 +7,9 @@ import { Model } from 'mongoose';
 import { TeamsService } from '../teams/services/teams.service';
 import mongoose from 'mongoose';
 import { AreasService } from '../areas/services/areas.service';
+import { GeostoreService } from '../areas/services/geostore.service';
 import { IUser } from 'src/common/user.model';
+import { IGeostore } from 'src/areas/models/area.entity';
 
 const allowedKeys = [
   'name',
@@ -26,6 +28,7 @@ export class AssignmentsService {
     private assignmentModel: Model<AssignmentDocument>,
     private readonly teamsService: TeamsService,
     private readonly areasService: AreasService,
+    private readonly geostoreService: GeostoreService,
   ) {}
 
   async create(
@@ -50,7 +53,7 @@ export class AssignmentsService {
       !(assignment.location.lat && assignment.location.lon)
     )
       throw new HttpException(
-        'location should be in the form {lat: number, lon: number}',
+        'location should be in the form {lat: number, lon: number, alertType: string}',
         HttpStatus.BAD_REQUEST,
       );
 
@@ -61,9 +64,18 @@ export class AssignmentsService {
           .join('')
       : 'null';
 
+    // create geostore
+    let geostore: IGeostore = null;
+    if (assignment.geostore)
+      geostore = await this.geostoreService.createGeostore(
+        assignment.geostore,
+        user.token,
+      );
+
     const newAssignment = {
       ...assignment,
       createdBy: user.id,
+      geostore: geostore.id ? geostore.id : null,
       name: `${userInitials}-${String(count + 1).padStart(4, '0')}`,
     };
 
@@ -152,5 +164,22 @@ export class AssignmentsService {
       _id: new mongoose.Types.ObjectId(id),
     });
     return null;
+  }
+
+  async buildAssignmentResponse(
+    assignments: AssignmentDocument[],
+    user: IUser,
+  ): Promise<AssignmentDocument[]> {
+    const assignmentsToReturn = Promise.all(
+      assignments.map(async (assignment) => {
+        assignment.geostore = await this.geostoreService.getGeostore(
+          assignment.geostore,
+          user.token,
+        );
+        return assignment;
+      }),
+    );
+
+    return assignmentsToReturn;
   }
 }

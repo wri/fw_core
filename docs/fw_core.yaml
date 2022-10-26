@@ -938,6 +938,8 @@ components:
               type: number
             lon:
               type: number
+            alertType:
+              type: string
         priority:
           type: number
         monitors:
@@ -968,6 +970,8 @@ components:
           type: string
         areaName:
           type: string
+        geostore:
+          $ref: '#/components/schemas/GeostoreModel'
       required:
         - name
         - priority
@@ -1821,6 +1825,8 @@ components:
                     type: number
                   lon:
                     type: number
+                  alertType:
+                    type: string
               priority:
                 type: number
               monitors:
@@ -1845,6 +1851,8 @@ components:
                 type: array
                 items:
                   type: string
+              geostore:
+                $ref: '#/components/schemas/GeojsonModel'
             required:
               - priority
               - monitors

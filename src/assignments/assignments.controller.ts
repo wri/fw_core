@@ -36,7 +36,13 @@ export class AssignmentsController {
       request.user,
     );
 
-    return { data: serializeAssignments(createdAssignment) };
+    const [assignmentResponse] =
+      await this.assignmentsService.buildAssignmentResponse(
+        [createdAssignment],
+        request.user,
+      );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Get('/user')
@@ -46,7 +52,13 @@ export class AssignmentsController {
     const { user } = request;
     const assignments = await this.assignmentsService.findUser(user.id);
 
-    return { data: serializeAssignments(assignments) };
+    const assignmentResponse =
+      await this.assignmentsService.buildAssignmentResponse(
+        assignments,
+        request.user,
+      );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Get('/teams')
@@ -56,7 +68,13 @@ export class AssignmentsController {
     const { user } = request;
     const assignments = await this.assignmentsService.findTeams(user.id);
 
-    return { data: serializeAssignments(assignments) };
+    const assignmentResponse =
+      await this.assignmentsService.buildAssignmentResponse(
+        assignments,
+        request.user,
+      );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Get('/allOpenUserForArea/:areaId')
@@ -75,7 +93,13 @@ export class AssignmentsController {
       areaId,
     );
 
-    return { data: serializeAssignments(assignments) };
+    const assignmentResponse =
+      await this.assignmentsService.buildAssignmentResponse(
+        assignments,
+        request.user,
+      );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Get('/open')
@@ -85,7 +109,13 @@ export class AssignmentsController {
     const { user } = request;
     const assignments = await this.assignmentsService.findOpen(user.id);
 
-    return { data: serializeAssignments(assignments) };
+    const assignmentResponse =
+      await this.assignmentsService.buildAssignmentResponse(
+        assignments,
+        request.user,
+      );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Get('/areas/:areaId')
@@ -104,11 +134,20 @@ export class AssignmentsController {
       areaId,
     );
 
-    return { data: serializeAssignments(assignments) };
+    const assignmentResponse =
+      await this.assignmentsService.buildAssignmentResponse(
+        assignments,
+        request.user,
+      );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Get('/:id')
-  async findOne(@Param('id') id: string): Promise<IAssignmentResponse> {
+  async findOne(
+    @Req() request: Request,
+    @Param('id') id: string,
+  ): Promise<IAssignmentResponse> {
     const assignment = await this.assignmentsService.findOne({
       _id: new mongoose.Types.ObjectId(id),
     });
@@ -120,7 +159,13 @@ export class AssignmentsController {
     if (area) assignment.areaName = area.attributes.name;
     else assignment.areaName = null;
 
-    return { data: serializeAssignments(assignment) };
+    const [assignmentResponse] =
+      await this.assignmentsService.buildAssignmentResponse(
+        [assignment],
+        request.user,
+      );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Patch('/:id')
@@ -146,7 +191,13 @@ export class AssignmentsController {
       updateAssignmentDto,
     );
 
-    return { data: serializeAssignments(updatedAssignment) };
+    const [assignmentResponse] =
+      await this.assignmentsService.buildAssignmentResponse(
+        [updatedAssignment],
+        request.user,
+      );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Delete('/:id')

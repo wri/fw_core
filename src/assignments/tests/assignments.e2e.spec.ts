@@ -51,6 +51,10 @@ describe('Assignments', () => {
     uploadFile: (file, name) =>
       `https://s3.amazonaws.com/bucket/folder/uuid.ext`,
   };
+  const geostoreService = {
+    getGeostore: (id, token) => assignments.geostore,
+    createGeostore: (id, token) => assignments.geostore,
+  };
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -97,6 +101,8 @@ describe('Assignments', () => {
       .useValue(areaService)
       .overrideProvider(S3Service)
       .useValue(s3Service)
+      .overrideProvider(GeostoreService)
+      .useValue(geostoreService)
       .compile();
 
     app = moduleRef.createNestApplication();
@@ -220,6 +226,24 @@ describe('Assignments', () => {
         .set('Authorization', 'MANAGER')
         .expect(404);
     });
+    it('should contain geostore information', async () => {
+      const response = await request(app.getHttpServer())
+        .post(`/assignments`)
+        .send({
+          ...assignments.defaultAssignment,
+          monitors: [ROLES.USER.id],
+        })
+        .set('Authorization', 'USER')
+        .expect(201);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('attributes');
+      expect(response.body.data.attributes).toHaveProperty('geostore');
+      expect(response.body.data.attributes.geostore).toHaveProperty(
+        'id',
+        assignments.geostore.id,
+      );
+    });
   });
 
   describe('GET /assignments/user', () => {
@@ -242,6 +266,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           monitors: [ROLES.USER.id],
           createdBy: ROLES.ADMIN.id,
@@ -251,6 +276,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'some other name',
           monitors: [ROLES.MANAGER.id, ROLES.USER.id],
           createdBy: ROLES.ADMIN.id,
@@ -258,6 +284,7 @@ describe('Assignments', () => {
 
       await formsDbConnection.collection('assignments').insertOne({
         ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
         name: 'not visible',
         monitors: [ROLES.MANAGER.id],
         createdBy: ROLES.ADMIN.id,
@@ -276,9 +303,19 @@ describe('Assignments', () => {
       );
       expect(response.body.data[0]).toHaveProperty('attributes');
       expect(response.body.data[0].attributes).toHaveProperty('name', 'name');
+      expect(response.body.data[0].attributes).toHaveProperty('geostore');
+      expect(response.body.data[0].attributes.geostore).toHaveProperty(
+        'id',
+        assignments.geostore.id,
+      );
       expect(response.body.data[1]).toHaveProperty(
         'id',
         assignment2.insertedId.toString(),
+      );
+      expect(response.body.data[1].attributes).toHaveProperty('geostore');
+      expect(response.body.data[1].attributes.geostore).toHaveProperty(
+        'id',
+        assignments.geostore.id,
       );
     });
   });
@@ -327,6 +364,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           monitors: [],
           teamIds: [team.insertedId.toString()],
@@ -336,6 +374,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'some other name',
           monitors: [],
           teamIds: [team.insertedId.toString(), team2.insertedId.toString()],
@@ -344,6 +383,7 @@ describe('Assignments', () => {
 
       await formsDbConnection.collection('assignments').insertOne({
         ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
         name: 'not visible',
         monitors: [],
         teamIds: [team2.insertedId.toString()],
@@ -366,6 +406,11 @@ describe('Assignments', () => {
       expect(response.body.data[1]).toHaveProperty(
         'id',
         assignment2.insertedId.toString(),
+      );
+      expect(response.body.data[1].attributes).toHaveProperty('geostore');
+      expect(response.body.data[1].attributes.geostore).toHaveProperty(
+        'id',
+        assignments.geostore.id,
       );
     });
   });
@@ -390,6 +435,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           status: 'open',
           monitors: [ROLES.USER.id],
@@ -400,6 +446,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'some other name',
           status: 'on hold',
           monitors: [ROLES.USER.id],
@@ -410,6 +457,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'some other name',
           status: 'open',
           monitors: [ROLES.MANAGER.id],
@@ -420,6 +468,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'some other name',
           status: 'completed',
           monitors: [ROLES.USER.id],
@@ -440,6 +489,11 @@ describe('Assignments', () => {
       expect(response.body.data[1]).toHaveProperty(
         'id',
         assignment2.insertedId.toString(),
+      );
+      expect(response.body.data[1].attributes).toHaveProperty('geostore');
+      expect(response.body.data[1].attributes.geostore).toHaveProperty(
+        'id',
+        assignments.geostore.id,
       );
     });
   });
@@ -485,6 +539,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           areaId: areaConstants.testArea.id,
           monitors: [],
@@ -495,6 +550,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'some other name',
           areaId: areaConstants.testArea.id,
           monitors: [],
@@ -504,6 +560,7 @@ describe('Assignments', () => {
 
       await formsDbConnection.collection('assignments').insertOne({
         ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
         name: 'not visible',
         monitors: [],
         areaId: areaConstants.testTeamArea.id,
@@ -512,6 +569,7 @@ describe('Assignments', () => {
       });
       await formsDbConnection.collection('assignments').insertOne({
         ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
         name: 'not visible',
         monitors: [],
         areaId: areaConstants.testArea.id,
@@ -524,6 +582,8 @@ describe('Assignments', () => {
         .set('Authorization', 'USER')
         .expect(200);
 
+      console.log('*****', response.body.data[1].attributes.geostore);
+
       expect(response.body).toHaveProperty('data');
       expect(response.body.data.length).toBe(2);
       expect(response.body.data[0]).toHaveProperty(
@@ -535,6 +595,11 @@ describe('Assignments', () => {
       expect(response.body.data[1]).toHaveProperty(
         'id',
         assignment2.insertedId.toString(),
+      );
+      expect(response.body.data[1].attributes).toHaveProperty('geostore');
+      expect(response.body.data[1].attributes.geostore).toHaveProperty(
+        'id',
+        assignments.geostore.id,
       );
     });
   });
@@ -566,6 +631,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           status: 'open',
           areaId: areaConstants.testArea.id,
@@ -577,6 +643,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'some other name',
           status: 'on hold',
           areaId: areaConstants.testArea.id,
@@ -586,6 +653,7 @@ describe('Assignments', () => {
         });
       await formsDbConnection.collection('assignments').insertOne({
         ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
         name: 'some other name',
         status: 'completed',
         areaId: areaConstants.testArea.id,
@@ -595,6 +663,7 @@ describe('Assignments', () => {
       });
       await formsDbConnection.collection('assignments').insertOne({
         ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
         name: 'not visible',
         monitors: [],
         areaId: areaConstants.testTeamArea.id,
@@ -603,6 +672,7 @@ describe('Assignments', () => {
       });
       await formsDbConnection.collection('assignments').insertOne({
         ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
         name: 'not visible',
         monitors: [],
         areaId: areaConstants.testTeamArea.id,
@@ -624,6 +694,11 @@ describe('Assignments', () => {
       expect(response.body.data[1]).toHaveProperty(
         'id',
         assignment2.insertedId.toString(),
+      );
+      expect(response.body.data[1].attributes).toHaveProperty('geostore');
+      expect(response.body.data[1].attributes.geostore).toHaveProperty(
+        'id',
+        assignments.geostore.id,
       );
     });
   });
@@ -648,6 +723,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           monitors: [ROLES.USER.id],
           createdBy: ROLES.ADMIN.id,
@@ -663,6 +739,11 @@ describe('Assignments', () => {
         'id',
         assignment.insertedId.toString(),
       );
+      expect(response.body.data.attributes).toHaveProperty('geostore');
+      expect(response.body.data.attributes.geostore).toHaveProperty(
+        'id',
+        assignments.geostore.id,
+      );
     });
 
     it('should include the area name', async () => {
@@ -670,6 +751,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           monitors: [ROLES.USER.id],
           createdBy: ROLES.ADMIN.id,
@@ -693,6 +775,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           areaId: new mongoose.Types.ObjectId(),
           monitors: [ROLES.USER.id],
@@ -730,6 +813,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           monitors: [ROLES.USER.id],
           createdBy: ROLES.ADMIN.id,
@@ -758,6 +842,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           monitors: [ROLES.USER.id],
           createdBy: ROLES.ADMIN.id,
@@ -784,6 +869,11 @@ describe('Assignments', () => {
       );
       expect(response.body.data.attributes).toHaveProperty('monitors');
       expect(response.body.data.attributes.monitors.length).toBe(2);
+      expect(response.body.data.attributes).toHaveProperty('geostore');
+      expect(response.body.data.attributes.geostore).toHaveProperty(
+        'id',
+        assignments.geostore.id,
+      );
     });
 
     it('shouldnt update disallowed fields', async () => {
@@ -791,6 +881,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           monitors: [ROLES.USER.id],
           createdBy: ROLES.ADMIN.id,
@@ -831,6 +922,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           monitors: [ROLES.USER.id],
           createdBy: ROLES.ADMIN.id,
@@ -851,6 +943,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           status: 'completed',
           monitors: [ROLES.USER.id],
@@ -888,6 +981,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           monitors: [ROLES.USER.id],
           createdBy: ROLES.ADMIN.id,
@@ -909,6 +1003,7 @@ describe('Assignments', () => {
         .collection('assignments')
         .insertOne({
           ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
           name: 'name',
           monitors: [ROLES.USER.id],
           createdBy: ROLES.ADMIN.id,
