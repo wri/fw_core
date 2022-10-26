@@ -15,15 +15,21 @@ import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import { Request } from 'express';
 import mongoose from 'mongoose';
-import { IAssignmentResponse } from './models/assignment.schema';
+import {
+  AssignmentDocument,
+  IAssignmentResponse,
+} from './models/assignment.schema';
 import serializeAssignments from './serializers/assignments.serializer';
 import { AreasService } from '../areas/services/areas.service';
+import { IUser } from '../common/user.model';
+import { GeostoreService } from '../areas/services/geostore.service';
 
 @Controller('assignments')
 export class AssignmentsController {
   constructor(
     private readonly assignmentsService: AssignmentsService,
     private readonly areasService: AreasService,
+    private readonly geostoreService: GeostoreService,
   ) {}
 
   @Post()
@@ -37,7 +43,12 @@ export class AssignmentsController {
       user,
     );
 
-    return { data: serializeAssignments(createdAssignment) };
+    const [assignmentResponse] = await this.buildAssignmentResponse(
+      [createdAssignment],
+      request.user,
+    );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Get('/user')
@@ -47,7 +58,12 @@ export class AssignmentsController {
     const user = request.user!;
     const assignments = await this.assignmentsService.findUser(user.id);
 
-    return { data: serializeAssignments(assignments) };
+    const assignmentResponse = await this.buildAssignmentResponse(
+      assignments,
+      request.user,
+    );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Get('/teams')
@@ -57,7 +73,12 @@ export class AssignmentsController {
     const user = request.user!;
     const assignments = await this.assignmentsService.findTeams(user.id);
 
-    return { data: serializeAssignments(assignments) };
+    const assignmentResponse = await this.buildAssignmentResponse(
+      assignments,
+      request.user,
+    );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Get('/allOpenUserForArea/:areaId')
@@ -76,7 +97,12 @@ export class AssignmentsController {
       areaId,
     );
 
-    return { data: serializeAssignments(assignments) };
+    const assignmentResponse = await this.buildAssignmentResponse(
+      assignments,
+      request.user,
+    );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Get('/open')
@@ -86,7 +112,12 @@ export class AssignmentsController {
     const user = request.user!;
     const assignments = await this.assignmentsService.findOpen(user.id);
 
-    return { data: serializeAssignments(assignments) };
+    const assignmentResponse = await this.buildAssignmentResponse(
+      assignments,
+      request.user,
+    );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Get('/areas/:areaId')
@@ -105,11 +136,19 @@ export class AssignmentsController {
       areaId,
     );
 
-    return { data: serializeAssignments(assignments) };
+    const assignmentResponse = await this.buildAssignmentResponse(
+      assignments,
+      request.user,
+    );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Get('/:id')
-  async findOne(@Param('id') id: string): Promise<IAssignmentResponse> {
+  async findOne(
+    @Req() request: Request,
+    @Param('id') id: string,
+  ): Promise<IAssignmentResponse> {
     const assignment = await this.assignmentsService.findOne({
       _id: new mongoose.Types.ObjectId(id),
     });
@@ -120,7 +159,12 @@ export class AssignmentsController {
     const area = await this.areasService.getAreaMICROSERVICE(assignment.areaId);
     assignment.areaName = area.attributes.name;
 
-    return { data: serializeAssignments(assignment) };
+    const [assignmentResponse] = await this.buildAssignmentResponse(
+      [assignment],
+      request.user,
+    );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Patch('/:id')
@@ -147,7 +191,12 @@ export class AssignmentsController {
       updateAssignmentDto,
     );
 
-    return { data: serializeAssignments(updatedAssignment) };
+    const [assignmentResponse] = await this.buildAssignmentResponse(
+      [updatedAssignment],
+      request.user,
+    );
+
+    return { data: serializeAssignments(assignmentResponse) };
   }
 
   @Delete('/:id')
@@ -168,5 +217,22 @@ export class AssignmentsController {
       );
 
     return await this.assignmentsService.remove(id);
+  }
+
+  async buildAssignmentResponse(
+    assignments: AssignmentDocument[],
+    user: IUser,
+  ): Promise<AssignmentDocument[]> {
+    const assignmentsToReturn = Promise.all(
+      assignments.map(async (assignment) => {
+        assignment.geostore = await this.geostoreService.getGeostore(
+          assignment.geostore,
+          user.token,
+        );
+        return assignment;
+      }),
+    );
+
+    return assignmentsToReturn;
   }
 }
