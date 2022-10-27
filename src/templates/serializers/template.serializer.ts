@@ -8,6 +8,8 @@ const whitelist = [
   'createdAt',
   'public',
   'status',
+  'editGroupId',
+  'isLatest',
 ];
 
 const serializeResource = (data) => {

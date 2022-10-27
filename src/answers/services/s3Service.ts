@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import AWS from 'aws-sdk';
 import fs from 'fs';
@@ -6,10 +6,10 @@ import { v4 } from 'uuid';
 
 @Injectable()
 export class S3Service {
-  private logger = new Logger(S3Service.name);
   constructor(private readonly configService: ConfigService) {}
 
-  getExtension(name: string) {
+  // eslint-disable-next-line class-methods-use-this
+  getExtension(name) {
     const parts = name.split('.');
     return parts[parts.length - 1];
   }
