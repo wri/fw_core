@@ -587,7 +587,7 @@ describe('Routes', () => {
         ...routeConstants.defaultRoute,
         routeId: 'cea34015-bfaf-46c2-a660-db1e9819b515',
         teamId: team.insertedId.toString(),
-        areaId,
+        areaId: areaId.toString(),
         createdBy: ROLES.ADMIN.id,
         active: true,
       });
@@ -595,7 +595,7 @@ describe('Routes', () => {
       const area = await formsDbConnection.collection('routes').insertOne({
         ...routeConstants.defaultRoute,
         routeId: 'cea34015-bfaf-46c2-a660-db1e9819b516',
-        areaId,
+        areaId: areaId.toString(),
         teamId: new mongoose.Types.ObjectId(),
         createdBy: ROLES.ADMIN.id,
         active: true,
@@ -605,7 +605,7 @@ describe('Routes', () => {
         ...routeConstants.defaultRoute,
         routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
         teamId: new mongoose.Types.ObjectId(),
-        areaId,
+        areaId: areaId.toString(),
         createdBy: ROLES.USER.id,
         active: true,
       });

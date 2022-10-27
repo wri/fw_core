@@ -16,6 +16,7 @@ import { Request } from 'express';
 import serializeRoutes from './serializers/routes.serializer';
 import { TeamsService } from '../teams/services/teams.service';
 import { RouteDocument } from './models/route.schema';
+import mongoose from 'mongoose';
 
 @Controller('routes')
 export class RoutesController {
@@ -52,16 +53,15 @@ export class RoutesController {
   async findAllUserAndTeamArea(@Req() request: Request, @Param() params) {
     const { teamId, areaId } = params;
     // active routes created by the user or with the team and area ids
-    const filter = {
-      $AND: [
+    const filter: mongoose.FilterQuery<any> = {
+      $and: [
         {
-          $OR: [{ teamId: teamId }, { createdBy: request.user.id }],
+          $or: [{ teamId: teamId }, { createdBy: request.user.id }],
         },
         { areaId: areaId },
         { active: true },
       ],
     };
-    console.log(filter, filter.$AND, filter.$AND[0], filter.$AND[0].$OR)
     return { data: serializeRoutes(await this.routesService.findAll(filter)) };
   }
 
