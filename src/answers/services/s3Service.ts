@@ -14,7 +14,7 @@ export class S3Service {
     return parts[parts.length - 1];
   }
 
-  async uploadFile(filePath: string, name: string) {
+  async uploadFile(filePath: string, name: string): Promise<string> {
     AWS.config.update({
       accessKeyId: this.configService.get('s3.accessKeyId'),
       secretAccessKey: this.configService.get('s3.secretAccessKey'),

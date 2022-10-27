@@ -10,4 +10,6 @@ export class CreateAnswerDto {
   layer?: string;
   date?: string;
   teamId?: string;
+  assignmentId?: string;
+  [questionName: string]: string | number;
 }
