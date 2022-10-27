@@ -8,10 +8,10 @@ import {
   Delete,
   Logger,
   Req,
-  HttpCode,
   HttpStatus,
   HttpException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { TemplatesService } from './templates.service';
 import { CreateTemplateDto } from './dto/create-template.dto';
@@ -30,6 +30,7 @@ import { TeamsService } from '../teams/services/teams.service';
 import serializeAnswers from '../answers/serializers/answers.serializer';
 import { TemplateAreaRelationService } from '../areas/services/templateAreaRelation.service';
 import mongoose from 'mongoose';
+import { CreateTemplateInput } from './input/create-template.input';
 
 @Controller('templates')
 export class TemplatesController {
@@ -43,28 +44,67 @@ export class TemplatesController {
 
   @Post()
   async create(@Req() request: Request): Promise<ITemplateResponse> {
-    const body: CreateTemplateDto = request.body;
-    const user = request.user;
-
+    const { body, user }: { body: CreateTemplateInput; user: IUser } = request;
     if (body.public && user.role !== 'ADMIN')
       throw new HttpException(
         'You must be an administrator to create a public template',
         HttpStatus.FORBIDDEN,
       );
 
-    const template = {
+    const template: CreateTemplateDto = {
       name: body.name,
-      user: user.id,
+      user: new mongoose.Types.ObjectId(user.id),
       languages: body.languages,
       defaultLanguage: body.defaultLanguage,
       questions: body.questions,
-      public: body.public,
+      public: body.public ?? false,
       status: body.status,
+      editGroupId: new mongoose.Types.ObjectId(),
+      isLatest: true,
     };
 
     const savedTemplate = await this.templatesService.create(template);
 
     return { data: serializeTemplate(savedTemplate) };
+  }
+
+  @Get('/latest')
+  async findAllLatestVersionsByUser(
+    @Req() request: Request,
+  ): Promise<ITemplateResponse> {
+    const user = request.user as IUser;
+
+    this.logger.log(
+      `Obtaining the latest version of all reports owned by user ${user.id}`,
+    );
+
+    const templates = await this.templatesService.findAllByUserId(user.id, {
+      latest: true,
+    });
+
+    return { data: serializeTemplate(templates) };
+  }
+
+  @Get('/versions/:id')
+  async findAllVersionsByUser(@Req() request: Request) {
+    const user = request.user as IUser;
+    const editGroupId = request.params.id;
+    if (!editGroupId) {
+      throw new BadRequestException('The id path parameter must be provided');
+    }
+
+    this.logger.log(
+      `Obtaining all template versions of ${editGroupId} for user ${user.id}`,
+    );
+
+    const templates = await this.templatesService.findAllByEditGroupId(
+      editGroupId,
+      {
+        user: user.id,
+      },
+    );
+
+    return { data: serializeTemplate(templates) };
   }
 
   @Get()

@@ -13,7 +13,7 @@ jobs:
       with:
         ref: ${{ github.head_ref }}
 
-    - name: Install dependencies
+    - name: Install packages
       run: npm install
 
     - name: Run eslint

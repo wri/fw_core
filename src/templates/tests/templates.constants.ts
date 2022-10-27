@@ -23,6 +23,8 @@ export default {
     languages: ['en'],
     status: 'published',
     defaultLanguage: 'en',
+    editGroupId: new mongoose.Types.ObjectId(),
+    isLatest: true,
     public: false,
   },
   managerTemplate: {
@@ -46,6 +48,8 @@ export default {
     languages: ['en'],
     status: 'published',
     defaultLanguage: 'en',
+    editGroupId: new mongoose.Types.ObjectId(),
+    isLatest: true,
     public: false,
   },
   defaultTemplate: {
@@ -70,5 +74,7 @@ export default {
     status: 'published',
     defaultLanguage: 'en',
     public: true,
+    editGroupId: new mongoose.Types.ObjectId(),
+    isLatest: true,
   },
 };
