@@ -48,6 +48,23 @@ export class RoutesController {
     return { data: serializeRoutes(syncedRoutes) };
   }
 
+  @Get('/team/:teamId/area/:areaId')
+  async findAllUserAndTeamArea(@Req() request: Request, @Param() params) {
+    const { teamId, areaId } = params;
+    // active routes created by the user or with the team and area ids
+    const filter = {
+      $AND: [
+        {
+          $OR: [{ teamId: teamId }, { createdBy: request.user.id }],
+        },
+        { areaId: areaId },
+        { active: true },
+      ],
+    };
+    console.log(filter, filter.$AND, filter.$AND[0], filter.$AND[0].$OR)
+    return { data: serializeRoutes(await this.routesService.findAll(filter)) };
+  }
+
   @Get('/user')
   async findAllUser(@Req() request: Request) {
     // get all active routes
@@ -71,23 +88,6 @@ export class RoutesController {
 
     const routes = await this.routesService.findAll(filter);
     return { data: serializeRoutes(routes) };
-  }
-
-  @Get('/team/:teamId/area/:areaId')
-  async findAllUserAndTeamArea(@Req() request: Request, @Param() params) {
-    const { teamId, areaId } = params;
-    // active routes created by the user or with the team and area ids
-    const filter = {
-      $AND: [
-        {
-          $OR: [
-            { $AND: [{ teamId }, { areaId }] },
-            { createdBy: request.user.id },
-          ],
-        },
-        { active: true },
-      ],
-    };
   }
 
   @Get('/:id')
