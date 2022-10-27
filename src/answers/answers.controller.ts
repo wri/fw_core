@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Req,
@@ -12,10 +11,10 @@ import {
   UseInterceptors,
   UploadedFiles,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AnswersService } from './services/answers.service';
 import { CreateAnswerDto } from './dto/create-answer.dto';
-import { UpdateAnswerDto } from './dto/update-answer.dto';
 import { Request } from 'express';
 import serializeAnswers from './serializers/answers.serializer';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
@@ -26,6 +25,7 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { S3Service } from './services/s3Service';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
 import { ITemplateQuestion } from 'src/templates/models/template.schema';
+import { AssignmentsService } from 'src/assignments/assignments.service';
 
 @Controller('templates/:templateId/answers')
 export class AnswersController {
@@ -34,6 +34,7 @@ export class AnswersController {
     private readonly teamMembersService: TeamMembersService,
     private readonly teamAreaRelationService: TeamAreaRelationService,
     private readonly s3Service: S3Service,
+    private readonly assignmentService: AssignmentsService,
   ) {}
 
   @Post()
@@ -127,7 +128,26 @@ export class AnswersController {
       }
     }
 
+    const assignmentId = fields.assignmentId;
+    if (!assignmentId) {
+      const answerModel = await this.answersService.create(answer);
+      return { data: serializeAnswers(answerModel) };
+    }
+
+    const assignment = this.assignmentService.findOne({
+      _id: assignmentId,
+      $or: [{ monitors: user.id }, { createdBy: user.id }],
+    });
+
+    if (!assignment)
+      throw new UnauthorizedException(
+        `User is not authorized to submit assignment ${assignmentId}`,
+      );
+
+    answer.assignmentId = new mongoose.Types.ObjectId(assignmentId);
     const answerModel = await this.answersService.create(answer);
+    await this.assignmentService.update(assignmentId, { status: 'completed' });
+
     return { data: serializeAnswers(answerModel) };
   }
 

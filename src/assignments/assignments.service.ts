@@ -83,7 +83,9 @@ export class AssignmentsService {
     return await assignmentToSave.save();
   }
 
-  async findOne(filter): Promise<AssignmentDocument> {
+  async findOne(
+    filter: mongoose.FilterQuery<AssignmentDocument>,
+  ): Promise<AssignmentDocument | null> {
     return await this.assignmentModel.findOne(filter);
   }
 
