@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { IGeostore } from 'src/areas/models/area.entity';
+import { AssignmentStatus } from '../assignment-status.enum';
 
 export interface IAssignment {
   name: string;
@@ -42,8 +43,8 @@ export class Assignment {
   @Prop({ required: true })
   notes: string;
 
-  @Prop({ required: true })
-  status: string;
+  @Prop({ type: String, enum: AssignmentStatus, required: true })
+  status: AssignmentStatus;
 
   @Prop({ required: false })
   alert: string;

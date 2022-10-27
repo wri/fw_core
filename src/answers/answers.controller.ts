@@ -24,8 +24,9 @@ import { IAnswer } from './models/answer.model';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { S3Service } from './services/s3Service';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
-import { ITemplateQuestion } from 'src/templates/models/template.schema';
-import { AssignmentsService } from 'src/assignments/assignments.service';
+import { AssignmentStatus } from '../assignments/assignment-status.enum';
+import { AssignmentsService } from '../assignments/assignments.service';
+import { ITemplateQuestion } from '../templates/models/template.schema';
 
 @Controller('templates/:templateId/answers')
 export class AnswersController {
@@ -146,7 +147,9 @@ export class AnswersController {
 
     answer.assignmentId = new mongoose.Types.ObjectId(assignmentId);
     const answerModel = await this.answersService.create(answer);
-    await this.assignmentService.update(assignmentId, { status: 'completed' });
+    await this.assignmentService.update(assignmentId, {
+      status: AssignmentStatus.COMPLETED,
+    });
 
     return { data: serializeAnswers(answerModel) };
   }
