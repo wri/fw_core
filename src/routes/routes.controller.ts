@@ -61,7 +61,7 @@ export class RoutesController {
         { active: true },
       ],
     };
-    console.log(filter, filter.$AND, filter.$AND[0], filter.$AND[0].$OR)
+    console.log(filter, filter.$AND, filter.$AND[0], filter.$AND[0].$OR);
     return { data: serializeRoutes(await this.routesService.findAll(filter)) };
   }
 
