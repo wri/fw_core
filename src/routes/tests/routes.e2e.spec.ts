@@ -63,7 +63,6 @@ describe('Routes', () => {
         TeamAreaRelationService,
         AnswersService,
         AreasService,
-        GeostoreService,
         CoverageService,
         DatasetService,
         S3Service,
@@ -552,6 +551,91 @@ describe('Routes', () => {
         .delete(`/routes/${route1.toString()}`)
         .set('Authorization', 'MANAGER')
         .expect(404);
+    });
+  });
+
+  describe('GET /routes/team/:teamId/area/:areaId', () => {
+    afterEach(async () => {
+      await teamsDbConnection.collection('gfwteams').deleteMany({});
+      await teamsDbConnection.collection('teamuserrelations').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
+      await formsDbConnection.collection('answers').deleteMany({});
+      await formsDbConnection.collection('assignments').deleteMany({});
+      await formsDbConnection.collection('routes').deleteMany({});
+    });
+
+    it('should return a 401 without authorisation', async () => {
+      return await request(app.getHttpServer())
+        .delete(`/routes/team/${1}/area/${1}`)
+        .expect(401);
+    });
+
+    it('should return an array of active routes the user has created and team routes for the given team and area id', async () => {
+      const areaId = new mongoose.Types.ObjectId();
+      const team = await teamsDbConnection
+        .collection('gfwteams')
+        .insertOne({ name: 'Test' });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Confirmed,
+        role: EMemberRole.Monitor,
+      });
+
+      const areaTeam = await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b515',
+        teamId: team.insertedId.toString(),
+        areaId: areaId.toString(),
+        createdBy: ROLES.ADMIN.id,
+        active: true,
+      });
+
+      const area = await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b516',
+        areaId: areaId.toString(),
+        teamId: new mongoose.Types.ObjectId(),
+        createdBy: ROLES.ADMIN.id,
+        active: true,
+      });
+
+      const areaUser = await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
+        teamId: new mongoose.Types.ObjectId(),
+        areaId: areaId.toString(),
+        createdBy: ROLES.USER.id,
+        active: true,
+      });
+
+      const userTeam = await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
+        teamId: team.insertedId.toString(),
+        createdBy: ROLES.USER.id,
+        active: false,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(
+          `/routes/team/${team.insertedId.toString()}/area/${areaId.toString()}`,
+        )
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      console.log(response.body.data);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data.length).toBe(2);
+      expect(response.body.data[0]).toHaveProperty(
+        'id',
+        areaTeam.insertedId.toString(),
+      );
+      expect(response.body.data[1]).toHaveProperty(
+        'id',
+        areaUser.insertedId.toString(),
+      );
     });
   });
 

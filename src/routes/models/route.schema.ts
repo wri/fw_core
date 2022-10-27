@@ -22,11 +22,11 @@ export interface IRoute {
   startDate: number;
   endDate: number;
   geostoreId: string;
-  routeId: string;
+  routeId: string | undefined;
   locations: ILocation[];
   name: string;
   createdBy: string;
-  teamId: string;
+  teamId?: string;
   active: boolean;
 }
 
@@ -59,7 +59,7 @@ export class Route {
   @Prop({ required: true })
   routeId: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   teamId: string;
 
   @Prop({ required: true })

@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Body,
+  Patch,
   Param,
   Delete,
   Req,
@@ -15,6 +16,7 @@ import { Request } from 'express';
 import serializeRoutes from './serializers/routes.serializer';
 import { TeamsService } from '../teams/services/teams.service';
 import { RouteDocument } from './models/route.schema';
+import mongoose from 'mongoose';
 
 @Controller('routes')
 export class RoutesController {
@@ -36,8 +38,7 @@ export class RoutesController {
       });
       if (existingRoute || !route.id) continue;
 
-      const user = request.user;
-      route.createdBy = user.id;
+      route.createdBy = request.user.id;
       route.routeId = route.id;
       route.active = true;
       delete route.id;
@@ -48,12 +49,27 @@ export class RoutesController {
     return { data: serializeRoutes(syncedRoutes) };
   }
 
+  @Get('/team/:teamId/area/:areaId')
+  async findAllUserAndTeamArea(@Req() request: Request, @Param() params) {
+    const { teamId, areaId } = params;
+    // active routes created by the user or with the team and area ids
+    const filter: mongoose.FilterQuery<any> = {
+      $and: [
+        {
+          $or: [{ teamId: teamId }, { createdBy: request.user.id }],
+        },
+        { areaId: areaId },
+        { active: true },
+      ],
+    };
+    return { data: serializeRoutes(await this.routesService.findAll(filter)) };
+  }
+
   @Get('/user')
   async findAllUser(@Req() request: Request) {
-    const user = request.user;
     // get all active routes
     const filter = {
-      createdBy: user.id,
+      createdBy: request.user.id,
       active: true,
     };
     const routes = await this.routesService.findAll(filter);
@@ -62,9 +78,8 @@ export class RoutesController {
 
   @Get('/teams')
   async findAllTeams(@Req() request: Request) {
-    const user = request.user;
     // find all user teams
-    const teams = await this.teamsService.findAllByUserId(user.id);
+    const teams = await this.teamsService.findAllByUserId(request.user.id);
 
     const filter = {
       teamId: { $in: teams.map((team) => team.id) },
@@ -94,10 +109,15 @@ export class RoutesController {
     const route = await this.routesService.findOneById(id);
     if (!route)
       throw new HttpException("This route doesn't exist", HttpStatus.NOT_FOUND);
-    const user = request.user;
     // check user is manager of route team
-    const managedTeams = await this.teamsService.findAllManagedTeams(user.id);
-    if (!managedTeams.includes(route.teamId) && route.createdBy !== user.id)
+    const managedTeams = await this.teamsService.findAllManagedTeams(
+      request.user.id,
+    );
+    if (
+      route.teamId &&
+      !managedTeams.includes(route.teamId) &&
+      route.createdBy !== request.user.id
+    )
       throw new HttpException(
         'You cannot delete this route',
         HttpStatus.FORBIDDEN,
