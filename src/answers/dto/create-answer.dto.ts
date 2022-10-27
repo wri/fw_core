@@ -11,5 +11,5 @@ export class CreateAnswerDto {
   date?: string;
   teamId?: string;
   assignmentId?: string;
-  [questionName: string]: string | number;
+  [questionName: string]: string | number | undefined;
 }

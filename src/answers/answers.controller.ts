@@ -97,7 +97,7 @@ export class AnswersController {
 
       answer.responses.push({
         name: question.name,
-        value: fields[question.name].toString(),
+        value: fields[question.name]?.toString(),
       });
     };
 

@@ -16,8 +16,6 @@ import { TemplatePermissionsMiddleware } from './middleware/templatePermissions.
 import { S3Service } from './services/s3Service';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
 import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema';
-import { AssignmentsService } from '../assignments/assignments.service';
-import { Assignment } from '../assignments/models/assignment.schema';
 import { AssignmentsModule } from '../assignments/assignments.module';
 
 @Module({
