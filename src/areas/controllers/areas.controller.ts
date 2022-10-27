@@ -12,6 +12,7 @@ import {
   Logger,
   HttpException,
   HttpStatus,
+  NotFoundException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AreasService } from '../services/areas.service';
@@ -44,8 +45,8 @@ export class AreasController {
   // Gets all areas the user has created
   @Get('/user')
   async getUserAreas(@Req() request: Request): Promise<IAreaResponse> {
-    const { user }: { user: IUser } = request;
-    let data: IArea[];
+    const user = request.user;
+    let data: IArea[] = [];
     if (user && user.id) {
       try {
         const areas = await this.areasService.getUserAreas(user);
@@ -80,8 +81,8 @@ export class AreasController {
   // Gets all areas the user has created and all areas linked to the user's teams
   @Get('/userAndTeam')
   async getUserAndTeamAreas(@Req() request: Request): Promise<IAreaResponse> {
-    const { user }: { user: IUser } = request;
-    let data: IArea[];
+    const user = request.user;
+    let data: IArea[] = [];
 
     if (user && user.id) {
       try {
@@ -92,26 +93,26 @@ export class AreasController {
               'Incorrect areas found',
               HttpStatus.SERVICE_UNAVAILABLE,
             );
-          area.attributes.teamId = null;
+          area.attributes.teamId = undefined;
         });
         // get a users teams
         const userTeams = await this.teamsService.findAllByUserId(user.id); // get list of user's teams
         //get areas for each team
+        const allTeamAreas: (IArea | null)[] = userAreas;
         for await (const team of userTeams) {
           const teamAreas: string[] =
             await this.teamAreaRelationService.getAllAreasForTeam(team.id);
-          const fullTeamAreas: Promise<IArea>[] = [];
+          const fullTeamAreas: Promise<IArea | null>[] = [];
           // get full area for each array member and push to user areas array
           for await (const teamAreaId of teamAreas) {
-            const area: Promise<IArea> =
-              this.areasService.getAreaMICROSERVICE(teamAreaId);
+            const area = this.areasService.getAreaMICROSERVICE(teamAreaId);
             fullTeamAreas.push(area);
           }
           const resolvedTeamAreas = await Promise.all(fullTeamAreas);
-          resolvedTeamAreas.forEach(
-            (area) => (area.attributes.teamId = team.id),
-          );
-          userAreas.push(...resolvedTeamAreas);
+          resolvedTeamAreas.forEach((area) => {
+            if (area) area.attributes.teamId = team.id;
+          });
+          allTeamAreas.push(...resolvedTeamAreas);
         }
         // format areas
         data = await this.responseService.buildAreasResponse(
@@ -151,7 +152,7 @@ export class AreasController {
         'Request must contain an image',
         HttpStatus.BAD_REQUEST,
       );
-    const { user }: { user: IUser } = request;
+    const user = request.user;
     const { geojson, name } = body;
     let data;
     if (user && user.id) {
@@ -186,10 +187,9 @@ export class AreasController {
     @Req() request: Request,
     @Param('id') id: string,
   ): Promise<IAreaResponse> {
-    let area: IArea;
     // see if area is a team area
     // get user teams
-    const { user }: { user: IUser } = request;
+    const user = request.user;
     const userTeams: TeamDocument[] = await this.teamsService.findAllByUserId(
       user.id,
     ); // get list of user's teams
@@ -199,10 +199,12 @@ export class AreasController {
       areaTeams.includes(userTeam.id),
     ); // match area teams to user teams
 
-    if (filteredTeams.length > 0)
-      area = await this.areasService.getAreaMICROSERVICE(id);
-    // get the area using the microservice token
-    else area = await this.areasService.getArea(id, user); // assume the area is a user area. Throws an error if not allowed
+    const area =
+      filteredTeams.length > 0
+        ? await this.areasService.getAreaMICROSERVICE(id)
+        : await this.areasService.getArea(id, user);
+
+    if (!area) throw new NotFoundException();
 
     const [data] = await this.responseService.buildAreasResponse(
       [area],
@@ -221,7 +223,7 @@ export class AreasController {
     @Req() request: Request,
     @Body() updateAreaDto: UpdateAreaDto,
   ): Promise<IAreaResponse> {
-    const { user }: { user: IUser } = request;
+    const user = request.user;
     // get the area
     const existingArea = await this.areasService.getArea(id, user);
     if (!existingArea)
@@ -243,7 +245,7 @@ export class AreasController {
       );
     const { geojson, name } = updateAreaDto;
 
-    let data = null;
+    let data: any;
     if (user && user.id) {
       try {
         const { area, geostoreId, coverage } =
@@ -284,7 +286,7 @@ export class AreasController {
     @Param('id') id: string,
     @Req() request: Request,
   ): Promise<string> {
-    const { user }: { user: IUser } = request;
+    const user = request.user;
     const area = await this.areasService.getArea(id, user);
 
     if (area.attributes.userId.toString() !== user.id.toString())

@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import request from 'supertest';
-import { HttpException, HttpStatus, INestApplication } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { UserService } from '../../common/user.service';
 import { getModelToken } from '@nestjs/mongoose';
@@ -11,22 +11,17 @@ import { DatabaseService } from '../../common/database/database.service';
 import {
   EMemberRole,
   EMemberStatus,
-  TeamMember,
 } from '../../teams/models/teamMember.schema';
-import { Team } from '../../teams/models/team.schema';
 import { TeamsService } from '../../teams/services/teams.service';
 import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import { TemplateAreaRelationService } from '../../areas/services/templateAreaRelation.service';
-import { TemplateAreaRelation } from '../../areas/models/templateAreaRelation.schema';
 import { TemplatesService } from '../../templates/templates.service';
-import { Template } from '../../templates/models/template.schema';
 import { AnswersService } from '../services/answers.service';
 import { Answer } from '../models/answer.model';
 import constants from './templates.constants';
 import { S3Service } from '../services/s3Service';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
-import { TeamAreaRelation } from '../../areas/models/teamAreaRelation.schema';
 
 describe('Answers', () => {
   let app: INestApplication;
@@ -674,8 +669,8 @@ describe('Answers', () => {
       expect(answer).toBeDefined();
       expect(answer).toHaveProperty('reportName', 'name');
       expect(answer).toHaveProperty('responses');
-      expect(answer.responses[0]).toHaveProperty('name', 'question-1');
-      expect(answer.responses[0]).toHaveProperty('value', 'answer');
+      expect(answer?.responses[0]).toHaveProperty('name', 'question-1');
+      expect(answer?.responses[0]).toHaveProperty('value', 'answer');
     });
 
     it('should return the created answer', async () => {
@@ -783,7 +778,7 @@ describe('Answers', () => {
       const insertedAnswer = await formsDbConnection
         .collection('answers')
         .findOne({ _id: answer.insertedId });
-      expect(insertedAnswer._id).toBeDefined();
+      expect(insertedAnswer?._id).toBeDefined();
       await request(app.getHttpServer())
         .delete(
           `/templates/${template.insertedId.toString()}/answers/${answer.insertedId.toString()}`,
@@ -811,7 +806,7 @@ describe('Answers', () => {
       const insertedAnswer = await formsDbConnection
         .collection('answers')
         .findOne({ _id: answer.insertedId });
-      expect(insertedAnswer._id).toBeDefined();
+      expect(insertedAnswer?._id).toBeDefined();
       await request(app.getHttpServer())
         .delete(
           `/templates/${template.insertedId.toString()}/answers/${answer.insertedId.toString()}`,
@@ -822,7 +817,7 @@ describe('Answers', () => {
       const deletedAnswer = await formsDbConnection
         .collection('answers')
         .findOne({ _id: answer.insertedId });
-      expect(deletedAnswer._id).toBeDefined();
+      expect(deletedAnswer?._id).toBeDefined();
     });
 
     it('should delete answer in team area if user is team manager', async () => {
@@ -855,7 +850,7 @@ describe('Answers', () => {
       const insertedAnswer = await formsDbConnection
         .collection('answers')
         .findOne({ _id: answer.insertedId });
-      expect(insertedAnswer._id).toBeDefined();
+      expect(insertedAnswer?._id).toBeDefined();
       await request(app.getHttpServer())
         .delete(
           `/templates/${template.insertedId.toString()}/answers/${answer.insertedId.toString()}`,
@@ -899,7 +894,7 @@ describe('Answers', () => {
       const insertedAnswer = await formsDbConnection
         .collection('answers')
         .findOne({ _id: answer.insertedId });
-      expect(insertedAnswer._id).toBeDefined();
+      expect(insertedAnswer?._id).toBeDefined();
       await request(app.getHttpServer())
         .delete(
           `/templates/${template.insertedId.toString()}/answers/${answer.insertedId.toString()}`,
@@ -910,7 +905,7 @@ describe('Answers', () => {
       const deletedAnswer = await formsDbConnection
         .collection('answers')
         .findOne({ _id: answer.insertedId });
-      expect(deletedAnswer._id).toBeDefined();
+      expect(deletedAnswer?._id).toBeDefined();
     });
   });
 

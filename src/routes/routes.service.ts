@@ -24,11 +24,11 @@ export class RoutesService {
     return await this.routeModel.find(filter);
   }
 
-  async findOneById(id: string): Promise<RouteDocument> {
+  async findOneById(id: string): Promise<RouteDocument | null> {
     return await this.routeModel.findById(new mongoose.Types.ObjectId(id));
   }
 
-  async findOne(filter): Promise<RouteDocument> {
+  async findOne(filter): Promise<RouteDocument | null> {
     return await this.routeModel.findOne(filter);
   }
 
@@ -38,6 +38,9 @@ export class RoutesService {
 
   async deactivate(id: string): Promise<void> {
     const route = await this.findOneById(id);
+
+    if (!route) return;
+
     route.active = false;
     await route.save();
   }

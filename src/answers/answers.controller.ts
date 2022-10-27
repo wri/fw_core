@@ -62,9 +62,9 @@ export class AnswersController {
       areaOfInterestName: fields.areaOfInterestName,
       language: fields.language,
       userPosition,
-      clickedPosition: JSON.parse(fields.clickedPosition),
+      clickedPosition: JSON.parse(fields.clickedPosition ?? '{}'),
       user: new mongoose.Types.ObjectId(user.id),
-      createdAt: fields.date,
+      createdAt: fields.date ?? Date.now().toString(),
       responses: [],
       teamId: fields.teamId,
     };
@@ -111,6 +111,8 @@ export class AnswersController {
         );
 
       await addResponseOrFail(question);
+
+      if (!question.childQuestions) continue;
       for (const childQuestion of question.childQuestions) {
         validateResponseTypeOrFail(childQuestion);
 
@@ -159,7 +161,7 @@ export class AnswersController {
     @Req() request: Request,
     @Param('areaId') areaId: string,
   ) {
-    const { user, template, query, userTeams } = request;
+    const { template, query, userTeams, user } = request;
     let restricted = false;
     if (query && query.restricted === 'true') restricted = true;
 
@@ -181,7 +183,7 @@ export class AnswersController {
 
   @Get()
   async findAll(@Req() request: Request) {
-    const { user, template } = request;
+    const { template, user } = request;
     return {
       data: serializeAnswers(
         await this.answersService.getAllTemplateAnswers({ user, template }),
@@ -210,9 +212,9 @@ export class AnswersController {
   @Get('/:id')
   async findOne(@Param('id') id: string, @Req() request: Request) {
     let filter: any = {};
-    const { user, template, userTeams = [] } = request;
+    const { template, user, userTeams = [] } = request;
 
-    const confirmedUsers = [];
+    const confirmedUsers: (mongoose.Types.ObjectId | undefined)[] = [];
     for await (const team of userTeams) {
       // get members of each team user belongs to and add to users array
       const users = await this.teamMembersService.findAllTeamMembers(
@@ -223,7 +225,7 @@ export class AnswersController {
     }
 
     // add current user to users array
-    confirmedUsers.push(user.id);
+    confirmedUsers.push(new mongoose.Types.ObjectId(user.id));
 
     // users can see all answers from their own template or answers made from team members from other templates
     if (user.role === 'ADMIN' || user.id === template.user.toString()) {
@@ -270,15 +272,15 @@ export class AnswersController {
     const answer = await this.answersService.findOne({
       _id: new mongoose.Types.ObjectId(id),
     });
-    if (answer.user.toString() === user.id.toString()) permitted = true;
+    if (answer?.user.toString() === user.id.toString()) permitted = true;
     else {
       // get associated teams of answer area
       const areaTeams = await this.teamAreaRelationService.find({
-        areaId: answer.areaOfInterest,
+        areaId: answer?.areaOfInterest,
       });
 
       // create array user is manager of
-      const managerTeams = [];
+      const managerTeams: string[] = [];
       userTeams.forEach((userTeam) => {
         if (
           userTeam.userRole === 'manager' ||

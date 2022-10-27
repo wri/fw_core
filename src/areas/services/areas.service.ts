@@ -28,7 +28,7 @@ export class AreasService {
       const url = `${baseURL}/v2/area/${areaId}`;
       const getAreasRequestConfig = {
         headers: {
-          authorization: user.token,
+          authorization: user.token ?? '',
         },
       };
       const { data } = await axios.get(url, getAreasRequestConfig);
@@ -40,7 +40,7 @@ export class AreasService {
     }
   }
 
-  async getAreaMICROSERVICE(areaId: string): Promise<IArea> {
+  async getAreaMICROSERVICE(areaId: string): Promise<IArea | null> {
     try {
       const baseURL = this.configService.get('areasApi.url');
       const url = `${baseURL}/v1/area/${areaId}`;
@@ -64,7 +64,7 @@ export class AreasService {
       const url = `${baseURL}/v2/area`;
       const getUserAreasRequestConfig = {
         headers: {
-          authorization: user.token,
+          authorization: user.token ?? '',
         },
       };
       const response = await axios.get(url, getUserAreasRequestConfig);
@@ -94,16 +94,23 @@ export class AreasService {
     const ALERTS_SUPPORTED = this.configService.get('alertsSupported');
 
     try {
-      geostore = await this.geostoreService.createGeostore(geojson, user.token);
+      geostore = await this.geostoreService.createGeostore(
+        geojson,
+        user.token ?? '',
+      );
     } catch (error) {
       this.logger.error('Error while creating geostore', error);
+      throw error;
     }
     try {
       const params = {
         geostoreId: geostore.id,
         slugs: ALERTS_SUPPORTED,
       };
-      coverage = await this.coverageService.getCoverage(params, user.token);
+      coverage = await this.coverageService.getCoverage(
+        params,
+        user.token ?? '',
+      );
     } catch (error) {
       this.logger.error('Error while getting area coverage', error);
       throw error;
@@ -120,7 +127,7 @@ export class AreasService {
       const createAreaRequestConfig = {
         headers: {
           ...form.getHeaders(),
-          authorization: user.token,
+          authorization: user.token ?? '',
         },
       };
       const { data } = await axios.post(url, form, createAreaRequestConfig);
@@ -145,7 +152,7 @@ export class AreasService {
       try {
         const geostoreResponse = await this.geostoreService.createGeostore(
           geojson,
-          user.token,
+          user.token ?? '',
         );
         geostoreId = geostoreResponse.id;
       } catch (e) {
@@ -159,7 +166,10 @@ export class AreasService {
         geostoreId,
         slugs: ALERTS_SUPPORTED,
       };
-      coverage = await this.coverageService.getCoverage(params, user.token);
+      coverage = await this.coverageService.getCoverage(
+        params,
+        user.token ?? '',
+      );
     } catch (e) {
       this.logger.error('Error while getting area coverage', e);
       throw e;
@@ -176,7 +186,7 @@ export class AreasService {
       const createAreaRequestConfig = {
         headers: {
           ...form.getHeaders(),
-          authorization: user.token,
+          authorization: user.token ?? '',
         },
       };
       const { data } = await axios.patch(url, form, createAreaRequestConfig);
@@ -194,7 +204,7 @@ export class AreasService {
       const url = `${baseURL}/v2/area/${areaId}`;
       const deleteAreaRequestConfig = {
         headers: {
-          authorization: user.token,
+          authorization: user.token ?? '',
         },
       };
       const { data } = await axios.delete(url, deleteAreaRequestConfig);

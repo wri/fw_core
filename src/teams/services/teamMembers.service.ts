@@ -43,19 +43,21 @@ export class TeamMembersService {
   async findTeamMember(
     teamId: string,
     userId: string,
-  ): Promise<TeamMemberDocument> {
-    return this.findFullNameForTeamMember(
-      await this.teamMemberModel.findOne({
-        teamId,
-        userId,
-      }),
-    );
+  ): Promise<TeamMemberDocument | null> {
+    const member = await this.teamMemberModel.findOne({
+      teamId,
+      userId,
+    });
+
+    if (!member) return null;
+
+    return this.findFullNameForTeamMember(member);
   }
 
-  async findById(id: string): Promise<TeamMemberDocument> {
-    return this.findFullNameForTeamMember(
-      await this.teamMemberModel.findById(id),
-    );
+  async findById(id: string): Promise<TeamMemberDocument | null> {
+    const member = await this.teamMemberModel.findById(id);
+    if (!member) return null;
+    return this.findFullNameForTeamMember(member);
   }
 
   async findAllTeamMembers(
@@ -99,7 +101,7 @@ export class TeamMembersService {
     teamId: string,
     userEmail: string,
     update: Partial<TeamMemberDocument>,
-  ): Promise<TeamMemberDocument> {
+  ): Promise<TeamMemberDocument | null> {
     return this.teamMemberModel.findOneAndUpdate(
       { teamId, email: userEmail },
       update,
@@ -107,7 +109,7 @@ export class TeamMembersService {
     );
   }
 
-  async remove(teamUserId: string): Promise<TeamMemberDocument> {
+  async remove(teamUserId: string): Promise<TeamMemberDocument | null> {
     return await this.teamMemberModel.findByIdAndDelete(teamUserId);
   }
 
@@ -139,9 +141,9 @@ export class TeamMembersService {
     });
   }
 
-  async findAllUsersManaged(userId: string): Promise<string[]> {
+  async findAllUsersManaged(userId: string): Promise<(string | null)[]> {
     const teams = await this.teamMemberModel.find({ userId });
-    const users: string[] = [];
+    const users: (string | null)[] = [];
     for await (const team of teams) {
       if (
         team.role === EMemberRole.Administrator ||

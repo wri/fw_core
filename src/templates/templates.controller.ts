@@ -8,9 +8,10 @@ import {
   Delete,
   Logger,
   Req,
-  HttpCode,
   HttpStatus,
   HttpException,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { TemplatesService } from './templates.service';
 import { CreateTemplateDto } from './dto/create-template.dto';
@@ -29,6 +30,7 @@ import { TeamsService } from '../teams/services/teams.service';
 import serializeAnswers from '../answers/serializers/answers.serializer';
 import { TemplateAreaRelationService } from '../areas/services/templateAreaRelation.service';
 import mongoose from 'mongoose';
+import { CreateTemplateInput } from './input/create-template.input';
 
 @Controller('templates')
 export class TemplatesController {
@@ -42,21 +44,23 @@ export class TemplatesController {
 
   @Post()
   async create(@Req() request: Request): Promise<ITemplateResponse> {
-    const { body, user }: { body: CreateTemplateDto; user: IUser } = request;
+    const { body, user }: { body: CreateTemplateInput; user: IUser } = request;
     if (body.public && user.role !== 'ADMIN')
       throw new HttpException(
         'You must be an administrator to create a public template',
         HttpStatus.FORBIDDEN,
       );
 
-    const template = {
+    const template: CreateTemplateDto = {
       name: body.name,
-      user: user.id,
+      user: new mongoose.Types.ObjectId(user.id),
       languages: body.languages,
       defaultLanguage: body.defaultLanguage,
       questions: body.questions,
-      public: body.public,
+      public: body.public ?? false,
       status: body.status,
+      editGroupId: new mongoose.Types.ObjectId(),
+      isLatest: true,
     };
 
     const savedTemplate = await this.templatesService.create(template);
@@ -64,9 +68,48 @@ export class TemplatesController {
     return { data: serializeTemplate(savedTemplate) };
   }
 
+  @Get('/latest')
+  async findAllLatestVersionsByUser(
+    @Req() request: Request,
+  ): Promise<ITemplateResponse> {
+    const user = request.user as IUser;
+
+    this.logger.log(
+      `Obtaining the latest version of all reports owned by user ${user.id}`,
+    );
+
+    const templates = await this.templatesService.findAllByUserId(user.id, {
+      latest: true,
+    });
+
+    return { data: serializeTemplate(templates) };
+  }
+
+  @Get('/versions/:id')
+  async findAllVersionsByUser(@Req() request: Request) {
+    const user = request.user as IUser;
+    const editGroupId = request.params.id;
+    if (!editGroupId) {
+      throw new BadRequestException('The id path parameter must be provided');
+    }
+
+    this.logger.log(
+      `Obtaining all template versions of ${editGroupId} for user ${user.id}`,
+    );
+
+    const templates = await this.templatesService.findAllByEditGroupId(
+      editGroupId,
+      {
+        user: user.id,
+      },
+    );
+
+    return { data: serializeTemplate(templates) };
+  }
+
   @Get()
   async findAll(@Req() request: Request): Promise<ITemplateResponse> {
-    const { user }: { user: IUser } = request;
+    const user = request.user;
     const filter = {
       $and: [
         {
@@ -106,7 +149,7 @@ export class TemplatesController {
   async getAllAnswers(@Req() request: Request): Promise<IAnswerReturn> {
     this.logger.log(`Obtaining all answers for user`);
 
-    const { user }: { user: IUser } = request;
+    const user = request.user;
 
     // get teams the user is part of
     const userTeams = await this.teamsService.findAllByUserId(user.id);
@@ -120,7 +163,7 @@ export class TemplatesController {
       const template = await this.templatesService.findOne({
         _id: answer.report,
       });
-      answer.templateName = template.name[answer.language];
+      answer.templateName = template?.name[answer.language];
     }
 
     if (!answers) {
@@ -136,12 +179,14 @@ export class TemplatesController {
     @Param('id') id: string,
     @Req() request: Request,
   ): Promise<ITemplateResponse> {
-    const { user }: { user: IUser } = request;
+    const user = request.user;
 
     this.logger.log('Obtaining template', id);
-    const template: TemplateDocument = await this.templatesService.findOne({
+    const template = await this.templatesService.findOne({
       _id: new mongoose.Types.ObjectId(id),
     });
+
+    if (!template) throw new NotFoundException();
 
     // get answer count for each report
     let answersFilter = {};
@@ -167,7 +212,7 @@ export class TemplatesController {
     @Body() body: UpdateTemplateDto,
     @Req() request: Request,
   ): Promise<ITemplateResponse> {
-    const { user }: { user: IUser } = request;
+    const user = request.user;
 
     // create filter to grab existing template
     const filter: any = {
@@ -207,7 +252,7 @@ export class TemplatesController {
 
   @Delete('/allAnswers')
   async deleteAllAnswers(@Req() request: Request): Promise<void> {
-    const { user }: { user: IUser } = request;
+    const user = request.user;
 
     await this.answersService.delete({ user: user.id });
   }
@@ -217,7 +262,7 @@ export class TemplatesController {
     @Param('id') id: string,
     @Req() request: Request,
   ): Promise<void> {
-    const { user }: { user: IUser } = request;
+    const user = request.user;
 
     const answers = await this.answersService.findSome({ report: id });
     if (answers.length > 0 && user.role !== 'ADMIN') {
@@ -231,7 +276,7 @@ export class TemplatesController {
       _id: new mongoose.Types.ObjectId(id),
     });
     if (
-      template.status === ETemplateStatus.PUBLISHED &&
+      template?.status === ETemplateStatus.PUBLISHED &&
       user.role !== 'ADMIN'
     ) {
       throw new HttpException(

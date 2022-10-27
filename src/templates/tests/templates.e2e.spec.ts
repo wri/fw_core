@@ -19,7 +19,7 @@ import mongoose from 'mongoose';
 import constants from './templates.constants';
 import { TemplateAreaRelationService } from '../../areas/services/templateAreaRelation.service';
 
-describe('Areas', () => {
+describe('Templates', () => {
   let app: INestApplication;
   let teamsDbConnection: Connection;
   let apiDbConnection: Connection;
@@ -329,7 +329,7 @@ describe('Areas', () => {
         new mongoose.Types.ObjectId(response.body.data.id),
       );
       expect(template).toHaveProperty('name');
-      expect(template.name).toHaveProperty('en', 'test');
+      expect(template?.name).toHaveProperty('en', 'test');
     });
 
     it('should fail to create a public template if not ADMIN', async () => {
@@ -1183,6 +1183,158 @@ describe('Areas', () => {
         .collection('answers')
         .findOne({ _id: answer3.insertedId });
       expect(deletedAnswer3).toBeDefined();
+    });
+  });
+
+  describe('GET /templates/latest', () => {
+    afterEach(async () => {
+      formsDbConnection.collection('reports').deleteMany({});
+    });
+
+    it('should return a 401 without authorisation', async () => {
+      return await request(app.getHttpServer())
+        .get(`/templates/latest`)
+        .expect(401);
+    });
+
+    it('should return empty array if no templates', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/templates/latest')
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response).toBeDefined();
+      expect(response.body).toBeDefined();
+      expect(response.body.data).toBeInstanceOf(Array);
+      expect(response.body.data).toHaveLength(0);
+    });
+
+    it('should return only the latest templates of the user', async () => {
+      const collection = formsDbConnection.collection('reports');
+      const templateBoilerplate = {
+        name: {
+          en: 'Default',
+        },
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        questions: [
+          {
+            type: 'text',
+            name: 'question-1',
+            label: {
+              en: 'test',
+            },
+          },
+        ],
+        languages: ['en'],
+        status: 'published',
+        defaultLanguage: 'en',
+      };
+
+      const groupId1 = new mongoose.Types.ObjectId();
+      const groupId2 = new mongoose.Types.ObjectId();
+      const groupId3 = new mongoose.Types.ObjectId();
+      const templates = await collection.insertMany([
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId1,
+          isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId1,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId2,
+          isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId3,
+          isLatest: true,
+          user: new mongoose.Types.ObjectId(),
+        },
+      ]);
+
+      const latestTemplateIds = [
+        templates.insertedIds[0],
+        templates.insertedIds[2],
+      ].map((t) => t.toString());
+
+      const response = await request(app.getHttpServer())
+        .get('/templates/latest')
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      const data = response?.body?.data;
+      expect(data).toBeDefined();
+      expect(data).toBeInstanceOf(Array);
+      expect(data).toHaveLength(2);
+
+      const dataIds = data.map((d) => d.id);
+      expect(dataIds.sort()).toEqual(latestTemplateIds.sort());
+    });
+  });
+
+  describe('GET /templates/versions/:id', () => {
+    afterEach(async () => {
+      formsDbConnection.collection('reports').deleteMany({});
+    });
+
+    it('should return 401 if not logged in', async () => {
+      return await request(app.getHttpServer())
+        .get(`/templates/versions/fakeid`)
+        .expect(401);
+    });
+
+    it("should return an empty array if the user doesn't own any templates in the group id", async () => {
+      const groupId = new mongoose.Types.ObjectId();
+      const userId = new mongoose.Types.ObjectId();
+
+      const templateBoilerplate = {
+        name: {
+          en: 'Default',
+        },
+        user: userId,
+        questions: [
+          {
+            type: 'text',
+            name: 'question-1',
+            label: {
+              en: 'test',
+            },
+          },
+        ],
+        languages: ['en'],
+        status: 'published',
+        defaultLanguage: 'en',
+      };
+
+      const templates = await formsDbConnection
+        .collection('reports')
+        .insertMany([
+          {
+            ...templateBoilerplate,
+            editGroupId: groupId,
+            isLatest: true,
+          },
+          {
+            ...templateBoilerplate,
+            editGroupId: groupId,
+            isLatest: false,
+          },
+        ]);
+
+      const response = await request(app.getHttpServer())
+        .get(`/templates/versions/${groupId}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      const data = response?.body?.data;
+      expect(data).toBeDefined();
+      expect(data).toBeInstanceOf(Array);
+      expect(data).toHaveLength(0);
     });
   });
 

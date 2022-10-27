@@ -6,7 +6,10 @@ import {
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
-import { EMemberRole } from '../../teams/models/teamMember.schema';
+import {
+  EMemberRole,
+  TeamMemberDocument,
+} from '../../teams/models/teamMember.schema';
 import { TemplatesService } from '../../templates/templates.service';
 import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import { TeamsService } from '../../teams/services/teams.service';
@@ -27,14 +30,14 @@ export class TemplatePermissionsMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { user, params } = <TRequest>req;
+    const { user, params } = req;
     // creates a filter to get the report if the user is allowed to see it
     // looks like a monitor can see reports made by their team manager(s)
     // get the users teams
     const teams = await this.teamsService.findAllByUserId(user.id);
 
     // get managers of those teams
-    const managers = [];
+    const managers: { user?: mongoose.Types.ObjectId }[] = [];
     for (const team of teams) {
       let teamUsers = await this.teamMembersService.findAllTeamMembers(
         team.id,

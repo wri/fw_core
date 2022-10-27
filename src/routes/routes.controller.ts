@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Req,
@@ -15,6 +14,7 @@ import { CreateRouteDto } from './dto/create-route.dto';
 import { Request } from 'express';
 import serializeRoutes from './serializers/routes.serializer';
 import { TeamsService } from '../teams/services/teams.service';
+import { RouteDocument } from './models/route.schema';
 
 @Controller('routes')
 export class RoutesController {
@@ -28,15 +28,16 @@ export class RoutesController {
     @Req() request: Request,
     @Body() routesToSync: CreateRouteDto[],
   ) {
-    const syncedRoutes = [];
+    const syncedRoutes: RouteDocument[] = [];
 
     for await (const route of routesToSync) {
       const existingRoute = await this.routesService.findOne({
         routeId: route.id,
       });
-      if (existingRoute) continue;
+      if (existingRoute || !route.id) continue;
 
-      route.createdBy = request.user.id;
+      const user = request.user;
+      route.createdBy = user.id;
       route.routeId = route.id;
       route.active = true;
       delete route.id;
@@ -49,9 +50,10 @@ export class RoutesController {
 
   @Get('/user')
   async findAllUser(@Req() request: Request) {
+    const user = request.user;
     // get all active routes
     const filter = {
-      createdBy: request.user.id,
+      createdBy: user.id,
       active: true,
     };
     const routes = await this.routesService.findAll(filter);
@@ -60,8 +62,9 @@ export class RoutesController {
 
   @Get('/teams')
   async findAllTeams(@Req() request: Request) {
+    const user = request.user;
     // find all user teams
-    const teams = await this.teamsService.findAllByUserId(request.user.id);
+    const teams = await this.teamsService.findAllByUserId(user.id);
 
     const filter = {
       teamId: { $in: teams.map((team) => team.id) },
@@ -91,14 +94,10 @@ export class RoutesController {
     const route = await this.routesService.findOneById(id);
     if (!route)
       throw new HttpException("This route doesn't exist", HttpStatus.NOT_FOUND);
+    const user = request.user;
     // check user is manager of route team
-    const managedTeams = await this.teamsService.findAllManagedTeams(
-      request.user.id,
-    );
-    if (
-      !managedTeams.includes(route.teamId) &&
-      route.createdBy !== request.user.id
-    )
+    const managedTeams = await this.teamsService.findAllManagedTeams(user.id);
+    if (!managedTeams.includes(route.teamId) && route.createdBy !== user.id)
       throw new HttpException(
         'You cannot delete this route',
         HttpStatus.FORBIDDEN,
