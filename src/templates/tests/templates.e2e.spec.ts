@@ -18,7 +18,6 @@ import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import constants from './templates.constants';
 import { TemplateAreaRelationService } from '../../areas/services/templateAreaRelation.service';
-import { faker } from '@faker-js/faker';
 
 describe('Templates', () => {
   let app: INestApplication;

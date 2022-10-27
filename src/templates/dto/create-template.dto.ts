@@ -11,8 +11,8 @@ export class CreateTemplateDto {
   questions: CreateTemplateQuestionDto[];
   createdAt?: string;
   answersCount?: number;
-  editGroupId: mongoose.Types.ObjectId;
-  isLatest: boolean;
+  editGroupId?: mongoose.Types.ObjectId;
+  isLatest?: boolean;
 }
 
 class CreateTemplateQuestionDto {
