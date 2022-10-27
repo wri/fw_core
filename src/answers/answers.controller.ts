@@ -137,14 +137,19 @@ export class AnswersController {
       return { data: serializeAnswers(answerModel) };
     }
 
-    const assignment = this.assignmentService.findOne({
+    const assignment = await this.assignmentService.findOne({
       _id: assignmentId,
-      $or: [{ monitors: user.id }, { createdBy: user.id }],
+      monitors: user.id,
     });
 
     if (!assignment)
       throw new UnauthorizedException(
         `User is not authorized to submit assignment ${assignmentId}`,
+      );
+
+    if (assignment.templateId !== template.id)
+      throw new BadRequestException(
+        `Assignment does not belong to template ${template.id}`,
       );
 
     answer.assignmentId = new mongoose.Types.ObjectId(assignmentId);
