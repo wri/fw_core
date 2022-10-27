@@ -768,7 +768,7 @@ describe('Assignments', () => {
       );
     });
 
-    it('should return a null area name if area doesnt exist', async () => {
+    it('should return undefined area name if area doesnt exist', async () => {
       const assignment = await formsDbConnection
         .collection('assignments')
         .insertOne({
@@ -787,7 +787,10 @@ describe('Assignments', () => {
 
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('attributes');
-      expect(response.body.data.attributes).toHaveProperty('areaName', null);
+      expect(response.body.data.attributes).toHaveProperty(
+        'areaName',
+        undefined,
+      );
     });
   });
 
@@ -832,7 +835,7 @@ describe('Assignments', () => {
       expect(updatedAssignment).toBeDefined();
       expect(updatedAssignment).toHaveProperty('name', 'different name');
       expect(updatedAssignment).toHaveProperty('monitors');
-      expect(updatedAssignment.monitors.length).toBe(2);
+      expect(updatedAssignment?.monitors.length).toBe(2);
     });
 
     it('should return the updated assignment', async () => {

@@ -27,7 +27,7 @@ export class ResponseService {
   async buildAreasResponse(areas: IArea[], objects, user: IUser) {
     const { geostoreObj, coverageObj } = objects;
     const areasWithGeostore = areas.filter((area) => area.attributes.geostore);
-    const promises = [];
+    const promises: any[] = [];
     const ALERTS_SUPPORTED = this.configService.get('alertsSupported');
 
     if (!geostoreObj) {
@@ -36,7 +36,7 @@ export class ResponseService {
           areasWithGeostore.map((area) =>
             this.geostoreService.getGeostore(
               area.attributes.geostore,
-              user.token,
+              user.token ?? '',
             ),
           ),
         ),
@@ -50,7 +50,7 @@ export class ResponseService {
               geostoreId: area.attributes.geostore,
               slugs: ALERTS_SUPPORTED,
             };
-            return this.coverageService.getCoverage(params, user.token);
+            return this.coverageService.getCoverage(params, user.token ?? '');
           }),
         ),
       );

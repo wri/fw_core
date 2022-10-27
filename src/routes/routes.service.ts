@@ -8,30 +8,28 @@ import mongoose from 'mongoose';
 
 @Injectable()
 export class RoutesService {
-
   constructor(
-    @InjectModel(Route.name, 'formsDb') private routeModel: Model<RouteDocument>,
-  ) { }
+    @InjectModel(Route.name, 'formsDb')
+    private routeModel: Model<RouteDocument>,
+  ) {}
 
   async create(createRouteDto: CreateRouteDto): Promise<RouteDocument> {
-
-    const routeToCreate = new this.routeModel(createRouteDto)
-    const savedRoute = await routeToCreate.save()
+    const routeToCreate = new this.routeModel(createRouteDto);
+    const savedRoute = await routeToCreate.save();
 
     return savedRoute;
-    
   }
 
   async findAll(filter): Promise<RouteDocument[]> {
-    return await this.routeModel.find(filter)
+    return await this.routeModel.find(filter);
   }
 
-  async findOneById(id: string): Promise<RouteDocument> {
-    return await this.routeModel.findById(new mongoose.Types.ObjectId(id))
+  async findOneById(id: string): Promise<RouteDocument | null> {
+    return await this.routeModel.findById(new mongoose.Types.ObjectId(id));
   }
 
-  async findOne(filter): Promise<RouteDocument> {
-    return await this.routeModel.findOne(filter)
+  async findOne(filter): Promise<RouteDocument | null> {
+    return await this.routeModel.findOne(filter);
   }
 
   update(id: string, updateRouteDto: UpdateRouteDto) {
@@ -39,8 +37,11 @@ export class RoutesService {
   }
 
   async deactivate(id: string): Promise<void> {
-    const route = await this.findOneById(id)
+    const route = await this.findOneById(id);
+
+    if (!route) return;
+
     route.active = false;
-    await route.save()
+    await route.save();
   }
 }

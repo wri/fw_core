@@ -313,7 +313,7 @@ describe('Teams', () => {
       const updatedTeam = await teamsDbConnection
         .collection('gfwteams')
         .findOne({ _id: team.insertedId });
-      expect(updatedTeam.name).toEqual('Update');
+      expect(updatedTeam?.name).toEqual('Update');
     });
 
     it('should return the record', async () => {

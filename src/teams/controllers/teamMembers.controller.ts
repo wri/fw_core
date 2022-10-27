@@ -6,10 +6,12 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  NotFoundException,
   Param,
   Patch,
   Post,
   Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -48,10 +50,17 @@ export class TeamMembersController {
     else throw new HttpException('No user found', HttpStatus.NOT_FOUND);
     const { id: userId } = JSON.parse(loggedUser);
     const { teamId } = params;
-    const teamMember: TeamMemberDocument =
-      await this.teamMembersService.findTeamMember(teamId, userId);
-    const members: TeamMemberDocument[] =
-      await this.teamMembersService.findAllTeamMembers(teamId, teamMember.role);
+    const teamMember = await this.teamMembersService.findTeamMember(
+      teamId,
+      userId,
+    );
+
+    if (!teamMember) throw new NotFoundException();
+
+    const members = await this.teamMembersService.findAllTeamMembers(
+      teamId,
+      teamMember.role,
+    );
 
     return { data: serializeTeamMember(members) };
   }
@@ -117,10 +126,14 @@ export class TeamMembersController {
     const { body } = request;
     const { id: loggedUserId } = body.loggedUser;
 
-    const teamUser: TeamMemberDocument =
-      await this.teamMembersService.findTeamMember(teamId, userId);
-    const adminUser: TeamMemberDocument =
-      await this.teamMembersService.findTeamMember(teamId, loggedUserId);
+    const teamUser = await this.teamMembersService.findTeamMember(
+      teamId,
+      userId,
+    );
+    const adminUser = await this.teamMembersService.findTeamMember(
+      teamId,
+      loggedUserId,
+    );
 
     if (!teamUser)
       throw new HttpException(
@@ -160,9 +173,7 @@ export class TeamMembersController {
         HttpStatus.BAD_REQUEST,
       );
 
-    const member: TeamMemberDocument = await this.teamMembersService.findById(
-      memberId,
-    );
+    const member = await this.teamMembersService.findById(memberId);
 
     if (!member)
       throw new HttpException("Member doesn't exist", HttpStatus.NOT_FOUND);
@@ -200,15 +211,21 @@ export class TeamMembersController {
     else throw new HttpException('No user found', HttpStatus.NOT_FOUND);
     const { id: loggedUserId } = JSON.parse(loggedUser);
 
-    const teamMemberToDelete: TeamMemberDocument =
-      await this.teamMembersService.findById(memberId);
-    const currentUser: TeamMemberDocument =
-      await this.teamMembersService.findTeamMember(teamId, loggedUserId);
+    const teamMemberToDelete = await this.teamMembersService.findById(memberId);
+    const currentUser = await this.teamMembersService.findTeamMember(
+      teamId,
+      loggedUserId,
+    );
 
     if (!teamMemberToDelete)
       throw new HttpException(
         "This team member doesn't exist",
         HttpStatus.NOT_FOUND,
+      );
+
+    if (!currentUser)
+      throw new UnauthorizedException(
+        "Current user doesn't belong to member team",
       );
 
     const authorised =
@@ -251,11 +268,14 @@ export class TeamMembersController {
         HttpStatus.FORBIDDEN,
       );
 
-    const updatedMember: TeamMemberDocument =
-      await this.teamMembersService.update(teamId, loggedEmail, {
+    const updatedMember = await this.teamMembersService.update(
+      teamId,
+      loggedEmail,
+      {
         userId: loggedUserId,
         status: EMemberStatus.Confirmed,
-      });
+      },
+    );
 
     return { data: serializeTeamMember(updatedMember) };
   }
@@ -278,11 +298,14 @@ export class TeamMembersController {
         HttpStatus.FORBIDDEN,
       );
 
-    const updatedMember: TeamMemberDocument =
-      await this.teamMembersService.update(teamId, loggedEmail, {
+    const updatedMember = await this.teamMembersService.update(
+      teamId,
+      loggedEmail,
+      {
         userId: loggedUserId,
         status: EMemberStatus.Declined,
-      });
+      },
+    );
 
     return { data: serializeTeamMember(updatedMember) };
   }
@@ -303,8 +326,10 @@ export class TeamMembersController {
         HttpStatus.FORBIDDEN,
       );
 
-    const teamMember: TeamMemberDocument =
-      await this.teamMembersService.findTeamMember(teamId, userId);
+    const teamMember = await this.teamMembersService.findTeamMember(
+      teamId,
+      userId,
+    );
 
     if (teamMember && teamMember.role === EMemberRole.Administrator)
       throw new HttpException(
@@ -312,10 +337,13 @@ export class TeamMembersController {
         HttpStatus.BAD_REQUEST,
       );
 
-    const updatedMember: TeamMemberDocument =
-      await this.teamMembersService.update(teamId, loggedEmail, {
+    const updatedMember = await this.teamMembersService.update(
+      teamId,
+      loggedEmail,
+      {
         role: EMemberRole.Left,
-      });
+      },
+    );
 
     return { data: serializeTeamMember(updatedMember) };
   }

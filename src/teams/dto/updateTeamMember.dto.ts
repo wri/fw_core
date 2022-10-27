@@ -1,5 +1,5 @@
-import { EMemberRole } from "../models/teamMember.schema";
+import { EMemberRole } from '../models/teamMember.schema';
 
 export class UpdateTeamMemberDto {
-    role: EMemberRole;
+  role: EMemberRole;
 }

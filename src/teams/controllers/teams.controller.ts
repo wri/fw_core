@@ -42,7 +42,7 @@ export class TeamsController {
     );
 
     // get members of teams and areas of team
-    const teamsToSend = [];
+    const teamsToSend: TeamDocument[] = [];
     for await (const team of teams) {
       const teamId = team._id;
       const members: TeamMemberDocument[] =
@@ -85,7 +85,7 @@ export class TeamsController {
     );
 
     // get members of teams and areas of team
-    const teamsToSend = [];
+    const teamsToSend: TeamDocument[] = [];
     for await (const team of filteredTeams) {
       const teamId = team._id;
       const teamUserRelation = await this.teamMembersService.findTeamMember(
@@ -93,13 +93,15 @@ export class TeamsController {
         userId,
       );
 
-      const members: TeamMemberDocument[] =
-        await this.teamMembersService.findAllTeamMembers(
-          teamId,
-          teamUserRelation.role,
-        );
+      if (teamUserRelation) {
+        const members: TeamMemberDocument[] =
+          await this.teamMembersService.findAllTeamMembers(
+            teamId,
+            teamUserRelation.role,
+          );
 
-      team.members = members;
+        team.members = members;
+      }
 
       // array of area ids
       const areas = await this.teamAreaRelationService.find({ teamId });
@@ -161,7 +163,5 @@ export class TeamsController {
       throw new HttpException("Team doesn't exist", HttpStatus.NOT_FOUND);
 
     await this.teamsService.delete(teamId);
-
-    return null;
   }
 }
