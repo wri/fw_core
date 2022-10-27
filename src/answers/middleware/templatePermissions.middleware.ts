@@ -37,7 +37,7 @@ export class TemplatePermissionsMiddleware implements NestMiddleware {
     const teams = await this.teamsService.findAllByUserId(user.id);
 
     // get managers of those teams
-    const managers: any[] = [];
+    const managers: { user?: mongoose.Types.ObjectId }[] = [];
     for (const team of teams) {
       let teamUsers = await this.teamMembersService.findAllTeamMembers(
         team.id,

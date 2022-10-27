@@ -49,9 +49,9 @@ export class AnswersService {
     user: IUser;
   }): Promise<IAnswer[]> {
     let filter = {};
-    const confirmedUsers: (mongoose.Types.ObjectId | string | undefined)[] = [];
+    const confirmedUsers: (mongoose.Types.ObjectId | undefined)[] = [];
     // add current user to users array
-    confirmedUsers.push(user.id);
+    confirmedUsers.push(new mongoose.Types.ObjectId(user.id));
 
     const teamsManaged = await this.teamsService.findAllManagedTeams(user.id);
     // get all managed teams users
@@ -98,7 +98,7 @@ export class AnswersService {
   }): Promise<IAnswer[]> {
     let filter = {};
     let teamsManaged: TeamDocument[] = [];
-    const confirmedUsers: (mongoose.Types.ObjectId | string | undefined)[] = [];
+    const confirmedUsers: (mongoose.Types.ObjectId | undefined)[] = [];
     if (teams.length > 0) {
       // check if user is manager of any teams
       teamsManaged = teams.filter(
@@ -158,7 +158,7 @@ export class AnswersService {
       areaTeams.includes(team.id.toString()),
     );
     // extract all user ids
-    const userIds: (mongoose.Types.ObjectId | string | undefined)[] = [];
+    const userIds: (mongoose.Types.ObjectId | undefined)[] = [];
     // get all filtered teams users if unrestricted
     if (!restricted && filteredTeams.length > 0) {
       for await (const team of filteredTeams) {
@@ -171,7 +171,7 @@ export class AnswersService {
       }
     }
     // else just get user's reports
-    else userIds.push(loggedUser.id);
+    else userIds.push(new mongoose.Types.ObjectId(loggedUser.id));
 
     const filter = {
       $and: [
