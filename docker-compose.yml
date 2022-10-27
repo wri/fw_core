@@ -80,7 +80,7 @@ services:
       - ./:/usr/src
     networks:
       - gfw-nest-network
-    command: yarn test:watch
+    command: yarn test
   docs:
     build: .
     ports:
