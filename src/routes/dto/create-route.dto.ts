@@ -7,11 +7,11 @@ export class CreateRouteDto {
   startDate: number;
   endDate: number;
   geostoreId: string;
-  routeId: string;
+  routeId?: string;
   locations: ILocation[];
   name: string;
   createdBy?: string;
   id?: string;
-  teamId: string;
+  teamId?: string;
   active?: boolean;
 }
