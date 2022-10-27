@@ -104,7 +104,7 @@ export class AnswersController {
     for (const question of template.questions) {
       validateResponseTypeOrFail(question);
 
-      let name = question.name;
+      const name = question.name;
       if (question.required && !files?.[name] && !fields[name])
         throw new BadRequestException(
           `${question.label[answer.language]} (${question.name}) required`,
