@@ -18,7 +18,7 @@ export class CreateTemplateMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     const { body } = <TRequest>req;
 
-    const errors = [];
+    const errors: any[] = [];
 
     if (!body.name)
       throw new HttpException(

@@ -329,7 +329,7 @@ describe('Templates', () => {
         new mongoose.Types.ObjectId(response.body.data.id),
       );
       expect(template).toHaveProperty('name');
-      expect(template.name).toHaveProperty('en', 'test');
+      expect(template?.name).toHaveProperty('en', 'test');
     });
 
     it('should fail to create a public template if not ADMIN', async () => {

@@ -50,7 +50,7 @@ async function bootstrap() {
     }
   });
 
-  await app.listen(process.env.PORT);
+  await app.listen(process.env.PORT ?? 4042);
   console.log(`App running on: ${await app.getUrl()}`);
 }
 bootstrap();

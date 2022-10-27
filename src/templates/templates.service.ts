@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTemplateDto } from './dto/create-template.dto';
 import { UpdateTemplateDto } from './dto/update-template.dto';
 import {
@@ -75,7 +75,7 @@ export class TemplatesService {
     return this.templateModel.find(filter);
   }
 
-  async findOne(filter): Promise<TemplateDocument> {
+  async findOne(filter): Promise<TemplateDocument | null> {
     return await this.templateModel.findOne(filter);
   }
 
@@ -92,6 +92,7 @@ export class TemplatesService {
     updateTemplateDto: UpdateTemplateDto,
   ): Promise<TemplateDocument> {
     const template = await this.templateModel.findById(id);
+    if (!template) throw new NotFoundException('Template not found');
     if (updateTemplateDto.name) template.name = updateTemplateDto.name;
     if (updateTemplateDto.status) template.status = updateTemplateDto.status;
     if (updateTemplateDto.languages)

@@ -32,7 +32,7 @@ export class S3Service {
         const base64data = Buffer.from(data);
         s3.upload(
           {
-            Bucket: this.configService.get('s3.bucket'),
+            Bucket: this.configService.getOrThrow('s3.bucket'),
             Key: `${this.configService.get('s3.folder')}/${uuid}.${ext}`,
             Body: base64data,
             ACL: 'public-read',

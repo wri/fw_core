@@ -393,11 +393,11 @@ describe('Team Members', () => {
       const newAdmin = await teamsDbConnection
         .collection('teamuserrelations')
         .findOne({ _id: teamUser.insertedId });
-      expect(newAdmin.role).toEqual(EMemberRole.Administrator);
+      expect(newAdmin?.role).toEqual(EMemberRole.Administrator);
       const oldAdmin = await teamsDbConnection
         .collection('teamuserrelations')
         .findOne({ _id: adminUser.insertedId });
-      expect(oldAdmin.role).toEqual(EMemberRole.Manager);
+      expect(oldAdmin?.role).toEqual(EMemberRole.Manager);
     });
   });
 
@@ -651,7 +651,7 @@ describe('Team Members', () => {
       const updatedMember = await teamsDbConnection
         .collection('teamuserrelations')
         .findOne({ _id: manager.insertedId });
-      expect(updatedMember.role).toEqual(EMemberRole.Monitor);
+      expect(updatedMember?.role).toEqual(EMemberRole.Monitor);
     });
   });
 
@@ -935,7 +935,7 @@ describe('Team Members', () => {
         .findOne({ _id: member.insertedId });
       expect(updatedMember).toHaveProperty('status', EMemberStatus.Confirmed);
       expect(updatedMember).toHaveProperty('userId');
-      expect(updatedMember.userId.toString()).toBe(ROLES.USER.id);
+      expect(updatedMember?.userId.toString()).toBe(ROLES.USER.id);
     });
   });
 
@@ -1024,7 +1024,7 @@ describe('Team Members', () => {
         .findOne({ _id: member.insertedId });
       expect(updatedMember).toHaveProperty('status', EMemberStatus.Declined);
       expect(updatedMember).toHaveProperty('userId');
-      expect(updatedMember.userId.toString()).toBe(ROLES.USER.id);
+      expect(updatedMember?.userId.toString()).toBe(ROLES.USER.id);
     });
   });
 
@@ -1107,7 +1107,7 @@ describe('Team Members', () => {
         .findOne({ _id: member.insertedId });
       expect(updatedMember).toHaveProperty('role', EMemberRole.Left);
       expect(updatedMember).toHaveProperty('userId');
-      expect(updatedMember.userId.toString()).toBe(ROLES.USER.id);
+      expect(updatedMember?.userId.toString()).toBe(ROLES.USER.id);
     });
 
     it('should fail if the member is team admin', async () => {

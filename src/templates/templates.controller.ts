@@ -57,7 +57,7 @@ export class TemplatesController {
       languages: body.languages,
       defaultLanguage: body.defaultLanguage,
       questions: body.questions,
-      public: body.public,
+      public: body.public ?? false,
       status: body.status,
       editGroupId: new mongoose.Types.ObjectId(),
       isLatest: true,
@@ -109,7 +109,7 @@ export class TemplatesController {
 
   @Get()
   async findAll(@Req() request: Request): Promise<ITemplateResponse> {
-    const { user }: { user: IUser } = request;
+    const user = request.user;
     const filter = {
       $and: [
         {
@@ -149,7 +149,7 @@ export class TemplatesController {
   async getAllAnswers(@Req() request: Request): Promise<IAnswerReturn> {
     this.logger.log(`Obtaining all answers for user`);
 
-    const { user }: { user: IUser } = request;
+    const user = request.user;
 
     // get teams the user is part of
     const userTeams = await this.teamsService.findAllByUserId(user.id);
@@ -163,7 +163,7 @@ export class TemplatesController {
       const template = await this.templatesService.findOne({
         _id: answer.report,
       });
-      answer.templateName = template.name[answer.language];
+      answer.templateName = template?.name[answer.language];
     }
 
     if (!answers) {
@@ -179,16 +179,14 @@ export class TemplatesController {
     @Param('id') id: string,
     @Req() request: Request,
   ): Promise<ITemplateResponse> {
-    const { user }: { user: IUser } = request;
+    const user = request.user;
 
     this.logger.log('Obtaining template', id);
-    const template: TemplateDocument = await this.templatesService.findOne({
+    const template = await this.templatesService.findOne({
       _id: new mongoose.Types.ObjectId(id),
     });
 
-    if (!template) {
-      throw new NotFoundException();
-    }
+    if (!template) throw new NotFoundException();
 
     // get answer count for each report
     let answersFilter = {};
@@ -214,7 +212,7 @@ export class TemplatesController {
     @Body() body: UpdateTemplateDto,
     @Req() request: Request,
   ): Promise<ITemplateResponse> {
-    const { user }: { user: IUser } = request;
+    const user = request.user;
 
     // create filter to grab existing template
     const filter: any = {
@@ -254,7 +252,7 @@ export class TemplatesController {
 
   @Delete('/allAnswers')
   async deleteAllAnswers(@Req() request: Request): Promise<void> {
-    const { user }: { user: IUser } = request;
+    const user = request.user;
 
     await this.answersService.delete({ user: user.id });
   }
@@ -264,7 +262,7 @@ export class TemplatesController {
     @Param('id') id: string,
     @Req() request: Request,
   ): Promise<void> {
-    const { user }: { user: IUser } = request;
+    const user = request.user;
 
     const answers = await this.answersService.findSome({ report: id });
     if (answers.length > 0 && user.role !== 'ADMIN') {
@@ -278,7 +276,7 @@ export class TemplatesController {
       _id: new mongoose.Types.ObjectId(id),
     });
     if (
-      template.status === ETemplateStatus.PUBLISHED &&
+      template?.status === ETemplateStatus.PUBLISHED &&
       user.role !== 'ADMIN'
     ) {
       throw new HttpException(
