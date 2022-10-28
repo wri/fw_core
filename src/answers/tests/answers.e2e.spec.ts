@@ -30,10 +30,10 @@ describe('Answers', () => {
   let formsDbConnection: Connection;
   const userService = {
     authorise: (token) => ROLES[token],
-    getNameByIdMICROSERVICE: (id) => 'Full Name',
+    getNameByIdMICROSERVICE: (_id) => 'Full Name',
   };
   const s3Service = {
-    uploadFile: (file, name) =>
+    uploadFile: (_file, _name) =>
       `https://s3.amazonaws.com/bucket/folder/uuid.ext`,
   };
 
@@ -178,24 +178,20 @@ describe('Answers', () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.defaultTemplate);
-      const managerAnswer = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: template.insertedId,
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
-      const wrongTemplateAnswer = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: new mongoose.Types.ObjectId(),
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
+      await formsDbConnection.collection('answers').insertOne({
+        report: new mongoose.Types.ObjectId(),
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
       const userAnswer1 = await formsDbConnection
         .collection('answers')
         .insertOne({
@@ -272,15 +268,13 @@ describe('Answers', () => {
           user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
           responses: [{ name: 'question-1', value: 'test' }],
         });
-      const wrongTemplateAnswer = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: new mongoose.Types.ObjectId(),
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
+      await formsDbConnection.collection('answers').insertOne({
+        report: new mongoose.Types.ObjectId(),
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
       const userAnswer1 = await formsDbConnection
         .collection('answers')
         .insertOne({
@@ -334,15 +328,13 @@ describe('Answers', () => {
           user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
           responses: [{ name: 'question-1', value: 'test' }],
         });
-      const wrongTemplateAnswer = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: new mongoose.Types.ObjectId(),
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
+      await formsDbConnection.collection('answers').insertOne({
+        report: new mongoose.Types.ObjectId(),
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
       const userAnswer1 = await formsDbConnection
         .collection('answers')
         .insertOne({
@@ -387,42 +379,34 @@ describe('Answers', () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.userTemplate);
-      const managerAnswer = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: template.insertedId,
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
-      const wrongTemplateAnswer = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: new mongoose.Types.ObjectId(),
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
-      const userAnswer1 = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: template.insertedId,
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
-      const userAnswer2 = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: template.insertedId,
-          reportName: 'answer 2',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
+      await formsDbConnection.collection('answers').insertOne({
+        report: new mongoose.Types.ObjectId(),
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 2',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
       const response = await request(app.getHttpServer())
         .get(`/templates/${template.insertedId.toString()}/answers`)
         .set('Authorization', 'USER')
@@ -956,7 +940,7 @@ describe('Answers', () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.userTemplate);
-      const answer = await formsDbConnection.collection('answers').insertOne({
+      await formsDbConnection.collection('answers').insertOne({
         report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
@@ -984,7 +968,7 @@ describe('Answers', () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.defaultTemplate);
-      const answer = await formsDbConnection.collection('answers').insertOne({
+      await formsDbConnection.collection('answers').insertOne({
         report: template.insertedId,
         reportName: 'answer 1',
         areaOfInterest: areaId,

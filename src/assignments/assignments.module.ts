@@ -4,12 +4,9 @@ import { AssignmentsController } from './assignments.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Assignment, AssignmentSchema } from './models/assignment.schema';
 import { TeamsService } from '../teams/services/teams.service';
-import { Team, TeamSchema } from '../teams/models/team.schema';
+import { TeamSchema } from '../teams/models/team.schema';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
-import {
-  TeamMember,
-  TeamMemberSchema,
-} from '../teams/models/teamMember.schema';
+import { TeamMemberSchema } from '../teams/models/teamMember.schema';
 import { UserService } from '../common/user.service';
 import { AreasService } from '../areas/services/areas.service';
 import { GeostoreService } from '../areas/services/geostore.service';

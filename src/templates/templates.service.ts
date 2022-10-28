@@ -1,11 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTemplateDto } from './dto/create-template.dto';
 import { UpdateTemplateDto } from './dto/update-template.dto';
-import {
-  ETemplateStatus,
-  Template,
-  TemplateDocument,
-} from './models/template.schema';
+import { ETemplateStatus, TemplateDocument } from './models/template.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';

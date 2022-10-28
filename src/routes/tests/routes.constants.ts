@@ -1,6 +1,3 @@
-import areaConstants from '../../areas/test/area.constants';
-import ROLES from '../../common/testConstants';
-
 export default {
   defaultRoute: {
     areaId: '624eb2e03a38cf001b822d95',

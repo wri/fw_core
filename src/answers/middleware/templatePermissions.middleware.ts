@@ -6,20 +6,10 @@ import {
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
-import {
-  EMemberRole,
-  TeamMemberDocument,
-} from '../../teams/models/teamMember.schema';
+import { EMemberRole } from '../../teams/models/teamMember.schema';
 import { TemplatesService } from '../../templates/templates.service';
 import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import { TeamsService } from '../../teams/services/teams.service';
-
-type TRequest = {
-  body: {
-    loggedUser: any;
-  };
-  query: any;
-} & Request;
 
 @Injectable()
 export class TemplatePermissionsMiddleware implements NestMiddleware {

@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
@@ -29,10 +28,10 @@ describe('Area Template Relations', () => {
   let formsDbConnection: Connection;
   const userService = {
     authorise: (token) => ROLES[token],
-    getNameByIdMICROSERVICE: (id) => 'Full Name',
+    getNameByIdMICROSERVICE: (_id) => 'Full Name',
   };
   const areaService = {
-    getUserAreas: (id) => [constants.testArea],
+    getUserAreas: (_id) => [constants.testArea],
     getArea: (id) => {
       if (id === constants.testArea.id) return constants.testArea;
       else return null;
@@ -41,15 +40,15 @@ describe('Area Template Relations', () => {
       if (id === constants.testArea.id) return constants.testArea;
       else return null;
     },
-    delete: (id) => constants.testArea,
+    delete: (_id) => constants.testArea,
   };
   const coverageService = {
-    getCoverage: (params, token) => {
+    getCoverage: (_params, _token) => {
       return { layers: [] };
     },
   };
   const geostoreService = {
-    getGeostore: (id, token) => constants.testGeostore,
+    getGeostore: (_id, _token) => constants.testGeostore,
   };
 
   beforeAll(async () => {

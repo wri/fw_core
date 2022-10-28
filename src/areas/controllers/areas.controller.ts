@@ -24,7 +24,6 @@ import { TemplateAreaRelationService } from '../services/templateAreaRelation.se
 import { TeamDocument } from '../../teams/models/team.schema';
 import { IArea, IAreaResponse } from '../models/area.entity';
 import { Request } from 'express';
-import { IUser } from '../../common/user.model';
 import { ResponseService } from '../services/response.service';
 import { TemplatesService } from '../../templates/templates.service';
 
@@ -248,7 +247,7 @@ export class AreasController {
     let data: any;
     if (user && user.id) {
       try {
-        const { area, geostoreId, coverage } =
+        const { area, coverage } =
           await this.areasService.updateAreaWithGeostore(
             {
               name,

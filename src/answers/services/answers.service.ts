@@ -1,12 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAnswerDto } from '../dto/create-answer.dto';
-import { UpdateAnswerDto } from '../dto/update-answer.dto';
-import {
-  Answer,
-  AnswerDocument,
-  IAnswer,
-  IAnswerResponse,
-} from '../models/answer.model';
+import { Answer, AnswerDocument, IAnswer } from '../models/answer.model';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { IUser } from '../../common/user.model';
@@ -15,10 +8,7 @@ import { EMemberRole } from '../../teams/models/teamMember.schema';
 import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import { UserService } from '../../common/user.service';
-import {
-  Template,
-  TemplateDocument,
-} from '../../templates/models/template.schema';
+import { TemplateDocument } from '../../templates/models/template.schema';
 import { TeamsService } from '../../teams/services/teams.service';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
 

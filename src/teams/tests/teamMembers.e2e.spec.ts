@@ -19,7 +19,7 @@ describe('Team Members', () => {
   let teamsDbConnection: Connection;
   const userService = {
     authorise: (token) => ROLES[token],
-    getNameByIdMICROSERVICE: (id) => 'Full Name',
+    getNameByIdMICROSERVICE: (_id) => 'Full Name',
   };
 
   beforeAll(async () => {
@@ -331,24 +331,20 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const admin = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Invited,
-          role: EMemberRole.Administrator,
-        });
-      const manager = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
-          email: ROLES.MANAGER.email,
-          status: EMemberStatus.Invited,
-          role: EMemberRole.Manager,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Invited,
+        role: EMemberRole.Administrator,
+      });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
+        email: ROLES.MANAGER.email,
+        status: EMemberStatus.Invited,
+        role: EMemberRole.Manager,
+      });
       return await request(app.getHttpServer())
         .patch(
           `/teams/${team1.insertedId.toString()}/users/reassignAdmin/${
@@ -444,15 +440,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const member = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Confirmed,
-          role: EMemberRole.Manager,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Confirmed,
+        role: EMemberRole.Manager,
+      });
       const member2 = await teamsDbConnection
         .collection('teamuserrelations')
         .insertOne({
@@ -475,15 +469,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const admin = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Confirmed,
-          role: EMemberRole.Administrator,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Confirmed,
+        role: EMemberRole.Administrator,
+      });
       const manager = await teamsDbConnection
         .collection('teamuserrelations')
         .insertOne({
@@ -622,15 +614,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const admin = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Confirmed,
-          role: EMemberRole.Administrator,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Confirmed,
+        role: EMemberRole.Administrator,
+      });
       const manager = await teamsDbConnection
         .collection('teamuserrelations')
         .insertOne({
@@ -681,15 +671,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const member = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Invited,
-          role: EMemberRole.Monitor,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Invited,
+        role: EMemberRole.Monitor,
+      });
       const member2 = await teamsDbConnection
         .collection('teamuserrelations')
         .insertOne({
@@ -711,15 +699,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const member = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Confirmed,
-          role: EMemberRole.Manager,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Confirmed,
+        role: EMemberRole.Manager,
+      });
       const member2 = await teamsDbConnection
         .collection('teamuserrelations')
         .insertOne({
@@ -741,15 +727,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const admin = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Confirmed,
-          role: EMemberRole.Administrator,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Confirmed,
+        role: EMemberRole.Administrator,
+      });
       const manager = await teamsDbConnection
         .collection('teamuserrelations')
         .insertOne({
@@ -771,15 +755,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const admin = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Confirmed,
-          role: EMemberRole.Administrator,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Confirmed,
+        role: EMemberRole.Administrator,
+      });
       const manager = await teamsDbConnection
         .collection('teamuserrelations')
         .insertOne({
@@ -806,15 +788,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const admin = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Confirmed,
-          role: EMemberRole.Administrator,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Confirmed,
+        role: EMemberRole.Administrator,
+      });
       const manager = await teamsDbConnection
         .collection('teamuserrelations')
         .insertOne({
@@ -870,15 +850,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const member = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Invited,
-          role: EMemberRole.Monitor,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Invited,
+        role: EMemberRole.Monitor,
+      });
       return await request(app.getHttpServer())
         .patch(
           `/teams/${team1.insertedId.toString()}/users/${
@@ -893,15 +871,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const member = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Invited,
-          role: EMemberRole.Monitor,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Invited,
+        role: EMemberRole.Monitor,
+      });
       return await request(app.getHttpServer())
         .patch(
           `/teams/${team1.insertedId.toString()}/users/${ROLES.USER.id}/accept`,
@@ -955,15 +931,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const member = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Invited,
-          role: EMemberRole.Monitor,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Invited,
+        role: EMemberRole.Monitor,
+      });
       return await request(app.getHttpServer())
         .patch(
           `/teams/${team1.insertedId.toString()}/users/${
@@ -978,15 +952,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const member = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Invited,
-          role: EMemberRole.Monitor,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Invited,
+        role: EMemberRole.Monitor,
+      });
       return await request(app.getHttpServer())
         .patch(
           `/teams/${team1.insertedId.toString()}/users/${
@@ -1044,15 +1016,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const member = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Confirmed,
-          role: EMemberRole.Monitor,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Confirmed,
+        role: EMemberRole.Monitor,
+      });
       return await request(app.getHttpServer())
         .patch(
           `/teams/${team1.insertedId.toString()}/users/${ROLES.ADMIN.id}/leave`,
@@ -1065,15 +1035,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const member = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Confirmed,
-          role: EMemberRole.Monitor,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Confirmed,
+        role: EMemberRole.Monitor,
+      });
       return await request(app.getHttpServer())
         .patch(
           `/teams/${team1.insertedId.toString()}/users/${ROLES.USER.id}/leave`,
@@ -1114,15 +1082,13 @@ describe('Team Members', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const member = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          status: EMemberStatus.Confirmed,
-          role: EMemberRole.Administrator,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Confirmed,
+        role: EMemberRole.Administrator,
+      });
       await request(app.getHttpServer())
         .patch(
           `/teams/${team1.insertedId.toString()}/users/${ROLES.USER.id}/leave`,

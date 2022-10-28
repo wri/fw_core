@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import request from 'supertest';
-import { HttpException, HttpStatus, INestApplication } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { UserService } from '../../common/user.service';
 import { getModelToken } from '@nestjs/mongoose';
@@ -15,20 +15,13 @@ import { DatasetService } from '../services/dataset.service';
 import { GeostoreService } from '../services/geostore.service';
 import { TeamAreaRelationService } from '../services/teamAreaRelation.service';
 import { TemplateAreaRelationService } from '../services/templateAreaRelation.service';
-import { TeamAreaRelation } from '../models/teamAreaRelation.schema';
-import { TemplateAreaRelation } from '../models/templateAreaRelation.schema';
 import constants from './area.constants';
 import { ResponseService } from '../services/response.service';
 import {
   EMemberRole,
   EMemberStatus,
-  TeamMember,
 } from '../../teams/models/teamMember.schema';
-import { Team } from '../../teams/models/team.schema';
-import {
-  Template,
-  ETemplateStatus,
-} from '../../templates/models/template.schema';
+import { ETemplateStatus } from '../../templates/models/template.schema';
 import { TemplatesService } from '../../templates/templates.service';
 import { TeamsService } from '../../teams/services/teams.service';
 import { TeamMembersService } from '../../teams/services/teamMembers.service';
@@ -41,21 +34,21 @@ describe('Areas', () => {
   let formsDbConnection: Connection;
   const userService = {
     authorise: (token) => ROLES[token],
-    getNameByIdMICROSERVICE: (id) => 'Full Name',
+    getNameByIdMICROSERVICE: (_id) => 'Full Name',
   };
   const areaService = {
-    getUserAreas: (id) => [constants.testArea],
-    getArea: (id) => constants.testArea,
-    getAreaMICROSERVICE: (id) => constants.testArea,
-    delete: (id) => constants.testArea,
+    getUserAreas: (_id) => [constants.testArea],
+    getArea: (_id) => constants.testArea,
+    getAreaMICROSERVICE: (_id) => constants.testArea,
+    delete: (_id) => constants.testArea,
   };
   const coverageService = {
-    getCoverage: (params, token) => {
+    getCoverage: (_params, _token) => {
       return { layers: [] };
     },
   };
   const geostoreService = {
-    getGeostore: (id, token) => constants.testGeostore,
+    getGeostore: (_id, _token) => constants.testGeostore,
   };
 
   beforeAll(async () => {
@@ -160,12 +153,10 @@ describe('Areas', () => {
         status: ETemplateStatus.PUBLISHED,
         questions: [],
       });
-      const templateAreaRelation = await apiDbConnection
-        .collection('areatemplaterelations')
-        .insertOne({
-          areaId: constants.testArea.id,
-          templateId: template.insertedId.toString(),
-        });
+      await apiDbConnection.collection('areatemplaterelations').insertOne({
+        areaId: constants.testArea.id,
+        templateId: template.insertedId.toString(),
+      });
       const response = await request(app.getHttpServer())
         .get(`/areas/user`)
         .set('Authorization', `USER`)
@@ -206,7 +197,7 @@ describe('Areas', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const relation = await apiDbConnection
+      await apiDbConnection
         .collection('areateamrelations')
         .insertOne({ areaId: constants.testArea.id, teamId: team1.insertedId });
       await teamsDbConnection.collection('teamuserrelations').insertOne({
@@ -302,7 +293,7 @@ describe('Areas', () => {
       const filename = 'image.png';
       const fileData = Buffer.from('TestFileContent', 'utf8');
 
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .post(`/areas`)
         .attach('image', fileData, filename)
         .set('Authorization', `USER`)
@@ -313,7 +304,7 @@ describe('Areas', () => {
       const filename = 'image.png';
       const fileData = Buffer.from('TestFileContent', 'utf8');
 
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .post(`/areas`)
         .attach('image', fileData, filename)
         .field({ name: 'name' })
@@ -321,7 +312,7 @@ describe('Areas', () => {
         .expect(400);
     });
     it('Create an area while being logged without an image value should return an error', async function () {
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .post(`/areas`)
         .send({ name: 'name', geojson: {} })
         .set('Authorization', `USER`)
@@ -384,12 +375,10 @@ describe('Areas', () => {
         status: ETemplateStatus.PUBLISHED,
         questions: [],
       });
-      const templateAreaRelation = await apiDbConnection
-        .collection('areatemplaterelations')
-        .insertOne({
-          areaId: constants.testArea.id,
-          templateId: template.insertedId.toString(),
-        });
+      await apiDbConnection.collection('areatemplaterelations').insertOne({
+        areaId: constants.testArea.id,
+        templateId: template.insertedId.toString(),
+      });
       const response = await request(app.getHttpServer())
         .get(`/areas/${constants.testArea.id}`)
         .set('Authorization', `USER`)
@@ -407,7 +396,7 @@ describe('Areas', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const relation = await apiDbConnection
+      await apiDbConnection
         .collection('areateamrelations')
         .insertOne({ areaId: constants.testArea.id, teamId: team1.insertedId });
       await teamsDbConnection.collection('teamuserrelations').insertOne({
@@ -442,7 +431,7 @@ describe('Areas', () => {
       const filename = 'image.png';
       const fileData = Buffer.from('TestFileContent', 'utf8');
 
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .patch(`/areas/${1}`)
         .attach('image', fileData, filename)
         .set('Authorization', `USER`)
@@ -453,7 +442,7 @@ describe('Areas', () => {
       const filename = 'image.png';
       const fileData = Buffer.from('TestFileContent', 'utf8');
 
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .patch(`/areas/${1}`)
         .attach('image', fileData, filename)
         .field({ name: 'name' })
@@ -461,7 +450,7 @@ describe('Areas', () => {
         .expect(400);
     });
     it('Update an area while being logged without an image value should return an error', async function () {
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .patch(`/areas/${1}`)
         .send({ name: 'name', geojson: {} })
         .set('Authorization', `USER`)
@@ -484,20 +473,18 @@ describe('Areas', () => {
     });
 
     it('should succeed when deleting own area', async function () {
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .delete(`/areas/${constants.testArea.id.toString()}`)
         .set('Authorization', `USER`)
         .expect(200);
     });
 
     it('should delete all team relations', async function () {
-      const relation = await apiDbConnection
-        .collection('areateamrelations')
-        .insertOne({
-          areaId: constants.testArea.id,
-          teamId: new mongoose.Types.ObjectId(),
-        });
-      const response = await request(app.getHttpServer())
+      await apiDbConnection.collection('areateamrelations').insertOne({
+        areaId: constants.testArea.id,
+        teamId: new mongoose.Types.ObjectId(),
+      });
+      await request(app.getHttpServer())
         .delete(`/areas/${constants.testArea.id.toString()}`)
         .set('Authorization', `USER`)
         .expect(200);
@@ -509,13 +496,11 @@ describe('Areas', () => {
     });
 
     it('should delete all template relations', async function () {
-      const relation = await apiDbConnection
-        .collection('areatemplaterelations')
-        .insertOne({
-          areaId: constants.testArea.id,
-          templateId: new mongoose.Types.ObjectId(),
-        });
-      const response = await request(app.getHttpServer())
+      await apiDbConnection.collection('areatemplaterelations').insertOne({
+        areaId: constants.testArea.id,
+        templateId: new mongoose.Types.ObjectId(),
+      });
+      await request(app.getHttpServer())
         .delete(`/areas/${constants.testArea.id.toString()}`)
         .set('Authorization', `USER`)
         .expect(200);

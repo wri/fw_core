@@ -1,10 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {
-  TeamAreaRelation,
-  TeamAreaRelationDocument,
-} from '../models/teamAreaRelation.schema';
+import { TeamAreaRelationDocument } from '../models/teamAreaRelation.schema';
 
 @Injectable()
 export class TeamAreaRelationService {

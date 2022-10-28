@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Req,
@@ -14,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { AnswersService } from './services/answers.service';
 import { CreateAnswerDto } from './dto/create-answer.dto';
-import { UpdateAnswerDto } from './dto/update-answer.dto';
 import { Request } from 'express';
 import serializeAnswers from './serializers/answers.serializer';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
@@ -185,7 +183,7 @@ export class AnswersController {
   }
 
   @Get('/exports/:id')
-  async findOneForExport(@Param('id') id: string, @Req() request: Request) {
+  async findOneForExport(@Param('id') id: string) {
     const answer = await this.answersService.findOne({
       _id: new mongoose.Types.ObjectId(id),
     });
