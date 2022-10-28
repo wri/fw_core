@@ -26,7 +26,7 @@ describe('Templates', () => {
   let formsDbConnection: Connection;
   const userService = {
     authorise: (token) => ROLES[token],
-    getNameByIdMICROSERVICE: (id) => 'Full Name',
+    getNameByIdMICROSERVICE: (_id) => 'Full Name',
   };
 
   beforeAll(async () => {
@@ -232,7 +232,7 @@ describe('Templates', () => {
     });
 
     it('should succeed with a 201', async () => {
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .post(`/templates`)
         .set('Authorization', 'USER')
         .send({
@@ -333,7 +333,7 @@ describe('Templates', () => {
     });
 
     it('should fail to create a public template if not ADMIN', async () => {
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .post(`/templates`)
         .set('Authorization', 'USER')
         .send({
@@ -438,7 +438,7 @@ describe('Templates', () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.defaultTemplate);
-      const template2 = await formsDbConnection
+      await formsDbConnection
         .collection('reports')
         .insertOne(constants.managerTemplate);
       const template3 = await formsDbConnection
@@ -611,7 +611,7 @@ describe('Templates', () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.defaultTemplate);
-      const template2 = await formsDbConnection
+      await formsDbConnection
         .collection('reports')
         .insertOne(constants.managerTemplate);
       const template3 = await formsDbConnection
@@ -665,24 +665,20 @@ describe('Templates', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const member1 = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          role: EMemberRole.Monitor,
-          status: EMemberStatus.Confirmed,
-        });
-      const member2 = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
-          email: ROLES.MANAGER.email,
-          role: EMemberRole.Manager,
-          status: EMemberStatus.Confirmed,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        role: EMemberRole.Monitor,
+        status: EMemberStatus.Confirmed,
+      });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
+        email: ROLES.MANAGER.email,
+        role: EMemberRole.Manager,
+        status: EMemberStatus.Confirmed,
+      });
 
       const response = await request(app.getHttpServer())
         .get(`/templates/allAnswers`)
@@ -714,31 +710,27 @@ describe('Templates', () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.defaultTemplate);
-      const template2 = await formsDbConnection
+      await formsDbConnection
         .collection('reports')
         .insertOne(constants.managerTemplate);
       const template3 = await formsDbConnection
         .collection('reports')
         .insertOne(constants.userTemplate);
 
-      const managerAnswer = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: template3.insertedId,
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
-      const managerAnswer2 = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: template.insertedId,
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template3.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
       await formsDbConnection.collection('answers').insertOne({
         report: template3.insertedId,
         reportName: 'answer 1',
@@ -768,24 +760,20 @@ describe('Templates', () => {
       const team1 = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
-      const member1 = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-          email: ROLES.USER.email,
-          role: EMemberRole.Monitor,
-          status: EMemberStatus.Confirmed,
-        });
-      const member2 = await teamsDbConnection
-        .collection('teamuserrelations')
-        .insertOne({
-          teamId: team1.insertedId,
-          userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
-          email: ROLES.MANAGER.email,
-          role: EMemberRole.Manager,
-          status: EMemberStatus.Confirmed,
-        });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        role: EMemberRole.Monitor,
+        status: EMemberStatus.Confirmed,
+      });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
+        email: ROLES.MANAGER.email,
+        role: EMemberRole.Manager,
+        status: EMemberStatus.Confirmed,
+      });
 
       const response = await request(app.getHttpServer())
         .get(`/templates/allAnswers`)
@@ -859,15 +847,13 @@ describe('Templates', () => {
         ...constants.userTemplate,
         status: 'unpublished',
       });
-      const userAnswer1 = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: template.insertedId,
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
       const createdTemplate = await formsDbConnection
         .collection('reports')
         .findOne({ _id: template.insertedId });
@@ -1188,7 +1174,7 @@ describe('Templates', () => {
 
   describe('GET /templates/latest', () => {
     afterEach(async () => {
-      formsDbConnection.collection('reports').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
     });
 
     it('should return a 401 without authorisation', async () => {
@@ -1279,7 +1265,7 @@ describe('Templates', () => {
 
   describe('GET /templates/versions/:id', () => {
     afterEach(async () => {
-      formsDbConnection.collection('reports').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
     });
 
     it('should return 401 if not logged in', async () => {
@@ -1311,20 +1297,18 @@ describe('Templates', () => {
         defaultLanguage: 'en',
       };
 
-      const templates = await formsDbConnection
-        .collection('reports')
-        .insertMany([
-          {
-            ...templateBoilerplate,
-            editGroupId: groupId,
-            isLatest: true,
-          },
-          {
-            ...templateBoilerplate,
-            editGroupId: groupId,
-            isLatest: false,
-          },
-        ]);
+      await formsDbConnection.collection('reports').insertMany([
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+      ]);
 
       const response = await request(app.getHttpServer())
         .get(`/templates/versions/${groupId}`)

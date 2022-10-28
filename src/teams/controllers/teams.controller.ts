@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
@@ -11,8 +10,7 @@ import {
   Post,
   Req,
 } from '@nestjs/common';
-import { CreateTeamDto } from '../dto/createTeam.dto';
-import { Team, TeamDocument } from '../models/team.schema';
+import { TeamDocument } from '../models/team.schema';
 import { TeamsService } from '../services/teams.service';
 import { Request } from 'express';
 import { TeamMembersService } from '../services/teamMembers.service';
@@ -30,7 +28,7 @@ export class TeamsController {
   private readonly logger = new Logger(TeamsController.name);
 
   @Get('/myinvites')
-  async findMyInvites(@Req() request: Request, @Param() params): Promise<any> {
+  async findMyInvites(@Req() request: Request, @Param() _params): Promise<any> {
     let loggedUser;
     if (request.query && request.query.loggedUser)
       loggedUser = (request.query as any).loggedUser;

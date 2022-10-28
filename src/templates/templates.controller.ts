@@ -20,11 +20,7 @@ import { IUser } from '../common/user.model';
 import { Request } from 'express';
 import { AnswersService } from '../answers/services/answers.service';
 import serializeTemplate from './serializers/template.serializer';
-import {
-  ETemplateStatus,
-  ITemplateResponse,
-  TemplateDocument,
-} from './models/template.schema';
+import { ETemplateStatus, ITemplateResponse } from './models/template.schema';
 import { IAnswerReturn } from '../answers/models/answer.model';
 import { TeamsService } from '../teams/services/teams.service';
 import serializeAnswers from '../answers/serializers/answers.serializer';
@@ -295,7 +291,7 @@ export class TemplatesController {
     } else if (answers.length > 0) {
       await this.answersService.delete({ report: id });
     }
-    const result = await this.templatesService.delete(query);
+    await this.templatesService.delete(query);
 
     // remove all area - template relations
     await this.templateAreaRelationService.delete({ templateId: id });

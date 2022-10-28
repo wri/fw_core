@@ -6,10 +6,7 @@ import { Route, RouteSchema } from './models/route.schema';
 import { TeamsService } from '../teams/services/teams.service';
 import { TeamSchema } from '../teams/models/team.schema';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
-import {
-  TeamMember,
-  TeamMemberSchema,
-} from '../teams/models/teamMember.schema';
+import { TeamMemberSchema } from '../teams/models/teamMember.schema';
 import { UserService } from '../common/user.service';
 
 @Module({

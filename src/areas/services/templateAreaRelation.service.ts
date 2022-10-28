@@ -2,10 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TemplatesService } from '../../templates/templates.service';
-import {
-  TemplateAreaRelation,
-  TemplateAreaRelationDocument,
-} from '../models/templateAreaRelation.schema';
+import { TemplateAreaRelationDocument } from '../models/templateAreaRelation.schema';
 
 @Injectable()
 export class TemplateAreaRelationService {

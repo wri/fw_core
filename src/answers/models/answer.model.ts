@@ -22,6 +22,7 @@ export interface IAnswer {
   user: mongoose.Types.ObjectId;
   responses: IAnswerResponse[];
   createdAt: string;
+  assignmentId?: mongoose.Types.ObjectId;
 }
 
 @Schema()
@@ -67,6 +68,9 @@ export class Answer {
 
   @Prop({ required: true, default: Date.now() })
   createdAt: Date;
+
+  @Prop()
+  assignmentId?: mongoose.Schema.Types.ObjectId;
 }
 
 export interface AnswerDocument extends IAnswer, mongoose.Document {}

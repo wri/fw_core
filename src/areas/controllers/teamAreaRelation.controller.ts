@@ -3,16 +3,13 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
-  Req,
   Logger,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
 import { AreasService } from '../services/areas.service';
-import { UpdateAreaDto } from '../dto/update-area.dto';
 import { CreateTeamAreaRelationDto } from '../dto/createTeamAreaRelation.dto';
 import { TeamsService } from '../../teams/services/teams.service';
 import { TeamAreaRelationService } from '../services/teamAreaRelation.service';

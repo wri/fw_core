@@ -6,8 +6,6 @@ import { CreateTeamMemberDto } from '../dto/createTeamMember.dto';
 import {
   EMemberRole,
   EMemberStatus,
-  ITeamMember,
-  TeamMember,
   TeamMemberDocument,
 } from '../models/teamMember.schema';
 import mongoose from 'mongoose';
@@ -15,7 +13,7 @@ import mongoose from 'mongoose';
 @Injectable()
 export class TeamMembersService {
   static findById(
-    memberId: any,
+    _memberId: any,
   ): TeamMemberDocument | PromiseLike<TeamMemberDocument> {
     throw new Error('Method not implemented.');
   }

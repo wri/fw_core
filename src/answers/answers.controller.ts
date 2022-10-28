@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Req,
@@ -11,10 +10,11 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFiles,
+  BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AnswersService } from './services/answers.service';
 import { CreateAnswerDto } from './dto/create-answer.dto';
-import { UpdateAnswerDto } from './dto/update-answer.dto';
 import { Request } from 'express';
 import serializeAnswers from './serializers/answers.serializer';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
@@ -24,6 +24,9 @@ import { IAnswer } from './models/answer.model';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { S3Service } from './services/s3Service';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
+import { AssignmentStatus } from '../assignments/assignment-status.enum';
+import { AssignmentsService } from '../assignments/assignments.service';
+import { ITemplateQuestion } from '../templates/models/template.schema';
 
 @Controller('templates/:templateId/answers')
 export class AnswersController {
@@ -32,30 +35,26 @@ export class AnswersController {
     private readonly teamMembersService: TeamMembersService,
     private readonly teamAreaRelationService: TeamAreaRelationService,
     private readonly s3Service: S3Service,
+    private readonly assignmentService: AssignmentsService,
   ) {}
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor({ dest: './tmp' }))
   async create(
-    @UploadedFiles() fileArray: Array<Express.Multer.File>,
     @Body() fields: CreateAnswerDto,
     @Req() request: Request,
+    @UploadedFiles() fileArray?: Array<Express.Multer.File>,
   ) {
-    const { template, user } = request;
-    let userPosition: string[] = [];
-    const files = {};
-    if (fileArray) fileArray.forEach((file) => (files[file.fieldname] = file));
+    const { user, template } = request;
 
-    try {
-      userPosition = fields.userPosition
-        ? fields.userPosition.split(',')
-        : ([] as string[]);
-    } catch (e) {
-      throw new HttpException(
-        `Position values must be separated by ','`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    const userPosition = fields.userPosition
+      ? fields.userPosition.split(',')
+      : [];
+
+    const files = fileArray?.reduce((acc, file) => {
+      return { ...acc, [file.fieldname]: file };
+    }, {} as { [fieldName: string]: Express.Multer.File });
+
     const answer: IAnswer = {
       report: template.id,
       reportName: fields.reportName,
@@ -67,85 +66,98 @@ export class AnswersController {
       user: new mongoose.Types.ObjectId(user.id),
       createdAt: fields.date ?? Date.now().toString(),
       responses: [],
+      teamId: fields.teamId,
     };
 
-    if (fields.teamId) answer.teamId = fields.teamId.toString();
+    const isFileTypeQuestion = (question: ITemplateQuestion) =>
+      question.type === 'blob';
+    const validateResponseTypeOrFail = (question: ITemplateQuestion) => {
+      const hasFileResponse = !!files?.[question.name];
+      const hasFieldResponse = !!fields[question.name];
 
-    const pushResponse = (question, response) => {
+      if (isFileTypeQuestion(question) && hasFieldResponse)
+        throw new BadRequestException(
+          `Expected file response for '${question.name}'`,
+        );
+
+      if (!isFileTypeQuestion(question) && hasFileResponse)
+        throw new BadRequestException(
+          `Expected non-file response for '${question.name}'`,
+        );
+    };
+    const addResponseOrFail = async (question: ITemplateQuestion) => {
+      if (isFileTypeQuestion(question)) {
+        const file = files?.[question.name];
+        const fileUrl = file
+          ? await this.s3Service.uploadFile(file.path, file.filename)
+          : undefined;
+        answer.responses.push({ name: question.name, value: fileUrl });
+        return;
+      }
+
       answer.responses.push({
         name: question.name,
-        value: typeof response !== 'undefined' ? response : null,
+        value: fields[question.name]?.toString(),
       });
     };
-    const pushError = (question) => {
-      throw new HttpException(
-        `${question.label[answer.language]} (${question.name}) required`,
-        HttpStatus.BAD_REQUEST,
-      );
-    };
-    const { questions } = template;
-    if (!questions || (questions && !questions.length)) {
-      throw new HttpException(
-        `No question associated with this report`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
 
-    for (let i = 0; i < questions.length; i++) {
-      const question = questions[i];
+    for (const question of template.questions) {
+      validateResponseTypeOrFail(question);
 
-      let fileAnswer;
-
-      // handle parent questions
-      const bodyAnswer = fields[question.name];
-      if (files) fileAnswer = files[question.name];
-      let response =
-        typeof bodyAnswer !== 'undefined' ? bodyAnswer : fileAnswer;
-      if (!response && question.required) {
-        pushError(question);
-      }
-      if (
-        response &&
-        response.path &&
-        response.filename &&
-        question.type === 'blob'
-      ) {
-        // upload file
-        response = await this.s3Service.uploadFile(
-          response.path,
-          response.filename,
+      const name = question.name;
+      if (question.required && !files?.[name] && !fields[name])
+        throw new BadRequestException(
+          `${question.label[answer.language]} (${question.name}) required`,
         );
-      }
 
-      pushResponse(question, response);
-      // handle child questions
-      if (question.childQuestions) {
-        for (let j = 0; j < question.childQuestions.length; j++) {
-          const childQuestion = question.childQuestions[j];
-          const childBodyAnswer = fields[childQuestion.name];
-          const childFileAnswer = files[childQuestion.name];
-          const conditionMatches =
-            typeof bodyAnswer !== 'undefined' &&
-            childQuestion.conditionalValue === bodyAnswer;
-          let childResponse =
-            typeof childBodyAnswer !== 'undefined'
-              ? childBodyAnswer
-              : childFileAnswer;
-          if (!childResponse && childQuestion.required && conditionMatches) {
-            pushError(childQuestion);
-          }
-          if (childResponse && childQuestion.type === 'blob') {
-            // upload file
-            childResponse = await this.s3Service.uploadFile(
-              childResponse.path,
-              childResponse.filename,
-            );
-          }
-          pushResponse(childQuestion, childResponse);
-        }
+      await addResponseOrFail(question);
+
+      if (!question.childQuestions) continue;
+      for (const childQuestion of question.childQuestions) {
+        validateResponseTypeOrFail(childQuestion);
+
+        const parentName = question.name;
+        const name = childQuestion.name;
+        const conditionMatches =
+          fields[parentName] && childQuestion.conditionalValue === fields[name];
+        const hasResponse = files?.[name] || fields[name];
+
+        if (childQuestion.required && conditionMatches && !hasResponse)
+          throw new BadRequestException(
+            `${question.label[answer.language]} (${question.name}) required`,
+          );
+
+        await addResponseOrFail(question);
       }
     }
+
+    const assignmentId = fields.assignmentId;
+    if (!assignmentId) {
+      const answerModel = await this.answersService.create(answer);
+      return { data: serializeAnswers(answerModel) };
+    }
+
+    const assignment = await this.assignmentService.findOne({
+      _id: assignmentId,
+      monitors: user.id,
+    });
+
+    if (!assignment)
+      throw new UnauthorizedException(
+        `User is not authorized to submit assignment ${assignmentId}`,
+      );
+
+    if (assignment.templateId !== template.id)
+      throw new BadRequestException(
+        `Assignment does not belong to template ${template.id}`,
+      );
+
+    answer.assignmentId = new mongoose.Types.ObjectId(assignmentId);
     const answerModel = await this.answersService.create(answer);
+    await this.assignmentService.update(assignmentId, {
+      status: AssignmentStatus.COMPLETED,
+    });
+
     return { data: serializeAnswers(answerModel) };
   }
 
@@ -185,7 +197,7 @@ export class AnswersController {
   }
 
   @Get('/exports/:id')
-  async findOneForExport(@Param('id') id: string, @Req() request: Request) {
+  async findOneForExport(@Param('id') id: string) {
     const answer = await this.answersService.findOne({
       _id: new mongoose.Types.ObjectId(id),
     });

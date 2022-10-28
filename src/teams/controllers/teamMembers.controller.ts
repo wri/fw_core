@@ -21,7 +21,6 @@ import { TeamMembersService } from '../services/teamMembers.service';
 import {
   EMemberRole,
   EMemberStatus,
-  TeamMember,
   TeamMemberDocument,
 } from '../models/teamMember.schema';
 import serializeTeamMember from '../serializers/teamMember.serializer';

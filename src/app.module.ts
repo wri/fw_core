@@ -1,5 +1,4 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthMiddleware } from './common/middleware/auth.middleware';
@@ -12,7 +11,6 @@ import { ConfigModule } from '@nestjs/config';
 import configuration from './common/configuration';
 import { TemplatesModule } from './templates/templates.module';
 import { AnswersModule } from './answers/answers.module';
-import { IdCheckMiddleware } from './common/middleware/idCheck.middleware';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { RoutesModule } from './routes/routes.module';
 

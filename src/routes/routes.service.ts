@@ -32,7 +32,7 @@ export class RoutesService {
     return await this.routeModel.findOne(filter);
   }
 
-  update(id: string, updateRouteDto: UpdateRouteDto) {
+  update(id: string, _updateRouteDto: UpdateRouteDto) {
     return `This action updates a #${id} route`;
   }
 

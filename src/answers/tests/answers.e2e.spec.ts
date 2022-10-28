@@ -20,8 +20,11 @@ import { TemplatesService } from '../../templates/templates.service';
 import { AnswersService } from '../services/answers.service';
 import { Answer } from '../models/answer.model';
 import constants from './templates.constants';
+import asssignments from '../../assignments/tests/assignments.constants';
 import { S3Service } from '../services/s3Service';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
+import { AssignmentStatus } from '../../assignments/assignment-status.enum';
+import { CreateAnswerDto } from '../dto/create-answer.dto';
 
 describe('Answers', () => {
   let app: INestApplication;
@@ -30,10 +33,10 @@ describe('Answers', () => {
   let formsDbConnection: Connection;
   const userService = {
     authorise: (token) => ROLES[token],
-    getNameByIdMICROSERVICE: (id) => 'Full Name',
+    getNameByIdMICROSERVICE: (_id) => 'Full Name',
   };
   const s3Service = {
-    uploadFile: (file, name) =>
+    uploadFile: (_file, _name) =>
       `https://s3.amazonaws.com/bucket/folder/uuid.ext`,
   };
 
@@ -178,24 +181,20 @@ describe('Answers', () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.defaultTemplate);
-      const managerAnswer = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: template.insertedId,
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
-      const wrongTemplateAnswer = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: new mongoose.Types.ObjectId(),
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
+      await formsDbConnection.collection('answers').insertOne({
+        report: new mongoose.Types.ObjectId(),
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
       const userAnswer1 = await formsDbConnection
         .collection('answers')
         .insertOne({
@@ -272,15 +271,13 @@ describe('Answers', () => {
           user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
           responses: [{ name: 'question-1', value: 'test' }],
         });
-      const wrongTemplateAnswer = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: new mongoose.Types.ObjectId(),
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
+      await formsDbConnection.collection('answers').insertOne({
+        report: new mongoose.Types.ObjectId(),
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
       const userAnswer1 = await formsDbConnection
         .collection('answers')
         .insertOne({
@@ -334,15 +331,13 @@ describe('Answers', () => {
           user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
           responses: [{ name: 'question-1', value: 'test' }],
         });
-      const wrongTemplateAnswer = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: new mongoose.Types.ObjectId(),
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
+      await formsDbConnection.collection('answers').insertOne({
+        report: new mongoose.Types.ObjectId(),
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
       const userAnswer1 = await formsDbConnection
         .collection('answers')
         .insertOne({
@@ -387,42 +382,34 @@ describe('Answers', () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.userTemplate);
-      const managerAnswer = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: template.insertedId,
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
-      const wrongTemplateAnswer = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: new mongoose.Types.ObjectId(),
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
-      const userAnswer1 = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: template.insertedId,
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
-      const userAnswer2 = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: template.insertedId,
-          reportName: 'answer 2',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
+      await formsDbConnection.collection('answers').insertOne({
+        report: new mongoose.Types.ObjectId(),
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 2',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
       const response = await request(app.getHttpServer())
         .get(`/templates/${template.insertedId.toString()}/answers`)
         .set('Authorization', 'USER')
@@ -748,6 +735,108 @@ describe('Answers', () => {
         'https://s3.amazonaws.com/bucket/folder/uuid.ext',
       );
     });
+
+    it('should return a 401 if submitting an assignment the user is not a monitor on', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate });
+
+      const assignment = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...asssignments.defaultAssignment,
+          monitors: [new mongoose.Types.ObjectId()],
+          status: AssignmentStatus.OPEN,
+          templateId: template.insertedId.toString(),
+          createdBy: new mongoose.Types.ObjectId(),
+          name: 'Assignment',
+        });
+
+      await request(app.getHttpServer())
+        .post(`/templates/${template.insertedId}/answers`)
+        .set('authorization', 'USER')
+        .send({
+          language: 'en',
+          reportName: 'Report Name',
+          assignmentId: assignment.insertedId.toString(),
+        } as CreateAnswerDto)
+        .expect(401);
+
+      const assignmentDb = await formsDbConnection
+        .collection('assignments')
+        .findOne({ _id: assignment.insertedId });
+
+      expect(assignmentDb?.status).toEqual(AssignmentStatus.OPEN);
+    });
+
+    it('should return a 400 if submitting an assignment on the wrong template', async () => {
+      const templates = await formsDbConnection
+        .collection('reports')
+        .insertMany([
+          { ...constants.userTemplate, _id: new mongoose.Types.ObjectId() },
+          { ...constants.userTemplate, _id: new mongoose.Types.ObjectId() },
+        ]);
+
+      const assignment = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...asssignments.defaultAssignment,
+          monitors: [ROLES.USER.id],
+          status: AssignmentStatus.OPEN,
+          templateId: templates.insertedIds[0].toString(),
+          createdBy: new mongoose.Types.ObjectId(),
+          name: 'Assignment',
+        });
+
+      await request(app.getHttpServer())
+        .post(`/templates/${templates.insertedIds[1]}/answers`)
+        .set('authorization', 'USER')
+        .send({
+          language: 'en',
+          reportName: 'Report Name',
+          assignmentId: assignment.insertedId.toString(),
+        } as CreateAnswerDto)
+        .expect(400);
+
+      const assignmentDb = await formsDbConnection
+        .collection('assignments')
+        .findOne({ _id: assignment.insertedId });
+
+      expect(assignmentDb?.status).toEqual(AssignmentStatus.OPEN);
+    });
+
+    it('should change assignment to completed if answer is with assignmentId', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate });
+
+      const assignment = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...asssignments.defaultAssignment,
+          monitors: [ROLES.USER.id],
+          status: AssignmentStatus.OPEN,
+          templateId: template.insertedId.toString(),
+          createdBy: new mongoose.Types.ObjectId(),
+          name: 'Assignment',
+        });
+
+      await request(app.getHttpServer())
+        .post(`/templates/${template.insertedId}/answers`)
+        .set('authorization', 'USER')
+        .send({
+          language: 'en',
+          reportName: 'Report Name',
+          assignmentId: assignment.insertedId.toString(),
+        } as CreateAnswerDto)
+        .expect(201);
+
+      const assignmentDb = await formsDbConnection
+        .collection('assignments')
+        .findOne({ _id: assignment.insertedId });
+
+      expect(assignmentDb?.status).toEqual(AssignmentStatus.COMPLETED);
+    });
   });
 
   describe('DELETE /templates/:templateId/answers/:id', () => {
@@ -956,7 +1045,7 @@ describe('Answers', () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.userTemplate);
-      const answer = await formsDbConnection.collection('answers').insertOne({
+      await formsDbConnection.collection('answers').insertOne({
         report: template.insertedId,
         reportName: 'answer 1',
         language: 'en',
@@ -984,7 +1073,7 @@ describe('Answers', () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.defaultTemplate);
-      const answer = await formsDbConnection.collection('answers').insertOne({
+      await formsDbConnection.collection('answers').insertOne({
         report: template.insertedId,
         reportName: 'answer 1',
         areaOfInterest: areaId,

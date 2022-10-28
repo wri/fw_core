@@ -20,7 +20,7 @@ describe('Teams', () => {
   let teamsDbConnection: Connection;
   const userService = {
     authorise: (token) => ROLES[token],
-    getNameByIdMICROSERVICE: (id) => 'Full Name',
+    getNameByIdMICROSERVICE: (_id) => 'Full Name',
   };
 
   beforeAll(async () => {

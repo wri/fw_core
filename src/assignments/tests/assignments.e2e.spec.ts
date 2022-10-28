@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
@@ -33,11 +32,10 @@ import { DatasetService } from '../../areas/services/dataset.service';
 describe('Assignments', () => {
   let app: INestApplication;
   let teamsDbConnection: Connection;
-  let apiDbConnection: Connection;
   let formsDbConnection: Connection;
   const userService = {
     authorise: (token) => ROLES[token],
-    getNameByIdMICROSERVICE: (id) => 'Full Name',
+    getNameByIdMICROSERVICE: (_id) => 'Full Name',
   };
   const areaService = {
     getAreaMICROSERVICE: (id) => {
@@ -48,12 +46,12 @@ describe('Assignments', () => {
     },
   };
   const s3Service = {
-    uploadFile: (file, name) =>
+    uploadFile: (_file, _name) =>
       `https://s3.amazonaws.com/bucket/folder/uuid.ext`,
   };
   const geostoreService = {
-    getGeostore: (id, token) => assignments.geostore,
-    createGeostore: (id, token) => assignments.geostore,
+    getGeostore: (_id, _token) => assignments.geostore,
+    createGeostore: (_id, _token) => assignments.geostore,
   };
 
   beforeAll(async () => {
@@ -110,9 +108,6 @@ describe('Assignments', () => {
     teamsDbConnection = moduleRef
       .get<DatabaseService>(DatabaseService)
       .getTeamsHandle();
-    apiDbConnection = moduleRef
-      .get<DatabaseService>(DatabaseService)
-      .getApiHandle();
     formsDbConnection = moduleRef
       .get<DatabaseService>(DatabaseService)
       .getFormsHandle();
@@ -187,13 +182,11 @@ describe('Assignments', () => {
     });
 
     it('should create a name', async () => {
-      const assignment = await formsDbConnection
-        .collection('assignments')
-        .insertOne({
-          ...assignments.defaultAssignment,
-          monitors: [ROLES.USER.id],
-          createdBy: ROLES.USER.id,
-        });
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        monitors: [ROLES.USER.id],
+        createdBy: ROLES.USER.id,
+      });
       const response = await request(app.getHttpServer())
         .post(`/assignments`)
         .send({
@@ -209,14 +202,12 @@ describe('Assignments', () => {
     });
 
     it('should fail if area doesnt exist', async () => {
-      const assignment = await formsDbConnection
-        .collection('assignments')
-        .insertOne({
-          ...assignments.defaultAssignment,
-          monitors: [ROLES.USER.id],
-          createdBy: ROLES.ADMIN.id,
-        });
-      const response = await request(app.getHttpServer())
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        monitors: [ROLES.USER.id],
+        createdBy: ROLES.ADMIN.id,
+      });
+      await request(app.getHttpServer())
         .post(`/assignments`)
         .send({
           ...assignments.defaultAssignment,
@@ -453,27 +444,23 @@ describe('Assignments', () => {
           createdBy: ROLES.USER.id,
         });
 
-      const assignment3 = await formsDbConnection
-        .collection('assignments')
-        .insertOne({
-          ...assignments.defaultAssignment,
-          geostore: assignments.geostore.id,
-          name: 'some other name',
-          status: 'open',
-          monitors: [ROLES.MANAGER.id],
-          createdBy: ROLES.ADMIN.id,
-        });
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
+        name: 'some other name',
+        status: 'open',
+        monitors: [ROLES.MANAGER.id],
+        createdBy: ROLES.ADMIN.id,
+      });
 
-      const assignment4 = await formsDbConnection
-        .collection('assignments')
-        .insertOne({
-          ...assignments.defaultAssignment,
-          geostore: assignments.geostore.id,
-          name: 'some other name',
-          status: 'completed',
-          monitors: [ROLES.USER.id],
-          createdBy: ROLES.USER.id,
-        });
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
+        name: 'some other name',
+        status: 'completed',
+        monitors: [ROLES.USER.id],
+        createdBy: ROLES.USER.id,
+      });
 
       const response = await request(app.getHttpServer())
         .get(`/assignments/open`)
@@ -820,7 +807,7 @@ describe('Assignments', () => {
           createdBy: ROLES.ADMIN.id,
         });
 
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .patch(`/assignments/${assignment.insertedId.toString()}`)
         .set('Authorization', 'ADMIN')
         .send({
@@ -929,7 +916,7 @@ describe('Assignments', () => {
           createdBy: ROLES.ADMIN.id,
         });
 
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .patch(`/assignments/${assignment.insertedId.toString()}`)
         .set('Authorization', 'USER')
         .send({
@@ -951,7 +938,7 @@ describe('Assignments', () => {
           createdBy: ROLES.ADMIN.id,
         });
 
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .patch(`/assignments/${assignment.insertedId.toString()}`)
         .set('Authorization', 'USER')
         .send({
@@ -988,7 +975,7 @@ describe('Assignments', () => {
           createdBy: ROLES.ADMIN.id,
         });
 
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .delete(`/assignments/${assignment.insertedId.toString()}`)
         .set('Authorization', 'ADMIN')
         .expect(200);
@@ -1010,7 +997,7 @@ describe('Assignments', () => {
           createdBy: ROLES.ADMIN.id,
         });
 
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .delete(`/assignments/${assignment.insertedId.toString()}`)
         .set('Authorization', 'USER')
         .expect(403);

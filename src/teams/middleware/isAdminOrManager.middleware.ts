@@ -8,12 +8,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Request, Response, NextFunction } from 'express';
 import { TeamMembersService } from '../services/teamMembers.service';
-import {
-  EMemberRole,
-  TeamMember,
-  TeamMemberDocument,
-} from '../models/teamMember.schema';
-import { Team, TeamDocument } from '../models/team.schema';
+import { EMemberRole, TeamMemberDocument } from '../models/teamMember.schema';
+import { TeamDocument } from '../models/team.schema';
 
 type TRequest = {
   body: {

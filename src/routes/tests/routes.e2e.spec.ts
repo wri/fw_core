@@ -24,7 +24,6 @@ import areaConstants from '../../areas/test/area.constants';
 import { S3Service } from '../../answers/services/s3Service';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
 import { AreasService } from '../../areas/services/areas.service';
-import { GeostoreService } from '../../areas/services/geostore.service';
 import { CoverageService } from '../../areas/services/coverage.service';
 import { DatasetService } from '../../areas/services/dataset.service';
 import { RoutesService } from '../routes.service';
@@ -33,11 +32,10 @@ import { Route } from '../models/route.schema';
 describe('Routes', () => {
   let app: INestApplication;
   let teamsDbConnection: Connection;
-  let apiDbConnection: Connection;
   let formsDbConnection: Connection;
   const userService = {
     authorise: (token) => ROLES[token],
-    getNameByIdMICROSERVICE: (id) => 'Full Name',
+    getNameByIdMICROSERVICE: (_id) => 'Full Name',
   };
   const areaService = {
     getAreaMICROSERVICE: (id) => {
@@ -46,7 +44,7 @@ describe('Routes', () => {
     },
   };
   const s3Service = {
-    uploadFile: (file, name) =>
+    uploadFile: (_file, _name) =>
       `https://s3.amazonaws.com/bucket/folder/uuid.ext`,
   };
 
@@ -98,9 +96,6 @@ describe('Routes', () => {
     teamsDbConnection = moduleRef
       .get<DatabaseService>(DatabaseService)
       .getTeamsHandle();
-    apiDbConnection = moduleRef
-      .get<DatabaseService>(DatabaseService)
-      .getApiHandle();
     formsDbConnection = moduleRef
       .get<DatabaseService>(DatabaseService)
       .getFormsHandle();
@@ -224,15 +219,13 @@ describe('Routes', () => {
     });
 
     it('should only sync and return unsynced routes', async () => {
-      const existingRoute = await formsDbConnection
-        .collection('routes')
-        .insertOne({
-          ...routeConstants.defaultRoute,
-          routeId: 'cea34015-bfaf-46c2-a660-db1e9819b515',
-          teamId: new mongoose.Types.ObjectId(),
-          createdBy: ROLES.USER.id,
-          active: true,
-        });
+      await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b515',
+        teamId: new mongoose.Types.ObjectId(),
+        createdBy: ROLES.USER.id,
+        active: true,
+      });
 
       const response = await request(app.getHttpServer())
         .post(`/routes/sync`)
@@ -284,7 +277,7 @@ describe('Routes', () => {
         active: true,
       });
 
-      const route2 = await formsDbConnection.collection('routes').insertOne({
+      await formsDbConnection.collection('routes').insertOne({
         ...routeConstants.defaultRoute,
         routeId: 'cea34015-bfaf-46c2-a660-db1e9819b516',
         teamId: new mongoose.Types.ObjectId(),
@@ -300,7 +293,7 @@ describe('Routes', () => {
         active: true,
       });
 
-      const route4 = await formsDbConnection.collection('routes').insertOne({
+      await formsDbConnection.collection('routes').insertOne({
         ...routeConstants.defaultRoute,
         routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
         teamId: new mongoose.Types.ObjectId(),
@@ -372,7 +365,7 @@ describe('Routes', () => {
         active: true,
       });
 
-      const route2 = await formsDbConnection.collection('routes').insertOne({
+      await formsDbConnection.collection('routes').insertOne({
         ...routeConstants.defaultRoute,
         routeId: 'cea34015-bfaf-46c2-a660-db1e9819b516',
         teamId: new mongoose.Types.ObjectId(),
@@ -388,7 +381,7 @@ describe('Routes', () => {
         active: true,
       });
 
-      const route4 = await formsDbConnection.collection('routes').insertOne({
+      await formsDbConnection.collection('routes').insertOne({
         ...routeConstants.defaultRoute,
         routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
         teamId: team.insertedId.toString(),
@@ -488,7 +481,7 @@ describe('Routes', () => {
         createdBy: ROLES.USER.id,
         active: true,
       });
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .delete(`/routes/${route1.insertedId.toString()}`)
         .set('Authorization', 'USER')
         .expect(200);
@@ -519,7 +512,7 @@ describe('Routes', () => {
         createdBy: ROLES.USER.id,
         active: true,
       });
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .delete(`/routes/${route1.insertedId.toString()}`)
         .set('Authorization', 'MANAGER')
         .expect(200);
@@ -539,7 +532,7 @@ describe('Routes', () => {
         createdBy: ROLES.USER.id,
         active: true,
       });
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .delete(`/routes/${route1.insertedId.toString()}`)
         .set('Authorization', 'MANAGER')
         .expect(403);
@@ -547,7 +540,7 @@ describe('Routes', () => {
 
     it('should fail if route doesnt exist', async () => {
       const route1 = new mongoose.Types.ObjectId();
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .delete(`/routes/${route1.toString()}`)
         .set('Authorization', 'MANAGER')
         .expect(404);
@@ -587,15 +580,26 @@ describe('Routes', () => {
         ...routeConstants.defaultRoute,
         routeId: 'cea34015-bfaf-46c2-a660-db1e9819b515',
         teamId: team.insertedId.toString(),
+<<<<<<< HEAD
         areaId,
+=======
+        areaId: areaId.toString(),
+>>>>>>> ee5f0044954e5f650d0400e9f8b6735536835242
         createdBy: ROLES.ADMIN.id,
         active: true,
       });
 
+<<<<<<< HEAD
       const area = await formsDbConnection.collection('routes').insertOne({
         ...routeConstants.defaultRoute,
         routeId: 'cea34015-bfaf-46c2-a660-db1e9819b516',
         areaId,
+=======
+      await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b516',
+        areaId: areaId.toString(),
+>>>>>>> ee5f0044954e5f650d0400e9f8b6735536835242
         teamId: new mongoose.Types.ObjectId(),
         createdBy: ROLES.ADMIN.id,
         active: true,
@@ -605,12 +609,20 @@ describe('Routes', () => {
         ...routeConstants.defaultRoute,
         routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
         teamId: new mongoose.Types.ObjectId(),
+<<<<<<< HEAD
         areaId,
+=======
+        areaId: areaId.toString(),
+>>>>>>> ee5f0044954e5f650d0400e9f8b6735536835242
         createdBy: ROLES.USER.id,
         active: true,
       });
 
+<<<<<<< HEAD
       const userTeam = await formsDbConnection.collection('routes').insertOne({
+=======
+      await formsDbConnection.collection('routes').insertOne({
+>>>>>>> ee5f0044954e5f650d0400e9f8b6735536835242
         ...routeConstants.defaultRoute,
         routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
         teamId: team.insertedId.toString(),
