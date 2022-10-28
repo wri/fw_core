@@ -16,6 +16,7 @@ import { TemplatePermissionsMiddleware } from './middleware/templatePermissions.
 import { S3Service } from './services/s3Service';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
 import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema';
+import { AssignmentsModule } from '../assignments/assignments.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema'
       [{ name: 'areateamrelations', schema: TeamAreaRelationSchema }],
       'apiDb',
     ),
+    AssignmentsModule,
   ],
   controllers: [AnswersController],
   providers: [

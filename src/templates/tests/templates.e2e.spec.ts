@@ -1174,7 +1174,7 @@ describe('Templates', () => {
 
   describe('GET /templates/latest', () => {
     afterEach(async () => {
-      formsDbConnection.collection('reports').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
     });
 
     it('should return a 401 without authorisation', async () => {
@@ -1265,7 +1265,7 @@ describe('Templates', () => {
 
   describe('GET /templates/versions/:id', () => {
     afterEach(async () => {
-      formsDbConnection.collection('reports').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
     });
 
     it('should return 401 if not logged in', async () => {

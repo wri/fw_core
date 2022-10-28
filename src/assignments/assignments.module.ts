@@ -41,5 +41,6 @@ import { ConfigService } from '@nestjs/config';
     DatasetService,
     ConfigService,
   ],
+  exports: [AssignmentsService],
 })
 export class AssignmentsModule {}
