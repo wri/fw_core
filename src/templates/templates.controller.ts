@@ -134,7 +134,7 @@ export class TemplatesController {
           report: templates[i].id,
         };
       }
-      const answers = await this.answersService.findSome(answersFilter);
+      const answers = await this.answersService.find(answersFilter);
       templates[i].answersCount = answers.length || 0;
     }
 
@@ -196,7 +196,7 @@ export class TemplatesController {
         report: template.id,
       };
     }
-    const answers = await this.answersService.findSome(answersFilter);
+    const answers = await this.answersService.find(answersFilter);
     template.answersCount = answers.length;
 
     return { data: serializeTemplate(template) };
@@ -275,7 +275,7 @@ export class TemplatesController {
       );
     }
 
-    const answers = await this.answersService.findSome({ report: id });
+    const answers = await this.answersService.find({ report: id });
     if (answers.length > 0 && user.role !== 'ADMIN') {
       throw new ForbiddenException(
         'This report has answers, you cannot delete. Please unpublish instead.',

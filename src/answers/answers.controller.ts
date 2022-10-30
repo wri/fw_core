@@ -306,6 +306,6 @@ export class AnswersController {
         HttpStatus.FORBIDDEN,
       );
 
-    await this.answersService.deleteMany({ _id: id });
+    await this.answersService.delete(id);
   }
 }

@@ -11,24 +11,30 @@ import { UserService } from '../../common/user.service';
 import { TemplateDocument } from '../../templates/models/template.schema';
 import { TeamsService } from '../../teams/services/teams.service';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
+import { CreateAnswerDto } from '../dto/create-answer.dto';
+import { UpdateAnswerDto } from '../dto/update-answer.dto';
+import { BaseService } from '../../common/base.service';
 
 @Injectable()
-export class AnswersService {
+export class AnswersService extends BaseService<
+  AnswerDocument,
+  IAnswer,
+  UpdateAnswerDto
+> {
   constructor(
-    @InjectModel('reports', 'formsDb')
-    private templateModel: Model<TemplateDocument>,
     @InjectModel(Answer.name, 'formsDb')
     private answerModel: Model<AnswerDocument>,
     private readonly teamMembersService: TeamMembersService,
     private readonly teamsService: TeamsService,
     private readonly teamAreaRelationService: TeamAreaRelationService,
     private readonly userService: UserService,
-  ) {}
+  ) {
+    super(AnswersService.name, answerModel);
+  }
 
-  async create(answer: IAnswer): Promise<IAnswer> {
-    const answerToSave = new this.answerModel(answer);
-    const savedAnswer = await answerToSave.save();
-    return await this.addUsernameToAnswer(savedAnswer);
+  async create(answerInput: IAnswer): Promise<AnswerDocument> {
+    const answer = await super.create(answerInput);
+    return await this.addUsernameToAnswer(answer);
   }
 
   async getAllTemplateAnswers({
@@ -174,10 +180,6 @@ export class AnswersService {
     const answers = await this.answerModel.find(filter);
 
     return await this.addUsernameToAnswers(answers);
-  }
-
-  async findSome(filter) {
-    return await this.answerModel.find(filter);
   }
 
   async findOne(filter) {

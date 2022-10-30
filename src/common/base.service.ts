@@ -63,4 +63,13 @@ export abstract class BaseService<
     this.logger.log(`Delete ${id}`);
     return this.model.findByIdAndDelete(id);
   }
+
+  /**
+   * Count the number of entities in the db that match the criteria
+   * @param filter Criteria for entities to be included in count
+   * @returns Total numbe rof entitites matching the criteria
+   */
+  async count(filter: mongoose.FilterQuery<T>): Promise<number> {
+    return this.model.countDocuments(filter);
+  }
 }
