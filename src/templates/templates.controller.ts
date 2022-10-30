@@ -12,6 +12,7 @@ import {
   HttpException,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { TemplatesService } from './templates.service';
 import { CreateTemplateDto } from './dto/create-template.dto';
@@ -27,6 +28,7 @@ import serializeAnswers from '../answers/serializers/answers.serializer';
 import { TemplateAreaRelationService } from '../areas/services/templateAreaRelation.service';
 import mongoose from 'mongoose';
 import { CreateTemplateInput } from './input/create-template.input';
+import { UserRole } from '../common/user-role.enum';
 
 @Controller('templates')
 export class TemplatesController {
@@ -210,40 +212,26 @@ export class TemplatesController {
   ): Promise<ITemplateResponse> {
     const user = request.user;
 
-    // create filter to grab existing template
-    const filter: any = {
-      $and: [{ _id: new mongoose.Types.ObjectId(id) }],
-    };
-    if (user.role !== 'ADMIN') {
-      filter.$and.push({ user: new mongoose.Types.ObjectId(user.id) });
+    if (user.role !== UserRole.ADMIN && body.public !== undefined)
+      throw new ForbiddenException('Only admin can change the public property');
+
+    const template = await this.templatesService.findById(request.params.id);
+
+    if (
+      !template ||
+      (user.role !== UserRole.ADMIN && user.id !== template.user.toString())
+    ) {
+      throw new ForbiddenException();
     }
-    // get the template based on the filter
-    const templateToUpdate = await this.templatesService.findOne(filter);
-    if (!templateToUpdate)
-      throw new HttpException(
-        'You do not have permission to edit this template',
-        HttpStatus.FORBIDDEN,
-      );
-    // stop public status of template being changed if not admin
-    if (user.role !== 'ADMIN' && body.hasOwnProperty('public'))
-      delete body.public;
-    const template = await this.templatesService.update(id, body);
+
+    const updatedTemplate = await this.templatesService.update(id, body);
 
     // get answer count for each report
-    let answersFilter = {};
-    if (user.role === 'ADMIN' || user.id === template.user.toString()) {
-      answersFilter = {
-        report: template.id,
-      };
-    } else {
-      answersFilter = {
-        user: user.id,
-        report: template.id,
-      };
-    }
-    const answers = await this.answersService.findSome(answersFilter);
-    template.answersCount = answers.length;
-    return { data: serializeTemplate(template) };
+    const answersCount = await this.answersService.count({
+      report: updatedTemplate.id,
+    });
+    updatedTemplate.answersCount = answersCount;
+    return { data: serializeTemplate(updatedTemplate) };
   }
 
   @Delete('/allAnswers')
