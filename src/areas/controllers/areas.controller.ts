@@ -298,7 +298,7 @@ export class AreasController {
 
     // delete area relations
     await this.teamAreaRelationService.delete({ areaId: id });
-    await this.templateAreaRelationService.delete({ areaId: id });
+    await this.templateAreaRelationService.deleteMany({ areaId: id });
 
     return deletedArea.id;
   }

@@ -1025,7 +1025,7 @@ describe('Templates', () => {
         .patch(`/templates/${template.insertedId.toString()}`)
         .set('Authorization', 'USER')
         .send({ public: true })
-        .expect(200);
+        .expect(403);
 
       const changedTemplate = await formsDbConnection
         .collection('reports')

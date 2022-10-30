@@ -250,7 +250,7 @@ export class TemplatesController {
   async deleteAllAnswers(@Req() request: Request): Promise<void> {
     const user = request.user;
 
-    await this.answersService.delete({ user: user.id });
+    await this.answersService.deleteMany({ user: user.id });
   }
 
   @Delete('/:id')
@@ -260,40 +260,33 @@ export class TemplatesController {
   ): Promise<void> {
     const user = request.user;
 
-    const answers = await this.answersService.findSome({ report: id });
-    if (answers.length > 0 && user.role !== 'ADMIN') {
-      throw new HttpException(
-        'This report has answers, you cannot delete. Please unpublish instead.',
-        HttpStatus.FORBIDDEN,
-      );
+    const template = await this.templatesService.findById(id);
+
+    if (!template) {
+      throw new ForbiddenException();
     }
 
-    const template = await this.templatesService.findOne({
-      _id: new mongoose.Types.ObjectId(id),
-    });
     if (
-      template?.status === ETemplateStatus.PUBLISHED &&
+      template.status === ETemplateStatus.PUBLISHED &&
       user.role !== 'ADMIN'
     ) {
-      throw new HttpException(
+      throw new ForbiddenException(
         'You cannot delete a published template. Please unpublish first.',
-        HttpStatus.FORBIDDEN,
       );
     }
 
-    // remove template
-    const query: any = {
-      $and: [{ _id: new mongoose.Types.ObjectId(id) }],
-    };
-    if (user.role !== 'ADMIN') {
-      query.$and.push({ user: user.id });
-      query.$and.push({ status: ['draft', 'unpublished'] });
-    } else if (answers.length > 0) {
-      await this.answersService.delete({ report: id });
+    const answers = await this.answersService.findSome({ report: id });
+    if (answers.length > 0 && user.role !== 'ADMIN') {
+      throw new ForbiddenException(
+        'This report has answers, you cannot delete. Please unpublish instead.',
+      );
     }
-    await this.templatesService.delete(query);
 
-    // remove all area - template relations
-    await this.templateAreaRelationService.delete({ templateId: id });
+    if (answers.length > 0) {
+      await this.answersService.deleteMany({ report: id });
+    }
+
+    await this.templatesService.delete(id);
+    await this.templateAreaRelationService.deleteMany({ report: id });
   }
 }

@@ -5,27 +5,19 @@ import { ETemplateStatus, TemplateDocument } from './models/template.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
+import { BaseService } from '../common/base.service';
 
 @Injectable()
-export class TemplatesService {
+export class TemplatesService extends BaseService<
+  TemplateDocument,
+  CreateTemplateDto,
+  UpdateTemplateDto
+> {
   constructor(
     @InjectModel('reports', 'formsDb')
-    private templateModel: Model<TemplateDocument>,
-  ) {}
-
-  async create(
-    createTemplateDto: CreateTemplateDto,
-  ): Promise<TemplateDocument> {
-    const template = new this.templateModel(createTemplateDto);
-    return template.save();
-  }
-
-  findAll() {
-    return `This action returns all templates`;
-  }
-
-  async find(filter): Promise<TemplateDocument[]> {
-    return await this.templateModel.find(filter);
+    templateModel: Model<TemplateDocument>,
+  ) {
+    super(TemplatesService.name, templateModel);
   }
 
   /**
@@ -43,7 +35,7 @@ export class TemplatesService {
       filter.user = opts.user;
     }
 
-    return this.templateModel.find(filter);
+    return this.model.find(filter);
   }
 
   /**
@@ -68,15 +60,13 @@ export class TemplatesService {
       filter.status = ETemplateStatus.PUBLISHED;
     }
 
-    return this.templateModel.find(filter);
+    return this.model.find(filter);
   }
 
-  async findOne(filter): Promise<TemplateDocument | null> {
-    return await this.templateModel.findOne(filter);
-  }
-
-  async delete(filter): Promise<void> {
-    await this.templateModel.deleteMany(filter);
+  async findOne(
+    filter: mongoose.FilterQuery<TemplateDocument>,
+  ): Promise<TemplateDocument | null> {
+    return await this.model.findOne(filter);
   }
 
   getTemplate(id: string) {
@@ -87,7 +77,7 @@ export class TemplatesService {
     id: string,
     updateTemplateDto: UpdateTemplateDto,
   ): Promise<TemplateDocument> {
-    const template = await this.templateModel.findById(id);
+    const template = await this.model.findById(id);
     if (!template) throw new NotFoundException('Template not found');
     if (updateTemplateDto.name) template.name = updateTemplateDto.name;
     if (updateTemplateDto.status) template.status = updateTemplateDto.status;
@@ -103,7 +93,7 @@ export class TemplatesService {
   }
 
   async getAllPublicTemplateIds(): Promise<string[]> {
-    const templates = await this.templateModel.find({ public: true });
+    const templates = await this.model.find({ public: true });
     return templates.map((template) => template.id);
   }
 }

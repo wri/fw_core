@@ -42,7 +42,7 @@ export class TemplateAreaRelationService {
     return areaTemplateIds;
   }
 
-  async delete(filter): Promise<void> {
+  async deleteMany(filter): Promise<void> {
     await this.templateAreaRelationModel.deleteMany(filter);
   }
 }

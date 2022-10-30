@@ -188,7 +188,7 @@ export class AnswersService {
     return `This action updates a #${id} answer`;
   } */
 
-  async delete(filter): Promise<void> {
+  async deleteMany(filter): Promise<void> {
     await this.answerModel.deleteMany(filter);
   }
 
