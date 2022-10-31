@@ -747,7 +747,7 @@ describe('Answers', () => {
           ...asssignments.defaultAssignment,
           monitors: [new mongoose.Types.ObjectId()],
           status: AssignmentStatus.OPEN,
-          templateId: template.insertedId.toString(),
+          templateIds: [template.insertedId.toString()],
           createdBy: new mongoose.Types.ObjectId(),
           name: 'Assignment',
         });
@@ -783,7 +783,7 @@ describe('Answers', () => {
           ...asssignments.defaultAssignment,
           monitors: [ROLES.USER.id],
           status: AssignmentStatus.OPEN,
-          templateId: templates.insertedIds[0].toString(),
+          templateIds: [templates.insertedIds[0].toString()],
           createdBy: new mongoose.Types.ObjectId(),
           name: 'Assignment',
         });
@@ -816,7 +816,7 @@ describe('Answers', () => {
           ...asssignments.defaultAssignment,
           monitors: [ROLES.USER.id],
           status: AssignmentStatus.OPEN,
-          templateId: template.insertedId.toString(),
+          templateIds: [template.insertedId.toString()],
           createdBy: new mongoose.Types.ObjectId(),
           name: 'Assignment',
         });
