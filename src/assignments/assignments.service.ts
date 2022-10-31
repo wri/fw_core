@@ -14,7 +14,6 @@ import mongoose from 'mongoose';
 import { AreasService } from '../areas/services/areas.service';
 import { GeostoreService } from '../areas/services/geostore.service';
 import { IUser } from 'src/common/user.model';
-import { IGeostore } from 'src/areas/models/area.entity';
 
 const allowedKeys = [
   'name',
@@ -22,8 +21,7 @@ const allowedKeys = [
   'monitors',
   'notes',
   'status',
-  'templateId',
-  'teamIds',
+  'templateIds',
 ];
 
 @Injectable()
@@ -96,13 +94,13 @@ export class AssignmentsService {
     return await this.assignmentModel.find({ monitors: userId });
   }
 
-  async findTeams(userId: string): Promise<AssignmentDocument[]> {
+  /*   async findTeams(userId: string): Promise<AssignmentDocument[]> {
     // get all user team ids
     const teams = await this.teamsService.findAllByUserId(userId);
     const teamIds = teams.map((team) => team.id);
 
     return await this.assignmentModel.find({ teamIds: { $in: teamIds } });
-  }
+  } */
 
   async findOpen(userId: string): Promise<AssignmentDocument[]> {
     return await this.assignmentModel.find({
@@ -129,11 +127,11 @@ export class AssignmentsService {
     areaId: string,
   ): Promise<AssignmentDocument[]> {
     // get all user team ids
-    const teams = await this.teamsService.findAllByUserId(userId);
-    const teamIds = teams.map((team) => team.id);
+    //const teams = await this.teamsService.findAllByUserId(userId);
+    //const teamIds = teams.map((team) => team.id);
 
     return await this.assignmentModel.find({
-      teamIds: { $in: teamIds },
+      //teamIds: { $in: teamIds },
       areaId,
     });
   }

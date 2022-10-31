@@ -147,7 +147,7 @@ export class AnswersController {
         `User is not authorized to submit assignment ${assignmentId}`,
       );
 
-    if (assignment.templateId !== template.id)
+    if (!assignment.templateIds.includes(template.id))
       throw new BadRequestException(
         `Assignment does not belong to template ${template.id}`,
       );

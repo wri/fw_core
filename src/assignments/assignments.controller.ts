@@ -66,7 +66,7 @@ export class AssignmentsController {
     return { data: serializeAssignments(assignmentResponse) };
   }
 
-  @Get('/teams')
+  /*   @Get('/teams')
   async findTeamAssignments(
     @Req() request: Request,
   ): Promise<IAssignmentResponse> {
@@ -79,7 +79,7 @@ export class AssignmentsController {
     );
 
     return { data: serializeAssignments(assignmentResponse) };
-  }
+  } */
 
   @Get('/allOpenUserForArea/:areaId')
   async findAllOpenAssignmentsForArea(

@@ -12,8 +12,7 @@ export interface IAssignment {
   notes: string;
   status: string;
   areaId: string;
-  templateId: string;
-  teamIds: string[];
+  templateIds: string[];
   createdAt: Date;
   createdBy?: string;
   areaName?: string;
@@ -53,10 +52,7 @@ export class Assignment {
   areaId: string;
 
   @Prop({ required: true })
-  templateId: string;
-
-  @Prop({ required: true })
-  teamIds: string[];
+  templateIds: string[];
 
   @Prop({ required: false })
   areaName: string;
