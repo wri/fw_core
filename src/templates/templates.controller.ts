@@ -29,6 +29,7 @@ import { TemplateAreaRelationService } from '../areas/services/templateAreaRelat
 import mongoose from 'mongoose';
 import { CreateTemplateInput } from './input/create-template.input';
 import { UserRole } from '../common/user-role.enum';
+import { MongooseObjectId } from '../common/objectId';
 
 @Controller('templates')
 export class TemplatesController {
@@ -224,7 +225,27 @@ export class TemplatesController {
       throw new ForbiddenException();
     }
 
-    const updatedTemplate = await this.templatesService.update(id, body);
+    if (!template.editGroupId) {
+      template.editGroupId = new MongooseObjectId();
+      await template.save();
+    }
+
+    const newTemplateDto: CreateTemplateDto = {
+      name: body.name ?? template.name,
+      user: template.user,
+      languages: body.languages ?? template.languages,
+      defaultLanguage: body.defaultLanguage ?? template.defaultLanguage,
+      questions: body.questions ?? template.questions,
+      public: body.public ?? template.public,
+      status: ETemplateStatus.UNPUBLISHED,
+      editGroupId: template.editGroupId,
+      isLatest: true,
+    };
+
+    const updatedTemplate = await this.templatesService.create(newTemplateDto);
+
+    template.isLatest = false;
+    await template.save();
 
     // get answer count for each report
     const answersCount = await this.answersService.count({

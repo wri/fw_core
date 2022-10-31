@@ -69,29 +69,6 @@ export class TemplatesService extends BaseService<
     return await this.model.findOne(filter);
   }
 
-  getTemplate(id: string) {
-    return `This action returns a #${id} template`;
-  }
-
-  async update(
-    id: string,
-    updateTemplateDto: UpdateTemplateDto,
-  ): Promise<TemplateDocument> {
-    const template = await this.model.findById(id);
-    if (!template) throw new NotFoundException('Template not found');
-    if (updateTemplateDto.name) template.name = updateTemplateDto.name;
-    if (updateTemplateDto.status) template.status = updateTemplateDto.status;
-    if (updateTemplateDto.languages)
-      template.languages = updateTemplateDto.languages;
-    if (updateTemplateDto.public) template.public = updateTemplateDto.public;
-    const savedTemplate = await template.save();
-    return savedTemplate;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} template`;
-  }
-
   async getAllPublicTemplateIds(): Promise<string[]> {
     const templates = await this.model.find({ public: true });
     return templates.map((template) => template.id);
