@@ -13,6 +13,7 @@ import { GeostoreService } from '../areas/services/geostore.service';
 import { CoverageService } from '../areas/services/coverage.service';
 import { DatasetService } from '../areas/services/dataset.service';
 import { ConfigService } from '@nestjs/config';
+import { AreasModule } from '../areas/modules/areas.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ConfigService } from '@nestjs/config';
       [{ name: 'teamuserrelations', schema: TeamMemberSchema }],
       'teamsDb',
     ),
+    AreasModule,
   ],
   controllers: [AssignmentsController],
   providers: [
@@ -35,10 +37,6 @@ import { ConfigService } from '@nestjs/config';
     TeamsService,
     TeamMembersService,
     UserService,
-    AreasService,
-    GeostoreService,
-    CoverageService,
-    DatasetService,
     ConfigService,
   ],
   exports: [AssignmentsService],
