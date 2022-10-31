@@ -207,7 +207,7 @@ export class TemplatesController {
 
   @Patch('/:id')
   async update(
-    @Param('id') id: string,
+    @Param('id') templateId: string,
     @Body() body: UpdateTemplateDto,
     @Req() request: Request,
   ): Promise<ITemplateResponse> {
@@ -216,7 +216,7 @@ export class TemplatesController {
     if (user.role !== UserRole.ADMIN && body.public !== undefined)
       throw new ForbiddenException('Only admin can change the public property');
 
-    const template = await this.templatesService.findById(request.params.id);
+    const template = await this.templatesService.findById(templateId);
 
     if (
       !template ||
@@ -253,6 +253,29 @@ export class TemplatesController {
     });
     updatedTemplate.answersCount = answersCount;
     return { data: serializeTemplate(updatedTemplate) };
+  }
+
+  @Patch('/:id/status')
+  async updateStatus(
+    @Param('id') templateId,
+    @Req() request: Request,
+    @Body('status') status: ETemplateStatus,
+  ): Promise<ITemplateResponse> {
+    const user = request.user;
+
+    const template = await this.templatesService.findById(templateId);
+
+    if (
+      !template ||
+      (user.role !== UserRole.ADMIN && user.id !== template.user.toString())
+    ) {
+      throw new ForbiddenException();
+    }
+
+    template.status = status;
+    await template.save();
+
+    return { data: serializeTemplate(template) };
   }
 
   @Delete('/allAnswers')
