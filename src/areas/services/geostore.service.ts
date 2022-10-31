@@ -4,13 +4,17 @@ import { Logger } from '@nestjs/common';
 import client from '../../common/redisClient';
 import deserialize from '../../common/deserlializer';
 import { ConfigService } from '@nestjs/config';
+import { IGeostore } from '../models/area.entity';
 
 @Injectable()
 export class GeostoreService {
   constructor(private readonly configService: ConfigService) {}
   private readonly logger = new Logger(GeostoreService.name);
 
-  async createGeostore(geojson: any, token: string): Promise<any> {
+  async createGeostore(
+    geojson: any,
+    token: string,
+  ): Promise<IGeostore | undefined> {
     try {
       const baseURL = this.configService.get('geostoreApi.url');
       const url = `${baseURL}/geostore`;
@@ -27,6 +31,7 @@ export class GeostoreService {
       return data && deserialize(data.data);
     } catch (error) {
       this.logger.error('Error while creating geostore', error);
+      throw error;
     }
   }
 

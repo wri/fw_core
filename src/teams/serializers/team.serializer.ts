@@ -1,4 +1,11 @@
-const whitelist = ['name', 'userRole', 'createdAt', 'members', 'areas'];
+const whitelist = [
+  'name',
+  'userRole',
+  'createdAt',
+  'members',
+  'areas',
+  'layers',
+];
 
 const serializeResource = (data) => {
   const attributes = {};
