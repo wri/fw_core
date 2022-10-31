@@ -413,7 +413,6 @@ describe('Assignments', () => {
     });
 
     it('should return an array of assignments with the area id', async () => {
-
       const assignment = await formsDbConnection
         .collection('assignments')
         .insertOne({
