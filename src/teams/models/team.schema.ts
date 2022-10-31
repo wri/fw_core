@@ -8,6 +8,7 @@ export interface ITeam {
   createdAt: string;
   members?: TeamMemberDocument[];
   areas?: string[];
+  layers?: string[];
 }
 
 @Schema()
@@ -18,14 +19,17 @@ export class Team {
   @Prop({ required: true, default: Date.now })
   createdAt: string;
 
-  @Prop({ required: false, default: Date.now })
+  @Prop({ required: false })
   userRole: string;
 
-  @Prop({ required: false, default: Date.now })
+  @Prop({ required: false })
   members: mongoose.Schema.Types.Mixed;
 
-  @Prop({ required: false, default: Date.now })
+  @Prop({ required: false })
   areas: string[];
+
+  @Prop({ required: true, default: [] })
+  layers: string[];
 }
 
 export interface TeamDocument extends ITeam, mongoose.Document {}
