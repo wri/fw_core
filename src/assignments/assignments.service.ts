@@ -70,17 +70,15 @@ export class AssignmentsService {
       : 'null';
 
     // create geostore
-    const geostore = assignmentDto.geostore
-      ? await this.geostoreService.createGeostore(
-          assignmentDto.geostore,
-          user.token ?? '',
-        )
-      : null;
+    const geostore = await this.geostoreService.createGeostore(
+      assignmentDto.geostore,
+      user.token ?? '',
+    );
 
     const newAssignment = {
       ...assignmentDto,
       createdBy: user.id,
-      geostore: geostore?.id,
+      geostore: geostore.id,
       name: `${userInitials}-${String(count + 1).padStart(4, '0')}`,
     };
 

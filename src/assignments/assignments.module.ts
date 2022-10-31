@@ -8,10 +8,6 @@ import { TeamSchema } from '../teams/models/team.schema';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
 import { TeamMemberSchema } from '../teams/models/teamMember.schema';
 import { UserService } from '../common/user.service';
-import { AreasService } from '../areas/services/areas.service';
-import { GeostoreService } from '../areas/services/geostore.service';
-import { CoverageService } from '../areas/services/coverage.service';
-import { DatasetService } from '../areas/services/dataset.service';
 import { ConfigService } from '@nestjs/config';
 import { AreasModule } from '../areas/modules/areas.module';
 

@@ -14,10 +14,7 @@ export class GeostoreService {
   ) {}
   private readonly logger = new Logger(GeostoreService.name);
 
-  async createGeostore(
-    geojson: IGeojson,
-    token: string,
-  ): Promise<IGeostore | undefined> {
+  async createGeostore(geojson: IGeojson, token: string): Promise<IGeostore> {
     try {
       const baseURL = this.configService.get('geostoreApi.url');
       const url = `${baseURL}/geostore`;
