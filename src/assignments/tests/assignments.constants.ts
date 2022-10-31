@@ -32,8 +32,7 @@ export default {
     status: 'open',
     alert: 'some alert',
     areaId: areaConstants.testArea.id,
-    templateId: 'someTemplateId',
-    teamIds: [],
+    templateIds: ['someTemplateId'],
   },
   geostore: {
     geojson: {

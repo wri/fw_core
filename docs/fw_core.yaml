@@ -41,18 +41,6 @@ paths:
       operationId: get-v3-gfw-user
       description: Returns a user's assignments
     parameters: []
-  /v3/gfw/assignments/teams:
-    get:
-      summary: Get Team Assignments
-      tags:
-        - Assignments
-      responses:
-        '200':
-          $ref: '#/components/responses/Assignments-Response'
-        '401':
-          $ref: '#/components/responses/Error'
-      operationId: get-v3-gfw-assignments-teams
-      description: Returns all assignments relating to the user's teams
   /v3/gfw/assignments/open:
     get:
       summary: Get Open User Assignments
@@ -959,8 +947,6 @@ components:
         areaId:
           type: string
         templateId:
-          type: string
-        teamIds:
           type: array
           items:
             type: string
@@ -980,7 +966,6 @@ components:
         - status
         - areaId
         - templateId
-        - teamIds
     RouteModel:
       type: object
       x-examples:
@@ -1846,8 +1831,6 @@ components:
               areaId:
                 type: string
               templateId:
-                type: string
-              teamIds:
                 type: array
                 items:
                   type: string
@@ -1860,7 +1843,6 @@ components:
               - status
               - areaId
               - templateId
-              - teamIds
           examples:
             example-1:
               value:
@@ -2199,6 +2181,17 @@ components:
         application/json:
           schema:
             type: object
+            x-examples:
+              example-1:
+                name: string
+                priority: 0
+                monitors:
+                  - string
+                notes: string
+                status: string
+                templateId: string
+                teamIds:
+                  - string
             properties:
               name:
                 type: string
@@ -2213,21 +2206,8 @@ components:
               status:
                 type: string
               templateId:
-                type: string
-              teamIds:
                 type: array
                 items:
                   type: string
-            x-examples:
-              example-1:
-                name: string
-                priority: 0
-                monitors:
-                  - string
-                notes: string
-                status: string
-                templateId: string
-                teamIds:
-                  - string
 security:
   - Authorization: []
