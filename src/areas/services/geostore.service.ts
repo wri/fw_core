@@ -1,18 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
-import client from '../../common/redisClient';
 import deserialize from '../../common/deserlializer';
 import { ConfigService } from '@nestjs/config';
-import { IGeostore } from '../models/area.entity';
+import { IGeojson, IGeostore } from '../models/area.entity';
+import { RedisService } from '../../common/redis.service';
 
 @Injectable()
 export class GeostoreService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly redisService: RedisService,
+  ) {}
   private readonly logger = new Logger(GeostoreService.name);
 
   async createGeostore(
-    geojson: any,
+    geojson: IGeojson,
     token: string,
   ): Promise<IGeostore | undefined> {
     try {
@@ -35,35 +38,37 @@ export class GeostoreService {
     }
   }
 
-  async getGeostore(geostoreId: any, token: string) {
+  async getGeostore(
+    geostoreId: string,
+    token: string,
+  ): Promise<IGeostore | null> {
     // check for geostore in redis hash
-    let geostore;
-    const geostoreString: any = await client.get(geostoreId.toString());
+    const geostoreString = await this.redisService.get(geostoreId.toString());
     if (geostoreString) {
-      geostore = JSON.parse(geostoreString);
+      const geostore = JSON.parse(geostoreString);
       this.logger.log(`Found Geostore ${geostore.id} in Redis store`);
-    } else {
-      try {
-        const baseURL = this.configService.get('geostoreApi.url');
-        const url = `${baseURL}/geostore/${geostoreId}`;
-        const getGeostoreRequestConfig = {
-          headers: {
-            authorization: token,
-          },
-        };
-        const { data } = await axios.get(url, getGeostoreRequestConfig);
-        geostore = deserialize(data.data);
-        client.set(
-          geostoreId.toString(),
-          JSON.stringify(geostore),
-          'EX',
-          7 * 60 * 60 * 24,
-        ); // set to expire in 7 days
-      } catch (error) {
-        this.logger.error('Error while fetching geostore', error);
-        throw error;
-      }
+      return geostore;
     }
-    return geostore;
+
+    try {
+      const baseURL = this.configService.get('geostoreApi.url');
+      const url = `${baseURL}/geostore/${geostoreId}`;
+      const getGeostoreRequestConfig = {
+        headers: {
+          authorization: token,
+        },
+      };
+      const { data } = await axios.get(url, getGeostoreRequestConfig);
+      const geostore = deserialize(data.data);
+      await this.redisService.set(
+        geostoreId.toString(),
+        JSON.stringify(geostore),
+      );
+      return geostore as IGeostore;
+    } catch (error: any) {
+      if (error.response.status === 404) return null;
+      this.logger.error('Error while fetching geostore', error);
+      throw error;
+    }
   }
 }
