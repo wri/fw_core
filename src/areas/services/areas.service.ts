@@ -87,7 +87,7 @@ export class AreasService {
     geojson,
     user: IUser,
   ): Promise<any> {
-    let geostore: IGeostore;
+    let geostore: IGeostore | undefined;
     let coverage;
     const ALERTS_SUPPORTED = this.configService.get('alertsSupported');
 
@@ -101,12 +101,11 @@ export class AreasService {
       throw error;
     }
     try {
-      const params = {
-        geostoreId: geostore.id,
-        slugs: ALERTS_SUPPORTED,
-      };
       coverage = await this.coverageService.getCoverage(
-        params,
+        {
+          geostoreId: geostore?.id,
+          slugs: ALERTS_SUPPORTED,
+        },
         user.token ?? '',
       );
     } catch (error) {
@@ -116,7 +115,7 @@ export class AreasService {
     try {
       const form = new FormData();
       form.append('name', name);
-      form.append('geostore', geostore.id);
+      form.append('geostore', geostore?.id);
       form.append('image', fs.createReadStream(image.path));
 
       const baseURL = this.configService.get('areasApi.url');
@@ -152,7 +151,7 @@ export class AreasService {
           geojson,
           user.token ?? '',
         );
-        geostoreId = geostoreResponse.id;
+        geostoreId = geostoreResponse?.id;
       } catch (e) {
         this.logger.error('Error while creating geostore', e);
         throw e;
