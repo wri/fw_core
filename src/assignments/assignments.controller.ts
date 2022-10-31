@@ -66,21 +66,6 @@ export class AssignmentsController {
     return { data: serializeAssignments(assignmentResponse) };
   }
 
-  @Get('/teams')
-  async findTeamAssignments(
-    @Req() request: Request,
-  ): Promise<IAssignmentResponse> {
-    const user = request.user;
-    const assignments = await this.assignmentsService.findTeams(user.id);
-
-    const assignmentResponse = await this.buildAssignmentResponse(
-      assignments,
-      user,
-    );
-
-    return { data: serializeAssignments(assignmentResponse) };
-  }
-
   @Get('/allOpenUserForArea/:areaId')
   async findAllOpenAssignmentsForArea(
     @Req() request: Request,

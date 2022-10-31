@@ -14,7 +14,6 @@ import mongoose from 'mongoose';
 import { AreasService } from '../areas/services/areas.service';
 import { GeostoreService } from '../areas/services/geostore.service';
 import { IUser } from 'src/common/user.model';
-import { IGeostore } from 'src/areas/models/area.entity';
 
 const allowedKeys = [
   'name',
@@ -22,8 +21,7 @@ const allowedKeys = [
   'monitors',
   'notes',
   'status',
-  'templateId',
-  'teamIds',
+  'templateIds',
 ];
 
 @Injectable()
@@ -70,17 +68,15 @@ export class AssignmentsService {
       : 'null';
 
     // create geostore
-    const geostore: IGeostore = assignment.geostore
-      ? await this.geostoreService.createGeostore(
-          assignment.geostore,
-          user.token ?? '',
-        )
-      : null;
+    const geostore = await this.geostoreService.createGeostore(
+      assignment.geostore,
+      user.token ?? '',
+    );
 
     const newAssignment = {
       ...assignment,
       createdBy: user.id,
-      geostore: geostore.id ? geostore.id : null,
+      geostore: geostore?.id,
       name: `${userInitials}-${String(count + 1).padStart(4, '0')}`,
     };
 
@@ -96,14 +92,6 @@ export class AssignmentsService {
 
   async findUser(userId: string): Promise<AssignmentDocument[]> {
     return await this.assignmentModel.find({ monitors: userId });
-  }
-
-  async findTeams(userId: string): Promise<AssignmentDocument[]> {
-    // get all user team ids
-    const teams = await this.teamsService.findAllByUserId(userId);
-    const teamIds = teams.map((team) => team.id);
-
-    return await this.assignmentModel.find({ teamIds: { $in: teamIds } });
   }
 
   async findOpen(userId: string): Promise<AssignmentDocument[]> {
@@ -130,12 +118,7 @@ export class AssignmentsService {
     userId: string,
     areaId: string,
   ): Promise<AssignmentDocument[]> {
-    // get all user team ids
-    const teams = await this.teamsService.findAllByUserId(userId);
-    const teamIds = teams.map((team) => team.id);
-
     return await this.assignmentModel.find({
-      teamIds: { $in: teamIds },
       areaId,
     });
   }

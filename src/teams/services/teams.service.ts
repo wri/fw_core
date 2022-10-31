@@ -25,7 +25,9 @@ export class TeamsService {
   ): Promise<TeamDocument> {
     const { id: userId, email: userEmail } = loggedUser; // ToDo: loggedUser Type
 
-    const team = await new this.teamModel({ name }).save();
+    const layers: string[] = [];
+
+    const team = await new this.teamModel({ name, layers }).save();
     const teamMember: CreateTeamMemberDto = {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       teamId: team.id,

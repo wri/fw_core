@@ -9,8 +9,7 @@ export class CreateAssignmentDto {
   notes: string;
   status: AssignmentStatus;
   areaId: string;
-  templateId: string;
-  teamIds: string[];
+  templateIds: string[];
   createdBy?: string;
   name?: string;
 }
