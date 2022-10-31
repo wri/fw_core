@@ -311,101 +311,6 @@ describe('Assignments', () => {
     });
   });
 
-  /*   describe('GET /assignments/teams', () => {
-    afterEach(async () => {
-      await teamsDbConnection.collection('gfwteams').deleteMany({});
-      await teamsDbConnection.collection('teamuserrelations').deleteMany({});
-      await formsDbConnection.collection('reports').deleteMany({});
-      await formsDbConnection.collection('answers').deleteMany({});
-      await formsDbConnection.collection('assignments').deleteMany({});
-    });
-
-    it('should return a 401 without authorisation', async () => {
-      return await request(app.getHttpServer())
-        .get(`/assignments/teams`)
-        .expect(401);
-    });
-
-    it('should return an array of team assignments', async () => {
-      const team = await teamsDbConnection
-        .collection('gfwteams')
-        .insertOne({ name: 'Test' });
-      const team2 = await teamsDbConnection
-        .collection('gfwteams')
-        .insertOne({ name: 'Test2' });
-      const team3 = await teamsDbConnection
-        .collection('gfwteams')
-        .insertOne({ name: 'Test3' });
-      await teamsDbConnection.collection('teamuserrelations').insertOne({
-        teamId: team.insertedId,
-        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-        email: ROLES.USER.email,
-        status: EMemberStatus.Confirmed,
-        role: EMemberRole.Monitor,
-      });
-      await teamsDbConnection.collection('teamuserrelations').insertOne({
-        teamId: team3.insertedId,
-        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-        email: ROLES.USER.email,
-        status: EMemberStatus.Confirmed,
-        role: EMemberRole.Monitor,
-      });
-
-      const assignment = await formsDbConnection
-        .collection('assignments')
-        .insertOne({
-          ...assignments.defaultAssignment,
-          geostore: assignments.geostore.id,
-          name: 'name',
-          monitors: [],
-          //teamIds: [team.insertedId.toString()],
-          createdBy: ROLES.ADMIN.id,
-        });
-      const assignment2 = await formsDbConnection
-        .collection('assignments')
-        .insertOne({
-          ...assignments.defaultAssignment,
-          geostore: assignments.geostore.id,
-          name: 'some other name',
-          monitors: [],
-          //teamIds: [team.insertedId.toString(), team2.insertedId.toString()],
-          createdBy: ROLES.ADMIN.id,
-        });
-
-      await formsDbConnection.collection('assignments').insertOne({
-        ...assignments.defaultAssignment,
-        geostore: assignments.geostore.id,
-        name: 'not visible',
-        monitors: [],
-        //teamIds: [team2.insertedId.toString()],
-        createdBy: ROLES.ADMIN.id,
-      });
-
-      const response = await request(app.getHttpServer())
-        .get(`/assignments/teams`)
-        .set('Authorization', 'USER')
-        .expect(200);
-
-      expect(response.body).toHaveProperty('data');
-      expect(response.body.data.length).toBe(2);
-      expect(response.body.data[0]).toHaveProperty(
-        'id',
-        assignment.insertedId.toString(),
-      );
-      expect(response.body.data[0]).toHaveProperty('attributes');
-      expect(response.body.data[0].attributes).toHaveProperty('name', 'name');
-      expect(response.body.data[1]).toHaveProperty(
-        'id',
-        assignment2.insertedId.toString(),
-      );
-      expect(response.body.data[1].attributes).toHaveProperty('geostore');
-      expect(response.body.data[1].attributes.geostore).toHaveProperty(
-        'id',
-        assignments.geostore.id,
-      );
-    });
-  }); */
-
   describe('GET /assignments/open', () => {
     afterEach(async () => {
       await teamsDbConnection.collection('gfwteams').deleteMany({});
@@ -508,19 +413,6 @@ describe('Assignments', () => {
     });
 
     it('should return an array of assignments with the area id', async () => {
-      /*       const team = await teamsDbConnection
-        .collection('gfwteams')
-        .insertOne({ name: 'Test' });
-      const team2 = await teamsDbConnection
-        .collection('gfwteams')
-        .insertOne({ name: 'Test' });
-      await teamsDbConnection.collection('teamuserrelations').insertOne({
-        teamId: team.insertedId,
-        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
-        email: ROLES.USER.email,
-        status: EMemberStatus.Confirmed,
-        role: EMemberRole.Monitor,
-      }); */
 
       const assignment = await formsDbConnection
         .collection('assignments')
@@ -530,7 +422,6 @@ describe('Assignments', () => {
           name: 'name',
           areaId: areaConstants.testArea.id,
           monitors: [],
-          //teamIds: [team.insertedId.toString()],
           createdBy: ROLES.ADMIN.id,
         });
       const assignment2 = await formsDbConnection
@@ -541,7 +432,6 @@ describe('Assignments', () => {
           name: 'some other name',
           areaId: areaConstants.testArea.id,
           monitors: [],
-          //teamIds: [team.insertedId.toString()],
           createdBy: ROLES.ADMIN.id,
         });
 
@@ -551,7 +441,6 @@ describe('Assignments', () => {
         name: 'not visible',
         monitors: [],
         areaId: areaConstants.testTeamArea.id,
-        //teamIds: [team.insertedId.toString()],
         createdBy: ROLES.ADMIN.id,
       });
 
@@ -612,7 +501,6 @@ describe('Assignments', () => {
           status: 'open',
           areaId: areaConstants.testArea.id,
           monitors: [ROLES.USER.id],
-          //teamIds: [],
           createdBy: ROLES.ADMIN.id,
         });
       const assignment2 = await formsDbConnection
@@ -624,7 +512,6 @@ describe('Assignments', () => {
           status: 'on hold',
           areaId: areaConstants.testArea.id,
           monitors: [],
-          //teamIds: [],
           createdBy: ROLES.USER.id,
         });
       await formsDbConnection.collection('assignments').insertOne({
@@ -634,7 +521,6 @@ describe('Assignments', () => {
         status: 'completed',
         areaId: areaConstants.testArea.id,
         monitors: [],
-        //teamIds: [],
         createdBy: ROLES.USER.id,
       });
       await formsDbConnection.collection('assignments').insertOne({
@@ -643,7 +529,6 @@ describe('Assignments', () => {
         name: 'not visible',
         monitors: [],
         areaId: areaConstants.testTeamArea.id,
-        //teamIds: [],
         createdBy: ROLES.USER.id,
       });
       await formsDbConnection.collection('assignments').insertOne({
@@ -652,7 +537,6 @@ describe('Assignments', () => {
         name: 'not visible',
         monitors: [],
         areaId: areaConstants.testTeamArea.id,
-        //teamIds: [],
         createdBy: ROLES.USER.id,
       });
 
