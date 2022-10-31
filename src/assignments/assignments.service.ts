@@ -118,12 +118,7 @@ export class AssignmentsService {
     userId: string,
     areaId: string,
   ): Promise<AssignmentDocument[]> {
-    // get all user team ids
-    //const teams = await this.teamsService.findAllByUserId(userId);
-    //const teamIds = teams.map((team) => team.id);
-
     return await this.assignmentModel.find({
-      //teamIds: { $in: teamIds },
       areaId,
     });
   }
