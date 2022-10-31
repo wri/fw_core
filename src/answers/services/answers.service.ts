@@ -11,7 +11,6 @@ import { UserService } from '../../common/user.service';
 import { TemplateDocument } from '../../templates/models/template.schema';
 import { TeamsService } from '../../teams/services/teams.service';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
-import { CreateAnswerDto } from '../dto/create-answer.dto';
 import { UpdateAnswerDto } from '../dto/update-answer.dto';
 import { BaseService } from '../../common/base.service';
 

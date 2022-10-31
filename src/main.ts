@@ -1,7 +1,6 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as Sentry from '@sentry/node';
 import ErrorSerializer from './common/error.serializer';
 import { IUser } from './common/user.model';
 import { TemplateDocument } from './templates/models/template.schema';

@@ -7,10 +7,6 @@ import { AppModule } from '../../app.module';
 import ROLES from '../../common/testConstants';
 import { Connection } from 'mongoose';
 import { DatabaseService } from '../../common/database/database.service';
-import {
-  EMemberRole,
-  EMemberStatus,
-} from '../../teams/models/teamMember.schema';
 import { TeamsService } from '../../teams/services/teams.service';
 import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
