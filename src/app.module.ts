@@ -13,6 +13,8 @@ import { TemplatesModule } from './templates/templates.module';
 import { AnswersModule } from './answers/answers.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { RoutesModule } from './routes/routes.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { SentryInterceptor } from './common/sentry.interceptor';
 
 @Module({
   imports: [
@@ -30,7 +32,14 @@ import { RoutesModule } from './routes/routes.module';
     RoutesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, UserService],
+  providers: [
+    AppService,
+    UserService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: SentryInterceptor,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
