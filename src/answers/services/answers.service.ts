@@ -225,4 +225,15 @@ export class AnswersService extends BaseService<
 
     return this.count({ report: { $in: templates.map((t) => t._id) } });
   }
+
+  /**
+   * Fetches the total answer count for a template
+   * @param templateId Id of templates to get answer count for
+   * @returns The count of answers for the given template
+   */
+  async countByTemplateId(
+    templateId: string | MongooseObjectId,
+  ): Promise<number> {
+    return this.count({ report: templateId });
+  }
 }

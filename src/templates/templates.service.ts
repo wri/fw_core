@@ -28,12 +28,16 @@ export class TemplatesService extends BaseService<
    */
   async findAllByEditGroupId(
     id: string | MongooseObjectId,
-    opts?: Partial<{ user: string }>,
+    opts?: Partial<{ user: string; latest: boolean }>,
   ): Promise<TemplateDocument[]> {
     const filter: mongoose.FilterQuery<TemplateDocument> = { editGroupId: id };
 
     if (opts?.user) {
       filter.user = opts.user;
+    }
+
+    if (opts?.latest) {
+      filter.isLatest = true;
     }
 
     return this.model.find(filter);

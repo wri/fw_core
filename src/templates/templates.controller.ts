@@ -81,11 +81,18 @@ export class TemplatesController {
       latest: true,
     });
 
+    for (const template of templates) {
+      const answersCount = template.editGroupId
+        ? await this.answersService.countByEditGroupId(template.editGroupId)
+        : await this.answersService.countByTemplateId(template.id);
+      template.answersCount = answersCount;
+    }
+
     return { data: serializeTemplate(templates) };
   }
 
   @Get('/versions/:id')
-  async findAllVersionsByUser(@Req() request: Request) {
+  async findAllVersionsByGroupIdForUser(@Req() request: Request) {
     const user = request.user as IUser;
     const editGroupId = request.params.id;
     if (!editGroupId) {
@@ -103,7 +110,41 @@ export class TemplatesController {
       },
     );
 
+    for (const template of templates) {
+      const answersCount = await this.answersService.countByTemplateId(
+        template.id,
+      );
+      template.answersCount = answersCount;
+    }
+
     return { data: serializeTemplate(templates) };
+  }
+
+  @Get('/versions/:id/latest')
+  async findLatestVersionByGroupIdForUser(@Req() request: Request) {
+    const user = request.user as IUser;
+    const editGroupId = request.params.id;
+    if (!editGroupId) {
+      throw new BadRequestException('The id path parameter must be provided');
+    }
+
+    this.logger.log(
+      `Obtaining all template versions of ${editGroupId} for user ${user.id}`,
+    );
+
+    const [template] = await this.templatesService.findAllByEditGroupId(
+      editGroupId,
+      {
+        user: user.id,
+        latest: true,
+      },
+    );
+
+    template.answersCount = await this.answersService.countByEditGroupId(
+      editGroupId,
+    );
+
+    return { data: serializeTemplate(template) };
   }
 
   @Get()
