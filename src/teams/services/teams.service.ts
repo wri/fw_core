@@ -79,8 +79,13 @@ export class TeamsService {
   async update(
     id: string,
     name: TeamDocument['name'],
+    layers: TeamDocument['layers'],
   ): Promise<TeamDocument | null> {
-    return await this.teamModel.findByIdAndUpdate(id, { name }, { new: true });
+    return await this.teamModel.findByIdAndUpdate(
+      id,
+      { name, layers },
+      { new: true },
+    );
   }
 
   async delete(id: string): Promise<void> {
