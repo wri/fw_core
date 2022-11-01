@@ -1044,7 +1044,7 @@ describe('Templates', () => {
 
       expect(updatedTemplateDb).toBeDefined();
       expect(updatedTemplateDb).toMatchObject({
-        name: 'CHANGE NAME',
+        name: 'CHANGED NAME',
         languages: ['fr'],
         defaultLanguage: 'fr',
         questions: [
@@ -1092,54 +1092,6 @@ describe('Templates', () => {
       });
     });
 
-    it('should change the template status', async () => {
-      const template = await formsDbConnection
-        .collection('reports')
-        .insertOne(constants.userTemplate);
-      await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId.toString()}`)
-        .set('Authorization', 'USER')
-        .send({ status: 'unpublished' })
-        .expect(200);
-
-      const changedTemplate = await formsDbConnection
-        .collection('reports')
-        .findOne({ _id: template.insertedId });
-      expect(changedTemplate).toHaveProperty('status', 'unpublished');
-    });
-
-    it('should change the template languages', async () => {
-      const template = await formsDbConnection
-        .collection('reports')
-        .insertOne(constants.userTemplate);
-      await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId.toString()}`)
-        .set('Authorization', 'USER')
-        .send({ languages: ['en', 'fr'] })
-        .expect(200);
-
-      const changedTemplate = await formsDbConnection
-        .collection('reports')
-        .findOne({ _id: template.insertedId });
-      expect(changedTemplate).toHaveProperty('languages', ['en', 'fr']);
-    });
-
-    it('should fail to make the template public if user', async () => {
-      const template = await formsDbConnection
-        .collection('reports')
-        .insertOne(constants.userTemplate);
-      await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId.toString()}`)
-        .set('Authorization', 'USER')
-        .send({ public: true })
-        .expect(403);
-
-      const changedTemplate = await formsDbConnection
-        .collection('reports')
-        .findOne({ _id: template.insertedId });
-      expect(changedTemplate).toHaveProperty('public', false);
-    });
-
     it('should make the template public if admin', async () => {
       const template = await formsDbConnection
         .collection('reports')
@@ -1167,10 +1119,7 @@ describe('Templates', () => {
         .expect(200);
 
       expect(response.body).toHaveProperty('data');
-      expect(response.body.data).toHaveProperty(
-        'id',
-        template.insertedId.toString(),
-      );
+      expect(response.body.data).toHaveProperty('id');
       expect(response.body.data).toHaveProperty('attributes');
       expect(response.body.data.attributes).toHaveProperty(
         'name',
@@ -1190,18 +1139,16 @@ describe('Templates', () => {
         responses: [{ name: 'question-1', value: 'test' }],
       });
       const response = await request(app.getHttpServer())
-        .get(`/templates/${template.insertedId.toString()}`)
+        .patch(`/templates/${template.insertedId.toString()}`)
         .set('Authorization', 'USER')
         .send({ name: 'different name' })
         .expect(200);
 
       expect(response.body).toHaveProperty('data');
-      expect(response.body.data).toHaveProperty(
-        'id',
-        template.insertedId.toString(),
+      expect(response.body.data.attributes.answersCount).toHaveProperty(
+        'answersCount',
+        1,
       );
-      expect(response.body.data).toHaveProperty('attributes');
-      expect(response.body.data.attributes).toHaveProperty('answersCount', 1);
     });
   });
 

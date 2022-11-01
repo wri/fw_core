@@ -13,6 +13,7 @@ import { TeamsService } from '../../teams/services/teams.service';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
 import { UpdateAnswerDto } from '../dto/update-answer.dto';
 import { BaseService } from '../../common/base.service';
+import { TemplatesService } from '../../templates/templates.service';
 
 @Injectable()
 export class AnswersService extends BaseService<
@@ -27,6 +28,7 @@ export class AnswersService extends BaseService<
     private readonly teamsService: TeamsService,
     private readonly teamAreaRelationService: TeamAreaRelationService,
     private readonly userService: UserService,
+    private readonly templatesService: TemplatesService,
   ) {
     super(AnswersService.name, answerModel);
   }
@@ -206,5 +208,13 @@ export class AnswersService extends BaseService<
     for await (let answer of answers)
       answer = await this.addUsernameToAnswer(answer);
     return answers;
+  }
+
+  async conutByEditGroupId(editGroupId: string): Promise<number> {
+    const templates = await this.templatesService.findAllByEditGroupId(
+      editGroupId,
+    );
+
+    return this.count({ report: { $in: templates.map((t) => t._id) } });
   }
 }
