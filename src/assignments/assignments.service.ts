@@ -7,7 +7,11 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
-import { Assignment, AssignmentDocument } from './models/assignment.schema';
+import {
+  Assignment,
+  AssignmentDocument,
+  IAssignment,
+} from './models/assignment.schema';
 import { Model } from 'mongoose';
 import { TeamsService } from '../teams/services/teams.service';
 import mongoose from 'mongoose';
@@ -72,9 +76,11 @@ export class AssignmentsService {
           .join('')
       : 'null';
 
-    const newAssignment = {
+    const newAssignment: IAssignment = {
       ...assignmentDto,
+      geostore: undefined,
       createdBy: user.id,
+      createdAt: Date.now(),
       name: `${userInitials}-${String(count + 1).padStart(4, '0')}`,
     };
 
