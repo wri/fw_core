@@ -62,13 +62,14 @@ export class AssignmentsService {
         'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
         HttpStatus.BAD_REQUEST,
       );
-    assignmentDto.location.forEach((obj) => {
-      if (!(obj.lat && obj.lon))
-        throw new HttpException(
-          'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
-          HttpStatus.BAD_REQUEST,
-        );
-    });
+    if (assignmentDto.location)
+      assignmentDto.location.forEach((obj) => {
+        if (!(obj.lat && obj.lon))
+          throw new HttpException(
+            'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
+            HttpStatus.BAD_REQUEST,
+          );
+      });
     const userInitials = user.name
       ? user.name
           .split(' ')
