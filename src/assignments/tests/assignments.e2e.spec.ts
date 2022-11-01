@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { UserService } from '../../common/user.service';
 import { getModelToken } from '@nestjs/mongoose';
@@ -100,6 +100,8 @@ describe('Assignments', () => {
       .compile();
 
     app = moduleRef.createNestApplication();
+    app.enableCors();
+    app.useGlobalPipes(new ValidationPipe());
     await app.init();
     teamsDbConnection = moduleRef
       .get<DatabaseService>(DatabaseService)
@@ -139,6 +141,18 @@ describe('Assignments', () => {
         .findOne({});
       expect(createdAssignment).toBeDefined();
       expect(createdAssignment).toHaveProperty('notes', 'some notes');
+    });
+
+    it('should fail when geostore not given', async () => {
+      await request(app.getHttpServer())
+        .post(`/assignments`)
+        .send({
+          ...assignments.defaultAssignment,
+          monitors: [ROLES.USER.id],
+          geostore: undefined,
+        })
+        .set('Authorization', 'MANAGER')
+        .expect(400);
     });
 
     it('should return the created assignment', async () => {

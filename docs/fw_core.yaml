@@ -1268,6 +1268,10 @@ components:
           type: array
           items:
             type: string
+        layers:
+          type: array
+          items:
+            type: string
       required:
         - name
         - createdAt
