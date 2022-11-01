@@ -942,11 +942,9 @@ components:
             - open
             - on hold
             - completed
-        alert:
-          type: string
         areaId:
           type: string
-        templateId:
+        templateIds:
           type: array
           items:
             type: string
@@ -965,7 +963,7 @@ components:
         - notes
         - status
         - areaId
-        - templateId
+        - templateIds
     RouteModel:
       type: object
       x-examples:
@@ -1830,11 +1828,9 @@ components:
                   - open
                   - on hold
                   - completed
-              alert:
-                type: string
               areaId:
                 type: string
-              templateId:
+              templateIds:
                 type: array
                 items:
                   type: string
@@ -1846,7 +1842,7 @@ components:
               - notes
               - status
               - areaId
-              - templateId
+              - templateIds
           examples:
             example-1:
               value:
@@ -2209,7 +2205,7 @@ components:
                 type: string
               status:
                 type: string
-              templateId:
+              templateIds:
                 type: array
                 items:
                   type: string
