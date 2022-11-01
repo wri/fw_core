@@ -154,9 +154,11 @@ export class AnswersController {
 
     answer.assignmentId = new mongoose.Types.ObjectId(assignmentId);
     const answerModel = await this.answersService.create(answer);
-    await this.assignmentService.update(assignmentId, {
-      status: AssignmentStatus.COMPLETED,
-    });
+
+    if (assignment.status !== AssignmentStatus.COMPLETED)
+      await this.assignmentService.update(assignmentId, {
+        status: AssignmentStatus.COMPLETED,
+      });
 
     return { data: serializeAnswers(answerModel) };
   }
