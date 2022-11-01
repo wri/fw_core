@@ -80,7 +80,7 @@ services:
       - ./:/usr/src
     networks:
       - gfw-nest-network
-    command: yarn test:watch src/routes/tests/routes.e2e.spec.ts
+    command: yarn test:watch src/assignments/tests/assignments.e2e.spec.ts
   docs:
     build: .
     ports:
