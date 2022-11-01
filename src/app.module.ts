@@ -13,9 +13,11 @@ import { TemplatesModule } from './templates/templates.module';
 import { AnswersModule } from './answers/answers.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { RoutesModule } from './routes/routes.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
+    CommonModule,
     TeamsModule,
     TeamMembersModule,
     AreasModule,
