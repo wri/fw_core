@@ -1096,7 +1096,7 @@ describe('Templates', () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.userTemplate);
-      await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId.toString()}`)
         .set('Authorization', 'ADMIN')
         .send({ public: true })
@@ -1104,7 +1104,7 @@ describe('Templates', () => {
 
       const changedTemplate = await formsDbConnection
         .collection('reports')
-        .findOne({ _id: template.insertedId });
+        .findOne({ _id: new MongooseObjectId(response.body.data.id) });
       expect(changedTemplate).toHaveProperty('public', true);
     });
 
@@ -1145,10 +1145,7 @@ describe('Templates', () => {
         .expect(200);
 
       expect(response.body).toHaveProperty('data');
-      expect(response.body.data.attributes.answersCount).toHaveProperty(
-        'answersCount',
-        1,
-      );
+      expect(response.body.data.attributes).toHaveProperty('answersCount', 1);
     });
   });
 

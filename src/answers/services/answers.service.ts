@@ -14,6 +14,7 @@ import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.s
 import { UpdateAnswerDto } from '../dto/update-answer.dto';
 import { BaseService } from '../../common/base.service';
 import { TemplatesService } from '../../templates/templates.service';
+import { MongooseObjectId } from '../../common/objectId';
 
 @Injectable()
 export class AnswersService extends BaseService<
@@ -210,7 +211,14 @@ export class AnswersService extends BaseService<
     return answers;
   }
 
-  async conutByEditGroupId(editGroupId: string): Promise<number> {
+  /**
+   * Fetch the sum of the count of answer responses for all versions in an edit group
+   * @param editGroupId The id of the edit group of templates for which the answer count is to be fetched
+   * @returns The count of answers in all versions of an edit group
+   */
+  async countByEditGroupId(
+    editGroupId: string | MongooseObjectId,
+  ): Promise<number> {
     const templates = await this.templatesService.findAllByEditGroupId(
       editGroupId,
     );

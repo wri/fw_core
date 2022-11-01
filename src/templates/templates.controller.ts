@@ -256,9 +256,9 @@ export class TemplatesController {
     await template.save();
 
     // get answer count for each report
-    const answersCount = await this.answersService.count({
-      report: updatedTemplate.id,
-    });
+    const answersCount = await this.answersService.countByEditGroupId(
+      template.editGroupId,
+    );
     updatedTemplate.answersCount = answersCount;
     return { data: serializeTemplate(updatedTemplate) };
   }

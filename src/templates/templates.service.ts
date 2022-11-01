@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { BaseService } from '../common/base.service';
+import { MongooseObjectId } from '../common/objectId';
 
 @Injectable()
 export class TemplatesService extends BaseService<
@@ -26,7 +27,7 @@ export class TemplatesService extends BaseService<
    * @returns A list of Template documents that belong to the edit group
    */
   async findAllByEditGroupId(
-    id: string,
+    id: string | MongooseObjectId,
     opts?: Partial<{ user: string }>,
   ): Promise<TemplateDocument[]> {
     const filter: mongoose.FilterQuery<TemplateDocument> = { editGroupId: id };
