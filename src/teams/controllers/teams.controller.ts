@@ -145,7 +145,11 @@ export class TeamsController {
     if (!team)
       throw new HttpException("Team doesn't exist", HttpStatus.NOT_FOUND);
 
-    const updatedTeam = await this.teamsService.update(teamId, body.name);
+    const updatedTeam = await this.teamsService.update(
+      teamId,
+      body.name,
+      body.layers,
+    );
 
     return { data: serializeTeam(updatedTeam) };
   }

@@ -6,9 +6,10 @@ import FormData from 'form-data';
 import axios from 'axios';
 import { CoverageService } from './coverage.service';
 import { DatasetService } from './dataset.service';
-import { IArea, IGeojson, IGeostore } from '../models/area.entity';
+import { IArea, IGeojson } from '../models/area.entity';
 import { IUser } from '../../common/user.model';
 import { ConfigService } from '@nestjs/config';
+import { IGeostore } from '../models/geostore.entity';
 
 @Injectable()
 export class AreasService {

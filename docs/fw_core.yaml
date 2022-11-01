@@ -920,14 +920,16 @@ components:
         name:
           type: string
         location:
-          type: object
-          properties:
-            lat:
-              type: number
-            lon:
-              type: number
-            alertType:
-              type: string
+          type: array
+          items:
+            type: object
+            properties:
+              lat:
+                type: integer
+              lon:
+                type: integer
+              arrayType:
+                type: string
         priority:
           type: number
         monitors:
@@ -942,11 +944,9 @@ components:
             - open
             - on hold
             - completed
-        alert:
-          type: string
         areaId:
           type: string
-        templateId:
+        templateIds:
           type: array
           items:
             type: string
@@ -965,7 +965,7 @@ components:
         - notes
         - status
         - areaId
-        - templateId
+        - templateIds
     RouteModel:
       type: object
       x-examples:
@@ -1808,14 +1808,16 @@ components:
                 areaName: string
             properties:
               location:
-                type: object
-                properties:
-                  lat:
-                    type: number
-                  lon:
-                    type: number
-                  alertType:
-                    type: string
+                type: array
+                items:
+                  type: object
+                  properties:
+                    lat:
+                      type: integer
+                    lon:
+                      type: integer
+                    alertType:
+                      type: string
               priority:
                 type: number
               monitors:
@@ -1830,11 +1832,9 @@ components:
                   - open
                   - on hold
                   - completed
-              alert:
-                type: string
               areaId:
                 type: string
-              templateId:
+              templateIds:
                 type: array
                 items:
                   type: string
@@ -1846,7 +1846,7 @@ components:
               - notes
               - status
               - areaId
-              - templateId
+              - templateIds
           examples:
             example-1:
               value:
@@ -2178,6 +2178,10 @@ components:
             properties:
               name:
                 type: string
+              layers:
+                type: array
+                items:
+                  type: string
             required:
               - name
     UpdateAssignmentBody:
@@ -2209,7 +2213,7 @@ components:
                 type: string
               status:
                 type: string
-              templateId:
+              templateIds:
                 type: array
                 items:
                   type: string

@@ -70,7 +70,7 @@ export class AnswersController {
     };
 
     const isFileTypeQuestion = (question: ITemplateQuestion) =>
-      question.type === 'blob';
+      question.type === 'blob' || question.type === 'audio';
     const validateResponseTypeOrFail = (question: ITemplateQuestion) => {
       const hasFileResponse = !!files?.[question.name];
       const hasFieldResponse = !!fields[question.name];
@@ -154,9 +154,11 @@ export class AnswersController {
 
     answer.assignmentId = new mongoose.Types.ObjectId(assignmentId);
     const answerModel = await this.answersService.create(answer);
-    await this.assignmentService.update(assignmentId, {
-      status: AssignmentStatus.COMPLETED,
-    });
+
+    if (assignment.status !== AssignmentStatus.COMPLETED)
+      await this.assignmentService.update(assignmentId, {
+        status: AssignmentStatus.COMPLETED,
+      });
 
     return { data: serializeAnswers(answerModel) };
   }
