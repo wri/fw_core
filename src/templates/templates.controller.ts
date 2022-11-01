@@ -225,8 +225,16 @@ export class TemplatesController {
       throw new ForbiddenException();
     }
 
+    if (template.isLatest === false)
+      throw new ForbiddenException('Cannot update older versions of templates');
+
     if (!template.editGroupId) {
       template.editGroupId = new MongooseObjectId();
+      await template.save();
+    }
+
+    if (template.isLatest === undefined) {
+      template.isLatest = true;
       await template.save();
     }
 

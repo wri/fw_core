@@ -32,7 +32,7 @@ export class TemplateAreaRelationController {
     const area = await this.areasService.getAreaMICROSERVICE(body.areaId);
     if (!area)
       throw new HttpException("Area doesn't exist", HttpStatus.NOT_FOUND);
-    const template = await this.templatesService.getTemplate(body.templateId);
+    const template = await this.templatesService.findById(body.templateId);
     if (!template)
       throw new HttpException("Template doesn't exist", HttpStatus.NOT_FOUND);
     return await this.templateAreaRelationService.create(body);

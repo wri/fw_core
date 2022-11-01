@@ -18,6 +18,9 @@ import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import constants from './templates.constants';
 import { TemplateAreaRelationService } from '../../areas/services/templateAreaRelation.service';
+import { TemplateDocument } from '../models/template.schema';
+import { MongooseObjectId } from '../../common/objectId';
+import { response } from 'express';
 
 describe('Templates', () => {
   let app: INestApplication;
@@ -949,40 +952,144 @@ describe('Templates', () => {
         .expect(401);
     });
 
-    it('should fail in changing a different users template', async () => {
+    it('should fail if user is not admin and public is changed', async () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.userTemplate);
+
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}`)
+        .set('Authorization', 'USER')
+        .send({ public: true })
+        .expect(403);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne<TemplateDocument>({ _id: template.insertedId });
+
+      expect(templateDb).not.toBeNull();
+      expect(templateDb?.public).toBe(constants.userTemplate.public);
+    });
+
+    it('should fail if no template found', async () => {
       return await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId.toString()}`)
-        .set('Authorization', 'MANAGER')
+        .patch(`/templates/${new MongooseObjectId()}`)
+        .set('Authorization', 'USER')
+        .send({})
         .expect(403);
     });
 
-    it('should succeed in changing a users template', async () => {
-      const template = await formsDbConnection
-        .collection('reports')
-        .insertOne(constants.userTemplate);
+    it('should fail in changing a different users template', async () => {
+      const template = await formsDbConnection.collection('reports').insertOne({
+        ...constants.userTemplate,
+        user: new MongooseObjectId().toString(),
+      });
       return await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId.toString()}`)
         .set('Authorization', 'USER')
-        .expect(200);
+        .expect(403);
     });
 
-    it('should change the template name', async () => {
+    it('should create a new version on update', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.userTemplate);
-      await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId.toString()}`)
+        .insertOne(constants.userTemplate, {});
+
+      const response = await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}`)
         .set('Authorization', 'USER')
-        .send({ name: 'different name' })
+        .send({ name: 'CHANGED NAME' })
         .expect(200);
 
-      const changedTemplate = await formsDbConnection
+      const updatedTemplateDb = await formsDbConnection
         .collection('reports')
-        .findOne({ _id: template.insertedId });
-      expect(changedTemplate).toHaveProperty('name', 'different name');
+        .findOne<TemplateDocument>({
+          _id: new MongooseObjectId(response.body.data.id),
+        });
+
+      expect(updatedTemplateDb).not.toBeNull();
+      expect(updatedTemplateDb).toMatchObject({
+        editGroupId: constants.userTemplate.editGroupId,
+      });
+    });
+
+    it('should change values on new version', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne(constants.userTemplate, {});
+
+      const response = await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}`)
+        .set('Authorization', 'USER')
+        .send({
+          name: 'CHANGED NAME',
+          languages: ['fr'],
+          defaultLanguage: 'fr',
+          questions: [
+            {
+              type: 'text',
+              label: { fr: 'French label' },
+              name: 'FRENCH QUESTION',
+              required: false,
+            },
+          ],
+        })
+        .expect(200);
+
+      const updatedTemplateDb = await formsDbConnection
+        .collection('reports')
+        .findOne<TemplateDocument>({
+          _id: new MongooseObjectId(response.body.data.id),
+        });
+
+      expect(updatedTemplateDb).toBeDefined();
+      expect(updatedTemplateDb).toMatchObject({
+        name: 'CHANGE NAME',
+        languages: ['fr'],
+        defaultLanguage: 'fr',
+        questions: [
+          {
+            type: 'text',
+            label: { fr: 'French label' },
+            name: 'FRENCH QUESTION',
+            required: false,
+          },
+        ],
+      });
+    });
+
+    it('should change the latest template', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne(constants.userTemplate, {});
+
+      const response = await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}`)
+        .set('Authorization', 'USER')
+        .send({ name: 'CHANGED NAME' })
+        .expect(200);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne<TemplateDocument>({
+          _id: template.insertedId,
+        });
+
+      const updatedTemplateDb = await formsDbConnection
+        .collection('reports')
+        .findOne<TemplateDocument>({
+          _id: new MongooseObjectId(response.body.data.id),
+        });
+
+      expect(updatedTemplateDb).not.toBeNull();
+      expect(updatedTemplateDb).toMatchObject({
+        editGroupId: new MongooseObjectId(templateDb?.editGroupId),
+        isLatest: true,
+      });
+      expect(templateDb).not.toBeNull();
+      expect(templateDb).toMatchObject({
+        isLatest: false,
+      });
     });
 
     it('should change the template status', async () => {
