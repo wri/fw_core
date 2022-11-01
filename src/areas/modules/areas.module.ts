@@ -64,5 +64,14 @@ import { ConfigModule } from '@nestjs/config';
     ResponseService,
     TemplatesService,
   ],
+  exports: [
+    GeostoreService,
+    ResponseService,
+    AreasService,
+    CoverageService,
+    DatasetService,
+    TeamAreaRelationService,
+    TemplateAreaRelationService,
+  ],
 })
 export class AreasModule {}

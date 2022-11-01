@@ -31,16 +31,16 @@ export class ResponseService {
     const ALERTS_SUPPORTED = this.configService.get('alertsSupported');
 
     if (!geostoreObj) {
-      promises.push(
-        Promise.all(
-          areasWithGeostore.map((area) =>
-            this.geostoreService.getGeostore(
-              area.attributes.geostore,
-              user.token ?? '',
-            ),
-          ),
-        ),
-      );
+      const geostorePromises = areasWithGeostore.map((area) => {
+        if (typeof area.attributes.geostore !== 'string')
+          return area.attributes.geostore;
+
+        return this.geostoreService.getGeostore(
+          area.attributes.geostore,
+          user.token ?? '',
+        );
+      });
+      promises.push(Promise.all(geostorePromises));
     } else promises.push([geostoreObj]);
     if (!coverageObj) {
       promises.push(

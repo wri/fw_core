@@ -70,7 +70,7 @@ export class AnswersController {
     };
 
     const isFileTypeQuestion = (question: ITemplateQuestion) =>
-      question.type === 'blob';
+      question.type === 'blob' || question.type === 'audio';
     const validateResponseTypeOrFail = (question: ITemplateQuestion) => {
       const hasFileResponse = !!files?.[question.name];
       const hasFieldResponse = !!fields[question.name];

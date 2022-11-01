@@ -35,25 +35,27 @@ export class AssignmentsService {
   ) {}
 
   async create(
-    assignment: CreateAssignmentDto,
+    assignmentDto: CreateAssignmentDto,
     user: IUser,
   ): Promise<AssignmentDocument> {
     // get number of assignments in area for assignment name code
     const count = await this.assignmentModel.count({ createdBy: user.id });
-    const area = await this.areasService.getAreaMICROSERVICE(assignment.areaId);
+    const area = await this.areasService.getAreaMICROSERVICE(
+      assignmentDto.areaId,
+    );
 
     if (!area)
       throw new HttpException('Area does not exist', HttpStatus.NOT_FOUND);
 
-    if (!['open', 'on hold', 'completed'].includes(assignment.status))
+    if (!['open', 'on hold', 'completed'].includes(assignmentDto.status))
       throw new HttpException(
         "Status must be one of 'open', 'on hold', 'completed'",
         HttpStatus.BAD_REQUEST,
       );
 
     if (
-      assignment.location &&
-      !(assignment.location.lat && assignment.location.lon)
+      assignmentDto.location &&
+      !(assignmentDto.location.lat && assignmentDto.location.lon)
     )
       throw new HttpException(
         'location should be in the form {lat: number, lon: number, alertType: string}',
@@ -69,14 +71,14 @@ export class AssignmentsService {
 
     // create geostore
     const geostore = await this.geostoreService.createGeostore(
-      assignment.geostore,
+      assignmentDto.geostore,
       user.token ?? '',
     );
 
     const newAssignment = {
-      ...assignment,
+      ...assignmentDto,
       createdBy: user.id,
-      geostore: geostore?.id,
+      geostore: geostore.id,
       name: `${userInitials}-${String(count + 1).padStart(4, '0')}`,
     };
 

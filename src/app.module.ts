@@ -15,9 +15,11 @@ import { AssignmentsModule } from './assignments/assignments.module';
 import { RoutesModule } from './routes/routes.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { SentryInterceptor } from './common/sentry.interceptor';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
+    CommonModule,
     TeamsModule,
     TeamMembersModule,
     AreasModule,
