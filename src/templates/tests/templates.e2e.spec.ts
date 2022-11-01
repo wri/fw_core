@@ -1583,6 +1583,81 @@ describe('Templates', () => {
         .get(`/templates/versions/${groupId}/latest`)
         .set('Authorization', 'USER')
         .expect(200);
+
+      expect(response.body.data).toMatchObject({
+        id: templates.insertedIds[2].toString(),
+      });
+    });
+
+    it('should return the answer count for each version', async () => {
+      const templateCollection = formsDbConnection.collection('reports');
+      const templateBoilerplate = {
+        name: {
+          en: 'Default',
+        },
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        questions: [
+          {
+            type: 'text',
+            name: 'question-1',
+            label: {
+              en: 'test',
+            },
+          },
+        ],
+        languages: ['en'],
+        status: 'published',
+        defaultLanguage: 'en',
+      };
+
+      const groupId = new mongoose.Types.ObjectId();
+      const templates = await templateCollection.insertMany([
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+      ]);
+
+      const answerBolierplate = {
+        report: undefined,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+      };
+      await formsDbConnection.collection('answers').insertMany([
+        { ...answerBolierplate, report: templates.insertedIds[0] },
+        { ...answerBolierplate, report: templates.insertedIds[0] },
+        { ...answerBolierplate, report: templates.insertedIds[0] },
+        { ...answerBolierplate, report: templates.insertedIds[1] },
+        { ...answerBolierplate, report: templates.insertedIds[1] },
+        { ...answerBolierplate, report: templates.insertedIds[2] },
+      ]);
+
+      const response = await request(app.getHttpServer())
+        .get(`/templates/versions/${groupId}/latest`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body.data).toBeDefined();
+      const t = response.body.data;
+      const responseCount = t.attributes.answersCount;
+      expect(responseCount).toBe(6);
     });
   });
 
