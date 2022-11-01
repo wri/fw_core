@@ -5,7 +5,7 @@ import { AssignmentStatus } from '../assignment-status.enum';
 export class CreateAssignmentDto {
   location: { lat: number; lon: number; alertType: string }[];
   @IsDefined()
-  geostore: IGeojson;
+  geostore?: IGeojson;
   priority: number;
   monitors: string[];
   notes: string;

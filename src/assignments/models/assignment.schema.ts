@@ -5,11 +5,7 @@ import { AssignmentStatus } from '../assignment-status.enum';
 
 export interface IAssignment {
   name: string;
-<<<<<<< HEAD
-  location?: { lat: number; lon: number; alertType: string }[];
-=======
   location?: { lat: number; lon: number; alertType?: string }[];
->>>>>>> a1c213ca8e2443e01ac98eca6aae20d2c48a7b6d
   geostore?: string | IGeostore;
   priority: number;
   monitors: string[];
