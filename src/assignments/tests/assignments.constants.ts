@@ -3,7 +3,7 @@ import ROLES from '../../common/testConstants';
 
 export default {
   defaultAssignment: {
-    location: { lat: 1, lon: 1, alertType: null },
+    location: [{ lat: 1, lon: 1, alertType: null }],
     geostore: {
       type: 'FeatureCollection',
       features: [

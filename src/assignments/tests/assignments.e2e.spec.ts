@@ -7,10 +7,6 @@ import { AppModule } from '../../app.module';
 import ROLES from '../../common/testConstants';
 import { Connection } from 'mongoose';
 import { DatabaseService } from '../../common/database/database.service';
-import {
-  EMemberRole,
-  EMemberStatus,
-} from '../../teams/models/teamMember.schema';
 import { TeamsService } from '../../teams/services/teams.service';
 import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
@@ -145,18 +141,6 @@ describe('Assignments', () => {
         .findOne({});
       expect(createdAssignment).toBeDefined();
       expect(createdAssignment).toHaveProperty('notes', 'some notes');
-    });
-
-    it('should fail when geostore not given', async () => {
-      await request(app.getHttpServer())
-        .post(`/assignments`)
-        .send({
-          ...assignments.defaultAssignment,
-          monitors: [ROLES.USER.id],
-          geostore: undefined,
-        })
-        .set('Authorization', 'MANAGER')
-        .expect(400);
     });
 
     it('should return the created assignment', async () => {
