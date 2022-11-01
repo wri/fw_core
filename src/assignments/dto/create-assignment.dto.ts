@@ -3,7 +3,7 @@ import { IGeojson } from '../../areas/models/area.entity';
 import { AssignmentStatus } from '../assignment-status.enum';
 
 export class CreateAssignmentDto {
-  location: { lat: number; lon: number; alertType: string }[];
+  location: { lat: number; lon: number; alertType?: string }[];
   @IsDefined()
   geostore?: IGeojson;
   priority: number;
