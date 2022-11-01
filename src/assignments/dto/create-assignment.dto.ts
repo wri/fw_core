@@ -1,4 +1,3 @@
-import { IsDefined } from 'class-validator';
 import { IGeojson } from '../../areas/models/area.entity';
 import { AssignmentStatus } from '../assignment-status.enum';
 
