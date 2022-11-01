@@ -209,16 +209,21 @@ export class AssignmentsController {
     assignments: AssignmentDocument[],
     user: IUser,
   ): Promise<AssignmentDocument[]> {
-    const assignmentsToReturn = Promise.all(
-      assignments.map(async (assignment) => {
-        assignment.geostore = await this.geostoreService.getGeostore(
-          assignment.geostore,
-          user.token ?? '',
-        );
+    const assignmentResponsePromises = assignments.map(async (assignment) => {
+      if (!assignment.geostore || typeof assignment.geostore !== 'string')
         return assignment;
-      }),
-    );
 
-    return assignmentsToReturn;
+      const geostoreId = assignment.geostore;
+      const geostore = await this.geostoreService.getGeostore(
+        geostoreId,
+        user.token ?? '',
+      );
+
+      assignment.geostore = geostore ?? assignment.geostore;
+
+      return assignment;
+    });
+
+    return Promise.all(assignmentResponsePromises);
   }
 }
