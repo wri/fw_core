@@ -1,4 +1,5 @@
 import { ITemplate } from 'src/templates/models/template.schema';
+import { IGeostore } from './geostore.entity';
 
 export class Area {}
 
@@ -14,17 +15,6 @@ export interface IGeojson {
   crs?: any;
   type: string;
   features: IFeature[];
-}
-
-export interface IGeostore {
-  id: string;
-  geojson: IGeojson;
-  hash: string;
-  provider: any;
-  areaHa: number;
-  bbox: number[];
-  lock: boolean;
-  info: any;
 }
 
 export interface IArea {

@@ -7,13 +7,17 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
-import { Assignment, AssignmentDocument } from './models/assignment.schema';
+import {
+  Assignment,
+  AssignmentDocument,
+  IAssignment,
+} from './models/assignment.schema';
 import { Model } from 'mongoose';
 import { TeamsService } from '../teams/services/teams.service';
 import mongoose from 'mongoose';
 import { AreasService } from '../areas/services/areas.service';
 import { GeostoreService } from '../areas/services/geostore.service';
-import { IUser } from 'src/common/user.model';
+import { IUser } from '../common/user.model';
 
 const allowedKeys = [
   'name',
@@ -53,15 +57,18 @@ export class AssignmentsService {
         HttpStatus.BAD_REQUEST,
       );
 
-    if (
-      assignmentDto.location &&
-      !(assignmentDto.location.lat && assignmentDto.location.lon)
-    )
+    if (assignmentDto.location && !Array.isArray(assignmentDto.location))
       throw new HttpException(
-        'location should be in the form {lat: number, lon: number, alertType: string}',
+        'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
         HttpStatus.BAD_REQUEST,
       );
-
+    assignmentDto.location.forEach((obj) => {
+      if (!(obj.lat && obj.lon))
+        throw new HttpException(
+          'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
+          HttpStatus.BAD_REQUEST,
+        );
+    });
     const userInitials = user.name
       ? user.name
           .split(' ')
@@ -69,18 +76,22 @@ export class AssignmentsService {
           .join('')
       : 'null';
 
-    // create geostore
-    const geostore = await this.geostoreService.createGeostore(
-      assignmentDto.geostore,
-      user.token ?? '',
-    );
-
-    const newAssignment = {
+    const newAssignment: IAssignment = {
       ...assignmentDto,
+      geostore: undefined,
       createdBy: user.id,
-      geostore: geostore.id,
+      createdAt: Date.now(),
       name: `${userInitials}-${String(count + 1).padStart(4, '0')}`,
     };
+
+    // create geostore
+    if (assignmentDto.geostore) {
+      const geostore = await this.geostoreService.createGeostore(
+        assignmentDto.geostore,
+        user.token ?? '',
+      );
+      newAssignment.geostore = geostore.id;
+    }
 
     const assignmentToSave = new this.assignmentModel(newAssignment);
     return await assignmentToSave.save();

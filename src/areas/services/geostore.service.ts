@@ -3,8 +3,9 @@ import axios from 'axios';
 import { Logger } from '@nestjs/common';
 import deserialize from '../../common/deserlializer';
 import { ConfigService } from '@nestjs/config';
-import { IGeojson, IGeostore } from '../models/area.entity';
+import { IGeojson } from '../models/area.entity';
 import { RedisService } from '../../common/redis.service';
+import { IGeostore } from '../models/geostore.entity';
 
 @Injectable()
 export class GeostoreService {
