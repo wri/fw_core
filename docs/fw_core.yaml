@@ -920,14 +920,16 @@ components:
         name:
           type: string
         location:
-          type: object
-          properties:
-            lat:
-              type: number
-            lon:
-              type: number
-            alertType:
-              type: string
+          type: array
+          items:
+            type: object
+            properties:
+              lat:
+                type: integer
+              lon:
+                type: integer
+              arrayType:
+                type: string
         priority:
           type: number
         monitors:
@@ -1806,14 +1808,16 @@ components:
                 areaName: string
             properties:
               location:
-                type: object
-                properties:
-                  lat:
-                    type: number
-                  lon:
-                    type: number
-                  alertType:
-                    type: string
+                type: array
+                items:
+                  type: object
+                  properties:
+                    lat:
+                      type: integer
+                    lon:
+                      type: integer
+                    alertType:
+                      type: string
               priority:
                 type: number
               monitors:

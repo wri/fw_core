@@ -1,12 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { IGeostore } from 'src/areas/models/area.entity';
+import { IGeostore } from '../../areas/models/geostore.entity';
 import { AssignmentStatus } from '../assignment-status.enum';
 
 export interface IAssignment {
   name: string;
-  location?: { lat: number; lon: number; alertType: string };
-  geostore: string | IGeostore;
+  location?: { lat: number; lon: number; alertType: string }[];
+  geostore?: string | IGeostore;
   priority: number;
   monitors: string[];
   notes: string;
@@ -28,9 +28,9 @@ export class Assignment {
     lat: number;
     lon: number;
     alertType: string;
-  };
+  }[];
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   geostore: mongoose.Schema.Types.Mixed;
 
   @Prop({ required: true })
