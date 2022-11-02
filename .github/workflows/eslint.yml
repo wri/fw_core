@@ -1,9 +1,9 @@
-name: eslint
+name: Build and lint
 
 on: [pull_request]
 
 jobs:
-  docker:
+  build-and-lint:
     timeout-minutes: 10
     runs-on: ubuntu-latest
 

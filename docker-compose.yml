@@ -78,9 +78,12 @@ services:
       - ./config:/opt/gfw/config
       - ./nodemon.json:/opt/gfw/nodemon.json
       - ./:/usr/src
+    depends_on:
+      - mongo
+      - redis
     networks:
       - gfw-nest-network
-    command: yarn test:watch src/assignments/tests/assignments.e2e.spec.ts
+    command: yarn test
   docs:
     build: .
     ports:
