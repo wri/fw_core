@@ -15,7 +15,3 @@ import mongoose from 'mongoose';
  * https://github.com/microsoft/TypeScript/issues/2552#issuecomment-87893040
  */
 export import MongooseObjectId = mongoose.Types.ObjectId;
-
-export const checkObjectId = (objectId: string) => {
-    if (objectId && !mongoose.Types.ObjectId.isValid(objectId)) throw new BadRequestException(`Invalid param id: ${objectId}`)
-}

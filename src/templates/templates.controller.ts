@@ -29,8 +29,9 @@ import { TemplateAreaRelationService } from '../areas/services/templateAreaRelat
 import mongoose from 'mongoose';
 import { CreateTemplateInput } from './input/create-template.input';
 import { UserRole } from '../common/user-role.enum';
-import { checkObjectId, MongooseObjectId } from '../common/objectId';
+import { MongooseObjectId } from '../common/objectId';
 import { UpdateStatusInput } from './input/update-status.input';
+import { ValidateMongoId } from '../common/objectIdValidator.pipe';
 
 @Controller('templates')
 export class TemplatesController {
@@ -231,12 +232,10 @@ export class TemplatesController {
 
   @Get('/:id')
   async findOne(
-    @Param('id') id: string,
+    @Param('id', ValidateMongoId) id: string,
     @Req() request: Request,
   ): Promise<ITemplateResponse> {
     const user = request.user;
-
-    checkObjectId(id);
 
     this.logger.log('Obtaining template', id);
     const template = await this.templatesService.findOne({
