@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TemplatesService } from '../../templates/templates.service';
 import { TemplateAreaRelationDocument } from '../models/templateAreaRelation.schema';
+import { AreasService } from './areas.service';
 
 @Injectable()
 export class TemplateAreaRelationService {
@@ -10,6 +11,7 @@ export class TemplateAreaRelationService {
     @InjectModel('areatemplaterelations', 'apiDb')
     private templateAreaRelationModel: Model<TemplateAreaRelationDocument>,
     private templateService: TemplatesService,
+    private areasService: AreasService,
   ) {}
 
   async create({ areaId, templateId }): Promise<TemplateAreaRelationDocument> {
@@ -18,6 +20,7 @@ export class TemplateAreaRelationService {
         'Relation already exists',
         HttpStatus.BAD_REQUEST,
       );
+
     const newRelation = new this.templateAreaRelationModel({
       areaId,
       templateId,
@@ -40,6 +43,22 @@ export class TemplateAreaRelationService {
       if (!areaTemplateIds.includes(id)) areaTemplateIds.push(id);
     });
     return areaTemplateIds;
+  }
+
+  async findAreasForTemplate(
+    templateId: string,
+  ): Promise<{ id: string | undefined; name: string | undefined }[]> {
+    const relations = await this.templateAreaRelationModel.find({ templateId });
+
+    const areas = await Promise.all(
+      relations.map((relation) =>
+        this.areasService.getAreaMICROSERVICE(relation.areaId),
+      ),
+    );
+
+    return areas.map((area) => {
+      return { id: area?.id, name: area?.attributes.name };
+    });
   }
 
   async deleteMany(filter): Promise<void> {

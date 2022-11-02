@@ -17,6 +17,10 @@ import { S3Service } from './services/s3Service';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
 import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema';
 import { AssignmentsModule } from '../assignments/assignments.module';
+import { AreasService } from '../areas/services/areas.service';
+import { GeostoreService } from '../areas/services/geostore.service';
+import { CoverageService } from '../areas/services/coverage.service';
+import { DatasetService } from '../areas/services/dataset.service';
 
 @Module({
   imports: [
@@ -55,6 +59,10 @@ import { AssignmentsModule } from '../assignments/assignments.module';
     TeamsService,
     TeamMembersService,
     S3Service,
+    AreasService,
+    GeostoreService,
+    CoverageService,
+    DatasetService,
     UserService,
   ],
 })

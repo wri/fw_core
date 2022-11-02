@@ -17,10 +17,14 @@ import { TeamsService } from '../../teams/services/teams.service';
 import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import constants from './templates.constants';
+import areaConstants from '../../areas/test/area.constants';
 import { TemplateAreaRelationService } from '../../areas/services/templateAreaRelation.service';
 import { ETemplateStatus, TemplateDocument } from '../models/template.schema';
 import { MongooseObjectId } from '../../common/objectId';
-import { response } from 'express';
+import { AreasService } from '../../areas/services/areas.service';
+import { GeostoreService } from '../../areas/services/geostore.service';
+import { CoverageService } from '../../areas/services/coverage.service';
+import { DatasetService } from '../../areas/services/dataset.service';
 
 describe('Templates', () => {
   let app: INestApplication;
@@ -31,12 +35,25 @@ describe('Templates', () => {
     authorise: (token) => ROLES[token],
     getNameByIdMICROSERVICE: (_id) => 'Full Name',
   };
+  const areaService = {
+    getAreaMICROSERVICE: (_id) => {
+      if (_id.toString() === areaConstants.testArea.id)
+        return areaConstants.testArea;
+      else if (_id.toString() === areaConstants.testTeamArea.id)
+        return areaConstants.testTeamArea;
+      else return null;
+    },
+  };
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
       providers: [
         UserService,
+        AreasService,
+        GeostoreService,
+        CoverageService,
+        DatasetService,
         DatabaseService,
         TeamsService,
         TeamMembersService,
@@ -56,6 +73,8 @@ describe('Templates', () => {
     })
       .overrideProvider(UserService)
       .useValue(userService)
+      .overrideProvider(AreasService)
+      .useValue(areaService)
       .compile();
 
     app = moduleRef.createNestApplication();
@@ -1659,6 +1678,88 @@ describe('Templates', () => {
       const t = response.body.data;
       const responseCount = t.attributes.answersCount;
       expect(responseCount).toBe(6);
+    });
+
+    it('should return an array of areas', async () => {
+      const templateCollection = formsDbConnection.collection('reports');
+      const templateBoilerplate = {
+        name: {
+          en: 'Default',
+        },
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        questions: [
+          {
+            type: 'text',
+            name: 'question-1',
+            label: {
+              en: 'test',
+            },
+          },
+        ],
+        languages: ['en'],
+        status: 'published',
+        defaultLanguage: 'en',
+      };
+
+      const groupId = new mongoose.Types.ObjectId();
+      await templateCollection.insertMany([
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+      ]);
+
+      await apiDbConnection.collection('areatemplaterelations').insertOne({
+        templateId: groupId.toString(),
+        areaId: areaConstants.testArea.id,
+      });
+      await apiDbConnection.collection('areatemplaterelations').insertOne({
+        templateId: groupId.toString(),
+        areaId: areaConstants.testTeamArea.id,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/templates/versions/${groupId.toString()}/latest`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body.data).toBeDefined();
+      const t = response.body.data;
+      expect(t).toHaveProperty('attributes');
+      expect(t.attributes).toHaveProperty('areas');
+      expect(t.attributes.areas.length).toBe(2);
+      expect(t.attributes.areas[0]).toHaveProperty(
+        'id',
+        areaConstants.testArea.id,
+      );
+      expect(t.attributes.areas[0]).toHaveProperty(
+        'name',
+        areaConstants.testArea.attributes.name,
+      );
+      expect(t.attributes.areas[1]).toHaveProperty(
+        'id',
+        areaConstants.testTeamArea.id,
+      );
+      expect(t.attributes.areas[1]).toHaveProperty(
+        'name',
+        areaConstants.testTeamArea.attributes.name,
+      );
     });
   });
 

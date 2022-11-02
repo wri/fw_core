@@ -245,7 +245,7 @@ paths:
           $ref: '#/components/responses/Template-Response'
         '401':
           description: Unauthorized
-      description: Creates a new version of the template that shares the same `editGroupId` with the template.
+      description: Updates the template with the given id
       requestBody:
         $ref: '#/components/requestBodies/UpdateTemplateBody'
       tags:
@@ -880,91 +880,6 @@ paths:
           $ref: '#/components/responses/Error'
       operationId: get-v3-gfw-assignments-allOpenUserForArea-areaId
       description: Returns all assignments the user has created or is assigned to for a given area
-  '/v3/gfw/templates/versions/{editGroupId}/latest':
-    get:
-      summary: Get latest version
-      tags: []
-      responses:
-        '200':
-          $ref: '#/components/responses/Assignment-Response'
-        '':
-          $ref: '#/components/responses/Template-Response'
-      operationId: 'get-v3-gfw-templates-versions-:id-latest'
-      description: Fetches the latest version in a given template group
-    parameters:
-      - schema:
-          type: string
-        name: editGroupId
-        in: path
-        required: true
-        description: Edit group id for which the latest version is to be fetched
-  /v3/gfw/templates/latest:
-    get:
-      summary: Get latest versions of all user templates
-      tags: []
-      responses:
-        '200':
-          $ref: '#/components/responses/Templates-Response'
-      operationId: get-v3-gfw-templates-latest
-      description: Returns a list of all user templates with the latest version of each template. The answer count refers to the sum of the answers for the edit group the template is in.
-  '/v3/gfw/templates/version/{editGroupId}':
-    parameters:
-      - schema:
-          type: string
-        name: editGroupId
-        in: path
-        required: true
-        description: The edit group id for the template group
-    get:
-      summary: Get all versions of a group
-      tags: []
-      responses:
-        '200':
-          $ref: '#/components/responses/Templates-Response'
-      operationId: get-v3-gfw-templates-version-editGroupId
-      description: Get a list of templates which are all the versions for the given edit group id. The answer counts on each templates refer to the answer count per individual version.
-      x-internal: false
-  '/v3/templates/{templateId}/status':
-    parameters:
-      - schema:
-          type: string
-        name: templateId
-        in: path
-        required: true
-        description: Id for the template to be updated
-    patch:
-      summary: Update template status
-      tags: []
-      responses:
-        '200':
-          $ref: '#/components/responses/Template-Response'
-      operationId: patch-v3-templates-templateId-status
-      description: Update the status of a given template
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                status:
-                  type: string
-                  enum:
-                    - published
-                    - unpublished
-              required:
-                - status
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              properties:
-                status:
-                  type: string
-                  enum:
-                    - published
-                    - unpublished
-              required:
-                - status
-        description: ''
 components:
   schemas:
     AssignmentModel:
@@ -1168,6 +1083,15 @@ components:
             $ref: '#/components/schemas/QuestionModel'
         answersCount:
           type: integer
+        areas:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
     ChildQuestionModel:
       type: object
       x-examples:
@@ -1911,6 +1835,12 @@ components:
                   type: string
               notes:
                 type: string
+              status:
+                type: string
+                enum:
+                  - open
+                  - on hold
+                  - completed
               areaId:
                 type: string
               templateIds:
@@ -1923,6 +1853,7 @@ components:
               - priority
               - monitors
               - notes
+              - status
               - areaId
               - templateIds
           examples:
@@ -2077,33 +2008,6 @@ components:
         application/json:
           schema:
             type: object
-            x-examples:
-              example-1:
-                name: string
-                questions:
-                  - type: string
-                    label:
-                      en: string
-                    name: string
-                    defaultValue: string
-                    values: string
-                    required: true
-                    order: 0
-                    childQuestions:
-                      type: string
-                      label:
-                        en: string
-                      name: string
-                      defaultValue: string
-                      values: string
-                      required: true
-                      order: 0
-                      conditionalValue: 0
-                languages:
-                  - string
-                status: string
-                public: true
-                defaultLanguage: string
             properties:
               name:
                 type: string
@@ -2155,10 +2059,39 @@ components:
                 type: array
                 items:
                   type: string
+              status:
+                type: string
               public:
                 type: boolean
               defaultLanguage:
                 type: string
+            x-examples:
+              example-1:
+                name: string
+                questions:
+                  - type: string
+                    label:
+                      en: string
+                    name: string
+                    defaultValue: string
+                    values: string
+                    required: true
+                    order: 0
+                    childQuestions:
+                      type: string
+                      label:
+                        en: string
+                      name: string
+                      defaultValue: string
+                      values: string
+                      required: true
+                      order: 0
+                      conditionalValue: 0
+                languages:
+                  - string
+                status: string
+                public: true
+                defaultLanguage: string
           examples: {}
     AnswerBody:
       content:

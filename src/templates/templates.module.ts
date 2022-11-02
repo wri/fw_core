@@ -15,6 +15,10 @@ import { TemplateAreaRelationService } from '../areas/services/templateAreaRelat
 import { TemplateAreaRelationSchema } from '../areas/models/templateAreaRelation.schema';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
 import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema';
+import { AreasService } from '../areas/services/areas.service';
+import { GeostoreService } from '../areas/services/geostore.service';
+import { CoverageService } from '../areas/services/coverage.service';
+import { DatasetService } from '../areas/services/dataset.service';
 
 @Module({
   imports: [
@@ -51,6 +55,10 @@ import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema'
     AnswersService,
     TeamsService,
     TeamMembersService,
+    AreasService,
+    GeostoreService,
+    CoverageService,
+    DatasetService,
     UserService,
   ],
 })
