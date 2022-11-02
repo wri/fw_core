@@ -26,6 +26,8 @@ import { IArea, IAreaResponse } from '../models/area.entity';
 import { Request } from 'express';
 import { ResponseService } from '../services/response.service';
 import { TemplatesService } from '../../templates/templates.service';
+import { IUser } from '../../common/user.model';
+import { AuthUser } from '../../common/decorators';
 
 @Controller('areas')
 export class AreasController {
@@ -43,8 +45,7 @@ export class AreasController {
   // GET /areas/user
   // Gets all areas the user has created
   @Get('/user')
-  async getUserAreas(@Req() request: Request): Promise<IAreaResponse> {
-    const user = request.user;
+  async getUserAreas(@AuthUser() user: IUser): Promise<IAreaResponse> {
     let data: IArea[] = [];
     if (user && user.id) {
       try {
@@ -79,8 +80,7 @@ export class AreasController {
   // GET /areas/userAndTeam
   // Gets all areas the user has created and all areas linked to the user's teams
   @Get('/userAndTeam')
-  async getUserAndTeamAreas(@Req() request: Request): Promise<IAreaResponse> {
-    const user = request.user;
+  async getUserAndTeamAreas(@AuthUser() user: IUser): Promise<IAreaResponse> {
     let data: IArea[] = [];
 
     if (user && user.id) {
@@ -133,7 +133,7 @@ export class AreasController {
   @UseInterceptors(FileInterceptor('image', { dest: './tmp' }))
   async createArea(
     @UploadedFile() image: Express.Multer.File,
-    @Req() request: Request,
+    @AuthUser() user: IUser,
     @Body() body: CreateAreaDto,
   ): Promise<IAreaResponse> {
     if (!body.name)
@@ -151,7 +151,6 @@ export class AreasController {
         'Request must contain an image',
         HttpStatus.BAD_REQUEST,
       );
-    const user = request.user;
     const { geojson, name } = body;
     let data;
     if (user && user.id) {
@@ -183,12 +182,11 @@ export class AreasController {
   // get an area user created or that is part of a team
   @Get('/:id')
   async findOneArea(
-    @Req() request: Request,
+    @AuthUser() user: IUser,
     @Param('id') id: string,
   ): Promise<IAreaResponse> {
     // see if area is a team area
     // get user teams
-    const user = request.user;
     const userTeams: TeamDocument[] = await this.teamsService.findAllByUserId(
       user.id,
     ); // get list of user's teams
@@ -218,11 +216,10 @@ export class AreasController {
   @UseInterceptors(FileInterceptor('image', { dest: './tmp' }))
   async updateArea(
     @UploadedFile() image: Express.Multer.File,
+    @AuthUser() user: IUser,
     @Param('id') id: string,
-    @Req() request: Request,
     @Body() updateAreaDto: UpdateAreaDto,
   ): Promise<IAreaResponse> {
-    const user = request.user;
     // get the area
     const existingArea = await this.areasService.getArea(id, user);
     if (!existingArea)
@@ -283,9 +280,8 @@ export class AreasController {
   @Delete('/:id')
   async deleteOneArea(
     @Param('id') id: string,
-    @Req() request: Request,
+    @AuthUser() user: IUser,
   ): Promise<string> {
-    const user = request.user;
     const area = await this.areasService.getArea(id, user);
 
     if (area.attributes.userId.toString() !== user.id.toString())
