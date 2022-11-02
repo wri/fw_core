@@ -1168,6 +1168,10 @@ components:
             $ref: '#/components/schemas/QuestionModel'
         answersCount:
           type: integer
+        isLatest:
+          type: boolean
+        editGroupId:
+          type: string
     ChildQuestionModel:
       type: object
       x-examples:
