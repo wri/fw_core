@@ -21,10 +21,8 @@ import areaConstants from '../../areas/test/area.constants';
 import { TemplateAreaRelationService } from '../../areas/services/templateAreaRelation.service';
 import { ETemplateStatus, TemplateDocument } from '../models/template.schema';
 import { MongooseObjectId } from '../../common/objectId';
+import { AreasModule } from '../../areas/modules/areas.module';
 import { AreasService } from '../../areas/services/areas.service';
-import { GeostoreService } from '../../areas/services/geostore.service';
-import { CoverageService } from '../../areas/services/coverage.service';
-import { DatasetService } from '../../areas/services/dataset.service';
 
 describe('Templates', () => {
   let app: INestApplication;
@@ -47,13 +45,9 @@ describe('Templates', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [AppModule, AreasModule],
       providers: [
         UserService,
-        AreasService,
-        GeostoreService,
-        CoverageService,
-        DatasetService,
         DatabaseService,
         TeamsService,
         TeamMembersService,
