@@ -15,10 +15,7 @@ import { TemplateAreaRelationService } from '../areas/services/templateAreaRelat
 import { TemplateAreaRelationSchema } from '../areas/models/templateAreaRelation.schema';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
 import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema';
-import { AreasService } from '../areas/services/areas.service';
-import { GeostoreService } from '../areas/services/geostore.service';
-import { CoverageService } from '../areas/services/coverage.service';
-import { DatasetService } from '../areas/services/dataset.service';
+import { AreasModule } from '../areas/modules/areas.module';
 
 @Module({
   imports: [
@@ -46,6 +43,7 @@ import { DatasetService } from '../areas/services/dataset.service';
       [{ name: 'areateamrelations', schema: TeamAreaRelationSchema }],
       'apiDb',
     ),
+    AreasModule,
   ],
   controllers: [TemplatesController],
   providers: [
@@ -55,10 +53,6 @@ import { DatasetService } from '../areas/services/dataset.service';
     AnswersService,
     TeamsService,
     TeamMembersService,
-    AreasService,
-    GeostoreService,
-    CoverageService,
-    DatasetService,
     UserService,
   ],
 })

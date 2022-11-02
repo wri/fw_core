@@ -17,10 +17,7 @@ import { S3Service } from './services/s3Service';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
 import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema';
 import { AssignmentsModule } from '../assignments/assignments.module';
-import { AreasService } from '../areas/services/areas.service';
-import { GeostoreService } from '../areas/services/geostore.service';
-import { CoverageService } from '../areas/services/coverage.service';
-import { DatasetService } from '../areas/services/dataset.service';
+import { AreasModule } from '../areas/modules/areas.module';
 
 @Module({
   imports: [
@@ -49,6 +46,7 @@ import { DatasetService } from '../areas/services/dataset.service';
       'apiDb',
     ),
     AssignmentsModule,
+    AreasModule,
   ],
   controllers: [AnswersController],
   providers: [
@@ -59,10 +57,6 @@ import { DatasetService } from '../areas/services/dataset.service';
     TeamsService,
     TeamMembersService,
     S3Service,
-    AreasService,
-    GeostoreService,
-    CoverageService,
-    DatasetService,
     UserService,
   ],
 })
