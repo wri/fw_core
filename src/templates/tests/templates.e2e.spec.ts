@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import request from 'supertest';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { UserService } from '../../common/user.service';
 import { getModelToken } from '@nestjs/mongoose';
@@ -18,6 +18,9 @@ import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import constants from './templates.constants';
 import { TemplateAreaRelationService } from '../../areas/services/templateAreaRelation.service';
+import { ETemplateStatus, TemplateDocument } from '../models/template.schema';
+import { MongooseObjectId } from '../../common/objectId';
+import { response } from 'express';
 
 describe('Templates', () => {
   let app: INestApplication;
@@ -56,6 +59,7 @@ describe('Templates', () => {
       .compile();
 
     app = moduleRef.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
     await app.init();
     teamsDbConnection = moduleRef
       .get<DatabaseService>(DatabaseService)
@@ -949,95 +953,151 @@ describe('Templates', () => {
         .expect(401);
     });
 
-    it('should fail in changing a different users template', async () => {
+    it('should fail if user is not admin and public is changed', async () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.userTemplate);
+
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}`)
+        .set('Authorization', 'USER')
+        .send({ public: true })
+        .expect(403);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne<TemplateDocument>({ _id: template.insertedId });
+
+      expect(templateDb).not.toBeNull();
+      expect(templateDb?.public).toBe(constants.userTemplate.public);
+    });
+
+    it('should fail if no template found', async () => {
       return await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId.toString()}`)
-        .set('Authorization', 'MANAGER')
+        .patch(`/templates/${new MongooseObjectId()}`)
+        .set('Authorization', 'USER')
+        .send({})
         .expect(403);
     });
 
-    it('should succeed in changing a users template', async () => {
-      const template = await formsDbConnection
-        .collection('reports')
-        .insertOne(constants.userTemplate);
+    it('should fail in changing a different users template', async () => {
+      const template = await formsDbConnection.collection('reports').insertOne({
+        ...constants.userTemplate,
+        user: new MongooseObjectId().toString(),
+      });
       return await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId.toString()}`)
         .set('Authorization', 'USER')
-        .expect(200);
+        .expect(403);
     });
 
-    it('should change the template name', async () => {
+    it('should create a new version on update', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.userTemplate);
-      await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId.toString()}`)
+        .insertOne(constants.userTemplate, {});
+
+      const response = await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}`)
         .set('Authorization', 'USER')
-        .send({ name: 'different name' })
+        .send({ name: 'CHANGED NAME' })
         .expect(200);
 
-      const changedTemplate = await formsDbConnection
+      const updatedTemplateDb = await formsDbConnection
         .collection('reports')
-        .findOne({ _id: template.insertedId });
-      expect(changedTemplate).toHaveProperty('name', 'different name');
+        .findOne<TemplateDocument>({
+          _id: new MongooseObjectId(response.body.data.id),
+        });
+
+      expect(updatedTemplateDb).not.toBeNull();
+      expect(updatedTemplateDb).toMatchObject({
+        editGroupId: constants.userTemplate.editGroupId,
+      });
     });
 
-    it('should change the template status', async () => {
+    it('should change values on new version', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.userTemplate);
-      await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId.toString()}`)
+        .insertOne(constants.userTemplate, {});
+
+      const response = await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}`)
         .set('Authorization', 'USER')
-        .send({ status: 'unpublished' })
+        .send({
+          name: 'CHANGED NAME',
+          languages: ['fr'],
+          defaultLanguage: 'fr',
+          questions: [
+            {
+              type: 'text',
+              label: { fr: 'French label' },
+              name: 'FRENCH QUESTION',
+              required: false,
+            },
+          ],
+        })
         .expect(200);
 
-      const changedTemplate = await formsDbConnection
+      const updatedTemplateDb = await formsDbConnection
         .collection('reports')
-        .findOne({ _id: template.insertedId });
-      expect(changedTemplate).toHaveProperty('status', 'unpublished');
+        .findOne<TemplateDocument>({
+          _id: new MongooseObjectId(response.body.data.id),
+        });
+
+      expect(updatedTemplateDb).toBeDefined();
+      expect(updatedTemplateDb).toMatchObject({
+        name: 'CHANGED NAME',
+        languages: ['fr'],
+        defaultLanguage: 'fr',
+        questions: [
+          {
+            type: 'text',
+            label: { fr: 'French label' },
+            name: 'FRENCH QUESTION',
+            required: false,
+          },
+        ],
+      });
     });
 
-    it('should change the template languages', async () => {
+    it('should change the latest template', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.userTemplate);
-      await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId.toString()}`)
+        .insertOne(constants.userTemplate, {});
+
+      const response = await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}`)
         .set('Authorization', 'USER')
-        .send({ languages: ['en', 'fr'] })
+        .send({ name: 'CHANGED NAME' })
         .expect(200);
 
-      const changedTemplate = await formsDbConnection
+      const templateDb = await formsDbConnection
         .collection('reports')
-        .findOne({ _id: template.insertedId });
-      expect(changedTemplate).toHaveProperty('languages', ['en', 'fr']);
-    });
+        .findOne<TemplateDocument>({
+          _id: template.insertedId,
+        });
 
-    it('should fail to make the template public if user', async () => {
-      const template = await formsDbConnection
+      const updatedTemplateDb = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.userTemplate);
-      await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId.toString()}`)
-        .set('Authorization', 'USER')
-        .send({ public: true })
-        .expect(200);
+        .findOne<TemplateDocument>({
+          _id: new MongooseObjectId(response.body.data.id),
+        });
 
-      const changedTemplate = await formsDbConnection
-        .collection('reports')
-        .findOne({ _id: template.insertedId });
-      expect(changedTemplate).toHaveProperty('public', false);
+      expect(updatedTemplateDb).not.toBeNull();
+      expect(updatedTemplateDb).toMatchObject({
+        editGroupId: new MongooseObjectId(templateDb?.editGroupId),
+        isLatest: true,
+      });
+      expect(templateDb).not.toBeNull();
+      expect(templateDb).toMatchObject({
+        isLatest: false,
+      });
     });
 
     it('should make the template public if admin', async () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne(constants.userTemplate);
-      await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId.toString()}`)
         .set('Authorization', 'ADMIN')
         .send({ public: true })
@@ -1045,7 +1105,7 @@ describe('Templates', () => {
 
       const changedTemplate = await formsDbConnection
         .collection('reports')
-        .findOne({ _id: template.insertedId });
+        .findOne({ _id: new MongooseObjectId(response.body.data.id) });
       expect(changedTemplate).toHaveProperty('public', true);
     });
 
@@ -1060,10 +1120,7 @@ describe('Templates', () => {
         .expect(200);
 
       expect(response.body).toHaveProperty('data');
-      expect(response.body.data).toHaveProperty(
-        'id',
-        template.insertedId.toString(),
-      );
+      expect(response.body.data).toHaveProperty('id');
       expect(response.body.data).toHaveProperty('attributes');
       expect(response.body.data.attributes).toHaveProperty(
         'name',
@@ -1083,17 +1140,12 @@ describe('Templates', () => {
         responses: [{ name: 'question-1', value: 'test' }],
       });
       const response = await request(app.getHttpServer())
-        .get(`/templates/${template.insertedId.toString()}`)
+        .patch(`/templates/${template.insertedId.toString()}`)
         .set('Authorization', 'USER')
         .send({ name: 'different name' })
         .expect(200);
 
       expect(response.body).toHaveProperty('data');
-      expect(response.body.data).toHaveProperty(
-        'id',
-        template.insertedId.toString(),
-      );
-      expect(response.body.data).toHaveProperty('attributes');
       expect(response.body.data.attributes).toHaveProperty('answersCount', 1);
     });
   });
@@ -1261,6 +1313,83 @@ describe('Templates', () => {
       const dataIds = data.map((d) => d.id);
       expect(dataIds.sort()).toEqual(latestTemplateIds.sort());
     });
+
+    it('should return answer count for all versions for each template', async () => {
+      const templateCollection = formsDbConnection.collection('reports');
+      const templateBoilerplate = {
+        name: {
+          en: 'Default',
+        },
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        questions: [
+          {
+            type: 'text',
+            name: 'question-1',
+            label: {
+              en: 'test',
+            },
+          },
+        ],
+        languages: ['en'],
+        status: 'published',
+        defaultLanguage: 'en',
+      };
+
+      const groupId1 = new mongoose.Types.ObjectId();
+      const groupId2 = new mongoose.Types.ObjectId();
+      const groupId3 = new mongoose.Types.ObjectId();
+      const templates = await templateCollection.insertMany([
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId1,
+          isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId1,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId2,
+          isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId3,
+          isLatest: true,
+        },
+      ]);
+
+      const answerBolierplate = {
+        report: undefined,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+      };
+      await formsDbConnection.collection('answers').insertMany([
+        { ...answerBolierplate, report: templates.insertedIds[0] },
+        { ...answerBolierplate, report: templates.insertedIds[1] },
+        { ...answerBolierplate, report: templates.insertedIds[2] },
+      ]);
+
+      const response = await request(app.getHttpServer())
+        .get('/templates/latest')
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body.data).toBeInstanceOf(Array);
+      const answerCounts = {
+        [groupId1.toString()]: 2,
+        [groupId2.toString()]: 1,
+        [groupId3.toString()]: 0,
+      };
+      response.body.data.forEach((t) => {
+        const responseCount = t.attributes.answersCount;
+        const expectedCount = answerCounts[t.attributes.editGroupId];
+        expect(responseCount).toBe(expectedCount);
+      });
+    });
   });
 
   describe('GET /templates/versions/:id', () => {
@@ -1319,6 +1448,335 @@ describe('Templates', () => {
       expect(data).toBeDefined();
       expect(data).toBeInstanceOf(Array);
       expect(data).toHaveLength(0);
+    });
+
+    it('should return answer count for each version', async () => {
+      const templateCollection = formsDbConnection.collection('reports');
+      const templateBoilerplate = {
+        name: {
+          en: 'Default',
+        },
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        questions: [
+          {
+            type: 'text',
+            name: 'question-1',
+            label: {
+              en: 'test',
+            },
+          },
+        ],
+        languages: ['en'],
+        status: 'published',
+        defaultLanguage: 'en',
+      };
+
+      const groupId = new mongoose.Types.ObjectId();
+      const templates = await templateCollection.insertMany([
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+      ]);
+
+      const answerBolierplate = {
+        report: undefined,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+      };
+      await formsDbConnection.collection('answers').insertMany([
+        { ...answerBolierplate, report: templates.insertedIds[0] },
+        { ...answerBolierplate, report: templates.insertedIds[0] },
+        { ...answerBolierplate, report: templates.insertedIds[0] },
+        { ...answerBolierplate, report: templates.insertedIds[1] },
+        { ...answerBolierplate, report: templates.insertedIds[1] },
+        { ...answerBolierplate, report: templates.insertedIds[2] },
+      ]);
+
+      const response = await request(app.getHttpServer())
+        .get(`/templates/versions/${groupId}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body.data).toBeInstanceOf(Array);
+      const answerCounts = {
+        [templates.insertedIds[0].toString()]: 3,
+        [templates.insertedIds[1].toString()]: 2,
+        [templates.insertedIds[2].toString()]: 1,
+        [templates.insertedIds[3].toString()]: 0,
+      };
+      response.body.data.forEach((t) => {
+        const responseCount = t.attributes.answersCount;
+        const expectedCount = answerCounts[t.id];
+        expect(responseCount).toBe(expectedCount);
+      });
+    });
+  });
+
+  describe('GET /templates/versions/:id/latest', () => {
+    afterEach(async () => {
+      await formsDbConnection.collection('reports').deleteMany({});
+    });
+
+    it('should return latest version in a group', async () => {
+      const templateCollection = formsDbConnection.collection('reports');
+      const templateBoilerplate = {
+        name: {
+          en: 'Default',
+        },
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        questions: [
+          {
+            type: 'text',
+            name: 'question-1',
+            label: {
+              en: 'test',
+            },
+          },
+        ],
+        languages: ['en'],
+        status: 'published',
+        defaultLanguage: 'en',
+      };
+
+      const groupId = new mongoose.Types.ObjectId();
+      const templates = await templateCollection.insertMany([
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+      ]);
+
+      const response = await request(app.getHttpServer())
+        .get(`/templates/versions/${groupId}/latest`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body.data).toMatchObject({
+        id: templates.insertedIds[2].toString(),
+      });
+    });
+
+    it('should return the answer count for each version', async () => {
+      const templateCollection = formsDbConnection.collection('reports');
+      const templateBoilerplate = {
+        name: {
+          en: 'Default',
+        },
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        questions: [
+          {
+            type: 'text',
+            name: 'question-1',
+            label: {
+              en: 'test',
+            },
+          },
+        ],
+        languages: ['en'],
+        status: 'published',
+        defaultLanguage: 'en',
+      };
+
+      const groupId = new mongoose.Types.ObjectId();
+      const templates = await templateCollection.insertMany([
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId,
+          isLatest: false,
+        },
+      ]);
+
+      const answerBolierplate = {
+        report: undefined,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+      };
+      await formsDbConnection.collection('answers').insertMany([
+        { ...answerBolierplate, report: templates.insertedIds[0] },
+        { ...answerBolierplate, report: templates.insertedIds[0] },
+        { ...answerBolierplate, report: templates.insertedIds[0] },
+        { ...answerBolierplate, report: templates.insertedIds[1] },
+        { ...answerBolierplate, report: templates.insertedIds[1] },
+        { ...answerBolierplate, report: templates.insertedIds[2] },
+      ]);
+
+      const response = await request(app.getHttpServer())
+        .get(`/templates/versions/${groupId}/latest`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body.data).toBeDefined();
+      const t = response.body.data;
+      const responseCount = t.attributes.answersCount;
+      expect(responseCount).toBe(6);
+    });
+  });
+
+  describe('PATCH /templates/:id/status', () => {
+    afterEach(async () => {
+      await formsDbConnection.collection('reports').deleteMany({});
+    });
+
+    it('should update the status to published', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate, status: 'unpublished' });
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}/status`)
+        .set('Authorization', 'USER')
+        .send({ status: ETemplateStatus.PUBLISHED })
+        .expect(200);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+
+      expect(templateDb).toBeTruthy();
+      expect(templateDb?.status).toBe('published');
+    });
+
+    it('should update status to unpublished', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate, status: 'published' });
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}/status`)
+        .set('Authorization', 'USER')
+        .send({ status: ETemplateStatus.UNPUBLISHED })
+        .expect(200);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+
+      expect(templateDb).toBeTruthy();
+      expect(templateDb?.status).toBe('unpublished');
+    });
+
+    it('should fail if status not given', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate, status: 'unpublished' });
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}/status`)
+        .set('Authorization', 'USER')
+        .send({})
+        .expect(400);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+
+      expect(templateDb).toBeTruthy();
+      expect(templateDb?.status).toBe('unpublished');
+    });
+
+    it('should fail if status is not a valid value', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate, status: 'unpublished' });
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}/status`)
+        .set('Authorization', 'USER')
+        .send({ status: 'notValid' })
+        .expect(400);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+
+      expect(templateDb).toBeTruthy();
+      expect(templateDb?.status).toBe('unpublished');
+    });
+
+    it("should fail if user doesn't own template and is not admin", async () => {
+      const template = await formsDbConnection.collection('reports').insertOne({
+        ...constants.userTemplate,
+        status: 'unpublished',
+        user: new MongooseObjectId(),
+      });
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}/status`)
+        .set('Authorization', 'USER')
+        .send({ status: ETemplateStatus.PUBLISHED })
+        .expect(403);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+
+      expect(templateDb).toBeTruthy();
+      expect(templateDb?.status).toBe('unpublished');
+    });
+
+    it('should update status if user is admin and not owner', async () => {
+      const template = await formsDbConnection.collection('reports').insertOne({
+        ...constants.userTemplate,
+        status: 'unpublished',
+        user: new MongooseObjectId(),
+      });
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}/status`)
+        .set('Authorization', 'ADMIN')
+        .send({ status: ETemplateStatus.PUBLISHED })
+        .expect(200);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+
+      expect(templateDb).toBeTruthy();
+      expect(templateDb?.status).toBe('published');
     });
   });
 

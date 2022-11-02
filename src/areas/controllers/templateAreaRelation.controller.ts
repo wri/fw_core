@@ -32,7 +32,7 @@ export class TemplateAreaRelationController {
     const area = await this.areasService.getAreaMICROSERVICE(body.areaId);
     if (!area)
       throw new HttpException("Area doesn't exist", HttpStatus.NOT_FOUND);
-    const template = await this.templatesService.getTemplate(body.templateId);
+    const template = await this.templatesService.findById(body.templateId);
     if (!template)
       throw new HttpException("Template doesn't exist", HttpStatus.NOT_FOUND);
     return await this.templateAreaRelationService.create(body);
@@ -42,7 +42,7 @@ export class TemplateAreaRelationController {
   async deleteTemplateAreaRelation(
     @Body() body: CreateTemplateAreaRelationDto,
   ): Promise<void> {
-    await this.templateAreaRelationService.delete(body);
+    await this.templateAreaRelationService.deleteMany(body);
   }
 
   // INTERNAL USE ONLY
@@ -68,12 +68,12 @@ export class TemplateAreaRelationController {
   // INTERNAL USE ONLY
   @Delete('/deleteAllForTemplate/:templateId')
   deleteAllTemplateRelations(@Param('templateId') templateId: string): void {
-    this.templateAreaRelationService.delete({ templateId });
+    this.templateAreaRelationService.deleteMany({ templateId });
   }
 
   // INTERNAL USE ONLY
   @Delete('/deleteAllForArea/:areaId')
   deleteAllAreaRelations(@Param('areaId') areaId: string): void {
-    this.templateAreaRelationService.delete({ areaId });
+    this.templateAreaRelationService.deleteMany({ areaId });
   }
 }

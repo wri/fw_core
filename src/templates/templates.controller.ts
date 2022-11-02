@@ -12,6 +12,7 @@ import {
   HttpException,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { TemplatesService } from './templates.service';
 import { CreateTemplateDto } from './dto/create-template.dto';
@@ -27,6 +28,9 @@ import serializeAnswers from '../answers/serializers/answers.serializer';
 import { TemplateAreaRelationService } from '../areas/services/templateAreaRelation.service';
 import mongoose from 'mongoose';
 import { CreateTemplateInput } from './input/create-template.input';
+import { UserRole } from '../common/user-role.enum';
+import { MongooseObjectId } from '../common/objectId';
+import { UpdateStatusInput } from './input/update-status.input';
 
 @Controller('templates')
 export class TemplatesController {
@@ -78,11 +82,18 @@ export class TemplatesController {
       latest: true,
     });
 
+    for (const template of templates) {
+      const answersCount = template.editGroupId
+        ? await this.answersService.countByEditGroupId(template.editGroupId)
+        : await this.answersService.countByTemplateId(template.id);
+      template.answersCount = answersCount;
+    }
+
     return { data: serializeTemplate(templates) };
   }
 
   @Get('/versions/:id')
-  async findAllVersionsByUser(@Req() request: Request) {
+  async findAllVersionsByGroupIdForUser(@Req() request: Request) {
     const user = request.user as IUser;
     const editGroupId = request.params.id;
     if (!editGroupId) {
@@ -100,7 +111,41 @@ export class TemplatesController {
       },
     );
 
+    for (const template of templates) {
+      const answersCount = await this.answersService.countByTemplateId(
+        template.id,
+      );
+      template.answersCount = answersCount;
+    }
+
     return { data: serializeTemplate(templates) };
+  }
+
+  @Get('/versions/:id/latest')
+  async findLatestVersionByGroupIdForUser(@Req() request: Request) {
+    const user = request.user as IUser;
+    const editGroupId = request.params.id;
+    if (!editGroupId) {
+      throw new BadRequestException('The id path parameter must be provided');
+    }
+
+    this.logger.log(
+      `Obtaining all template versions of ${editGroupId} for user ${user.id}`,
+    );
+
+    const [template] = await this.templatesService.findAllByEditGroupId(
+      editGroupId,
+      {
+        user: user.id,
+        latest: true,
+      },
+    );
+
+    template.answersCount = await this.answersService.countByEditGroupId(
+      editGroupId,
+    );
+
+    return { data: serializeTemplate(template) };
   }
 
   @Get()
@@ -134,7 +179,7 @@ export class TemplatesController {
           report: templates[i].id,
         };
       }
-      const answers = await this.answersService.findSome(answersFilter);
+      const answers = await this.answersService.find(answersFilter);
       templates[i].answersCount = answers.length || 0;
     }
 
@@ -196,7 +241,7 @@ export class TemplatesController {
         report: template.id,
       };
     }
-    const answers = await this.answersService.findSome(answersFilter);
+    const answers = await this.answersService.find(answersFilter);
     template.answersCount = answers.length;
 
     return { data: serializeTemplate(template) };
@@ -204,45 +249,82 @@ export class TemplatesController {
 
   @Patch('/:id')
   async update(
-    @Param('id') id: string,
+    @Param('id') templateId: string,
     @Body() body: UpdateTemplateDto,
     @Req() request: Request,
   ): Promise<ITemplateResponse> {
     const user = request.user;
 
-    // create filter to grab existing template
-    const filter: any = {
-      $and: [{ _id: new mongoose.Types.ObjectId(id) }],
-    };
-    if (user.role !== 'ADMIN') {
-      filter.$and.push({ user: new mongoose.Types.ObjectId(user.id) });
+    if (user.role !== UserRole.ADMIN && body.public !== undefined)
+      throw new ForbiddenException('Only admin can change the public property');
+
+    const template = await this.templatesService.findById(templateId);
+
+    if (
+      !template ||
+      (user.role !== UserRole.ADMIN && user.id !== template.user.toString())
+    ) {
+      throw new ForbiddenException();
     }
-    // get the template based on the filter
-    const templateToUpdate = await this.templatesService.findOne(filter);
-    if (!templateToUpdate)
-      throw new HttpException(
-        'You do not have permission to edit this template',
-        HttpStatus.FORBIDDEN,
-      );
-    // stop public status of template being changed if not admin
-    if (user.role !== 'ADMIN' && body.hasOwnProperty('public'))
-      delete body.public;
-    const template = await this.templatesService.update(id, body);
+
+    if (template.isLatest === false)
+      throw new ForbiddenException('Cannot update older versions of templates');
+
+    if (!template.editGroupId) {
+      template.editGroupId = new MongooseObjectId();
+      await template.save();
+    }
+
+    if (template.isLatest === undefined) {
+      template.isLatest = true;
+      await template.save();
+    }
+
+    const newTemplateDto: CreateTemplateDto = {
+      name: body.name ?? template.name,
+      user: template.user,
+      languages: body.languages ?? template.languages,
+      defaultLanguage: body.defaultLanguage ?? template.defaultLanguage,
+      questions: body.questions ?? template.questions,
+      public: body.public ?? template.public,
+      status: ETemplateStatus.UNPUBLISHED,
+      editGroupId: template.editGroupId,
+      isLatest: true,
+    };
+
+    const updatedTemplate = await this.templatesService.create(newTemplateDto);
+
+    template.isLatest = false;
+    await template.save();
 
     // get answer count for each report
-    let answersFilter = {};
-    if (user.role === 'ADMIN' || user.id === template.user.toString()) {
-      answersFilter = {
-        report: template.id,
-      };
-    } else {
-      answersFilter = {
-        user: user.id,
-        report: template.id,
-      };
+    const answersCount = await this.answersService.countByEditGroupId(
+      template.editGroupId,
+    );
+    updatedTemplate.answersCount = answersCount;
+    return { data: serializeTemplate(updatedTemplate) };
+  }
+
+  @Patch('/:id/status')
+  async updateStatus(
+    @Param('id') templateId: string,
+    @Req() request: Request,
+    @Body() body: UpdateStatusInput,
+  ): Promise<ITemplateResponse> {
+    const user = request.user;
+
+    const template = await this.templatesService.findById(templateId);
+
+    if (
+      !template ||
+      (user.role !== UserRole.ADMIN && user.id !== template.user.toString())
+    ) {
+      throw new ForbiddenException();
     }
-    const answers = await this.answersService.findSome(answersFilter);
-    template.answersCount = answers.length;
+
+    template.status = body.status;
+    await template.save();
+
     return { data: serializeTemplate(template) };
   }
 
@@ -250,7 +332,7 @@ export class TemplatesController {
   async deleteAllAnswers(@Req() request: Request): Promise<void> {
     const user = request.user;
 
-    await this.answersService.delete({ user: user.id });
+    await this.answersService.deleteMany({ user: user.id });
   }
 
   @Delete('/:id')
@@ -260,40 +342,33 @@ export class TemplatesController {
   ): Promise<void> {
     const user = request.user;
 
-    const answers = await this.answersService.findSome({ report: id });
-    if (answers.length > 0 && user.role !== 'ADMIN') {
-      throw new HttpException(
-        'This report has answers, you cannot delete. Please unpublish instead.',
-        HttpStatus.FORBIDDEN,
-      );
+    const template = await this.templatesService.findById(id);
+
+    if (!template) {
+      throw new ForbiddenException();
     }
 
-    const template = await this.templatesService.findOne({
-      _id: new mongoose.Types.ObjectId(id),
-    });
     if (
-      template?.status === ETemplateStatus.PUBLISHED &&
+      template.status === ETemplateStatus.PUBLISHED &&
       user.role !== 'ADMIN'
     ) {
-      throw new HttpException(
+      throw new ForbiddenException(
         'You cannot delete a published template. Please unpublish first.',
-        HttpStatus.FORBIDDEN,
       );
     }
 
-    // remove template
-    const query: any = {
-      $and: [{ _id: new mongoose.Types.ObjectId(id) }],
-    };
-    if (user.role !== 'ADMIN') {
-      query.$and.push({ user: user.id });
-      query.$and.push({ status: ['draft', 'unpublished'] });
-    } else if (answers.length > 0) {
-      await this.answersService.delete({ report: id });
+    const answers = await this.answersService.find({ report: id });
+    if (answers.length > 0 && user.role !== 'ADMIN') {
+      throw new ForbiddenException(
+        'This report has answers, you cannot delete. Please unpublish instead.',
+      );
     }
-    await this.templatesService.delete(query);
 
-    // remove all area - template relations
-    await this.templateAreaRelationService.delete({ templateId: id });
+    if (answers.length > 0) {
+      await this.answersService.deleteMany({ report: id });
+    }
+
+    await this.templatesService.delete(id);
+    await this.templateAreaRelationService.deleteMany({ report: id });
   }
 }
