@@ -31,6 +31,7 @@ import { CreateTemplateInput } from './input/create-template.input';
 import { UserRole } from '../common/user-role.enum';
 import { MongooseObjectId } from '../common/objectId';
 import { UpdateStatusInput } from './input/update-status.input';
+import { ValidateMongoId } from '../common/objectIdValidator.pipe';
 
 @Controller('templates')
 export class TemplatesController {
@@ -64,6 +65,7 @@ export class TemplatesController {
     };
 
     const savedTemplate = await this.templatesService.create(template);
+    savedTemplate.areas = [];
 
     return { data: serializeTemplate(savedTemplate) };
   }
@@ -87,6 +89,10 @@ export class TemplatesController {
         ? await this.answersService.countByEditGroupId(template.editGroupId)
         : await this.answersService.countByTemplateId(template.id);
       template.answersCount = answersCount;
+      template.areas =
+        await this.templateAreaRelationService.findAreasForTemplate(
+          template.editGroupId ? template.editGroupId.toString() : template.id,
+        );
     }
 
     return { data: serializeTemplate(templates) };
@@ -116,6 +122,10 @@ export class TemplatesController {
         template.id,
       );
       template.answersCount = answersCount;
+      template.areas =
+        await this.templateAreaRelationService.findAreasForTemplate(
+          template.editGroupId ? template.editGroupId.toString() : template.id,
+        );
     }
 
     return { data: serializeTemplate(templates) };
@@ -144,6 +154,11 @@ export class TemplatesController {
     template.answersCount = await this.answersService.countByEditGroupId(
       editGroupId,
     );
+
+    template.areas =
+      await this.templateAreaRelationService.findAreasForTemplate(
+        template.editGroupId ? template.editGroupId.toString() : template.id,
+      );
 
     return { data: serializeTemplate(template) };
   }
@@ -217,7 +232,7 @@ export class TemplatesController {
 
   @Get('/:id')
   async findOne(
-    @Param('id') id: string,
+    @Param('id', ValidateMongoId) id: string,
     @Req() request: Request,
   ): Promise<ITemplateResponse> {
     const user = request.user;
@@ -243,6 +258,10 @@ export class TemplatesController {
     }
     const answers = await this.answersService.find(answersFilter);
     template.answersCount = answers.length;
+    template.areas =
+      await this.templateAreaRelationService.findAreasForTemplate(
+        template.editGroupId ? template.editGroupId.toString() : template.id,
+      );
 
     return { data: serializeTemplate(template) };
   }
@@ -302,6 +321,10 @@ export class TemplatesController {
       template.editGroupId,
     );
     updatedTemplate.answersCount = answersCount;
+    updatedTemplate.areas =
+      await this.templateAreaRelationService.findAreasForTemplate(
+        template.editGroupId ? template.editGroupId.toString() : template.id,
+      );
     return { data: serializeTemplate(updatedTemplate) };
   }
 

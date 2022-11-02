@@ -42,6 +42,7 @@ export interface ITemplate {
   answersCount?: number;
   editGroupId?: mongoose.Types.ObjectId;
   isLatest?: boolean;
+  areas?: { id: string | undefined; name: string | undefined }[];
 }
 
 @Schema()
@@ -108,6 +109,9 @@ export class Template {
 
   @Prop()
   isLatest?: boolean;
+
+  @Prop()
+  areas?: { id: string | undefined; name: string | undefined }[];
 }
 
 export interface TemplateDocument extends ITemplate, mongoose.Document {}

@@ -25,6 +25,10 @@ import { S3Service } from '../services/s3Service';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
 import { AssignmentStatus } from '../../assignments/assignment-status.enum';
 import { CreateAnswerDto } from '../dto/create-answer.dto';
+import { AreasService } from '../../areas/services/areas.service';
+import { GeostoreService } from '../../areas/services/geostore.service';
+import { CoverageService } from '../../areas/services/coverage.service';
+import { DatasetService } from '../../areas/services/dataset.service';
 
 describe('Answers', () => {
   let app: INestApplication;
@@ -52,6 +56,10 @@ describe('Answers', () => {
         TemplateAreaRelationService,
         TeamAreaRelationService,
         AnswersService,
+        AreasService,
+        GeostoreService,
+        CoverageService,
+        DatasetService,
         S3Service,
         { provide: getModelToken('gfwteams', 'teamsDb'), useValue: jest.fn() },
         {

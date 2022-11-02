@@ -1172,6 +1172,15 @@ components:
           type: boolean
         editGroupId:
           type: string
+        areas:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
     ChildQuestionModel:
       type: object
       x-examples:

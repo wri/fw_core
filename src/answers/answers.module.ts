@@ -17,6 +17,7 @@ import { S3Service } from './services/s3Service';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
 import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema';
 import { AssignmentsModule } from '../assignments/assignments.module';
+import { AreasModule } from '../areas/modules/areas.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { AssignmentsModule } from '../assignments/assignments.module';
       'apiDb',
     ),
     AssignmentsModule,
+    AreasModule,
   ],
   controllers: [AnswersController],
   providers: [
