@@ -11,24 +11,32 @@ import { UserService } from '../../common/user.service';
 import { TemplateDocument } from '../../templates/models/template.schema';
 import { TeamsService } from '../../teams/services/teams.service';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
+import { UpdateAnswerDto } from '../dto/update-answer.dto';
+import { BaseService } from '../../common/base.service';
+import { TemplatesService } from '../../templates/templates.service';
+import { MongooseObjectId } from '../../common/objectId';
 
 @Injectable()
-export class AnswersService {
+export class AnswersService extends BaseService<
+  AnswerDocument,
+  IAnswer,
+  UpdateAnswerDto
+> {
   constructor(
-    @InjectModel('reports', 'formsDb')
-    private templateModel: Model<TemplateDocument>,
     @InjectModel(Answer.name, 'formsDb')
     private answerModel: Model<AnswerDocument>,
     private readonly teamMembersService: TeamMembersService,
     private readonly teamsService: TeamsService,
     private readonly teamAreaRelationService: TeamAreaRelationService,
     private readonly userService: UserService,
-  ) {}
+    private readonly templatesService: TemplatesService,
+  ) {
+    super(AnswersService.name, answerModel);
+  }
 
-  async create(answer: IAnswer): Promise<IAnswer> {
-    const answerToSave = new this.answerModel(answer);
-    const savedAnswer = await answerToSave.save();
-    return await this.addUsernameToAnswer(savedAnswer);
+  async create(answerInput: IAnswer): Promise<AnswerDocument> {
+    const answer = await super.create(answerInput);
+    return await this.addUsernameToAnswer(answer);
   }
 
   async getAllTemplateAnswers({
@@ -176,10 +184,6 @@ export class AnswersService {
     return await this.addUsernameToAnswers(answers);
   }
 
-  async findSome(filter) {
-    return await this.answerModel.find(filter);
-  }
-
   async findOne(filter) {
     return await this.answerModel.findOne(filter);
   }
@@ -188,7 +192,7 @@ export class AnswersService {
     return `This action updates a #${id} answer`;
   } */
 
-  async delete(filter): Promise<void> {
+  async deleteMany(filter): Promise<void> {
     await this.answerModel.deleteMany(filter);
   }
 
@@ -205,5 +209,31 @@ export class AnswersService {
     for await (let answer of answers)
       answer = await this.addUsernameToAnswer(answer);
     return answers;
+  }
+
+  /**
+   * Fetch the sum of the count of answer responses for all versions in an edit group
+   * @param editGroupId The id of the edit group of templates for which the answer count is to be fetched
+   * @returns The count of answers in all versions of an edit group
+   */
+  async countByEditGroupId(
+    editGroupId: string | MongooseObjectId,
+  ): Promise<number> {
+    const templates = await this.templatesService.findAllByEditGroupId(
+      editGroupId,
+    );
+
+    return this.count({ report: { $in: templates.map((t) => t._id) } });
+  }
+
+  /**
+   * Fetches the total answer count for a template
+   * @param templateId Id of templates to get answer count for
+   * @returns The count of answers for the given template
+   */
+  async countByTemplateId(
+    templateId: string | MongooseObjectId,
+  ): Promise<number> {
+    return this.count({ report: templateId });
   }
 }
