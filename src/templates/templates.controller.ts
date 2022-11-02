@@ -306,7 +306,7 @@ export class TemplatesController {
 
   @Patch('/:id/status')
   async updateStatus(
-    @Param('id') templateId,
+    @Param('id') templateId: string,
     @Req() request: Request,
     @Body('status') status: ETemplateStatus,
   ): Promise<ITemplateResponse> {
