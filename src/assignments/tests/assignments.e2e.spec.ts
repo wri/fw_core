@@ -215,6 +215,26 @@ describe('Assignments', () => {
         .set('Authorization', 'MANAGER')
         .expect(404);
     });
+
+    it('should fail if neither geostore nor location are sent', async () => {
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        monitors: [ROLES.USER.id],
+        createdBy: ROLES.ADMIN.id,
+      });
+      await request(app.getHttpServer())
+        .post(`/assignments`)
+        .send({
+          ...assignments.defaultAssignment,
+          location: undefined,
+          geostore: undefined,
+          areaId: new mongoose.Types.ObjectId(),
+          monitors: [ROLES.USER.id],
+        })
+        .set('Authorization', 'MANAGER')
+        .expect(400);
+    });
+
     it('should contain geostore information', async () => {
       const response = await request(app.getHttpServer())
         .post(`/assignments`)
