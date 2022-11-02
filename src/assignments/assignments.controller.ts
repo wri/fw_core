@@ -9,6 +9,7 @@ import {
   Req,
   HttpException,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { AssignmentsService } from './assignments.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
@@ -38,6 +39,12 @@ export class AssignmentsController {
     @Body() createAssignmentDto: CreateAssignmentDto,
   ): Promise<IAssignmentResponse> {
     const user = request.user;
+
+    if (!(createAssignmentDto.location || createAssignmentDto.geostore))
+      throw new BadRequestException(
+        'Assignment must contain either a location, alert or geojson',
+      ); // alerts are included in the createAssignmentDto.location field
+
     const createdAssignment = await this.assignmentsService.create(
       createAssignmentDto,
       user,
