@@ -20,7 +20,6 @@ import constants from './templates.constants';
 import { TemplateAreaRelationService } from '../../areas/services/templateAreaRelation.service';
 import { ETemplateStatus, TemplateDocument } from '../models/template.schema';
 import { MongooseObjectId } from '../../common/objectId';
-import { response } from 'express';
 
 describe('Templates', () => {
   let app: INestApplication;

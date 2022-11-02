@@ -8,7 +8,6 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
-  Req,
   Logger,
   HttpException,
   HttpStatus,
@@ -23,7 +22,6 @@ import { TeamAreaRelationService } from '../services/teamAreaRelation.service';
 import { TemplateAreaRelationService } from '../services/templateAreaRelation.service';
 import { TeamDocument } from '../../teams/models/team.schema';
 import { IArea, IAreaResponse } from '../models/area.entity';
-import { Request } from 'express';
 import { ResponseService } from '../services/response.service';
 import { TemplatesService } from '../../templates/templates.service';
 import { IUser } from '../../common/user.model';

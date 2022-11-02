@@ -5,13 +5,11 @@ import {
   Body,
   Param,
   Delete,
-  Req,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { CreateRouteDto } from './dto/create-route.dto';
-import { Request } from 'express';
 import serializeRoutes from './serializers/routes.serializer';
 import { TeamsService } from '../teams/services/teams.service';
 import { RouteDocument } from './models/route.schema';

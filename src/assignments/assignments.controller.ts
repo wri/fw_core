@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  Req,
   HttpException,
   HttpStatus,
   BadRequestException,
@@ -14,7 +13,6 @@ import {
 import { AssignmentsService } from './assignments.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
-import { Request } from 'express';
 import mongoose from 'mongoose';
 import {
   AssignmentDocument,
