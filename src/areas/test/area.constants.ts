@@ -72,7 +72,7 @@ export default {
     type: 'area',
     id: '62b07c69378080001b0d4e40',
     attributes: {
-      name: 'Upton country Park',
+      name: 'Upton country Park 2',
       application: 'fw',
       geostore: 'c826fac0aa7686055695a85abd2625e0',
       userId: ROLES.ADMIN.id,

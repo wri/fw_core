@@ -10,6 +10,7 @@ const whitelist = [
   'status',
   'editGroupId',
   'isLatest',
+  'areas',
 ];
 
 const serializeResource = (data) => {

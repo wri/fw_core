@@ -15,6 +15,7 @@ import { TemplateAreaRelationService } from '../areas/services/templateAreaRelat
 import { TemplateAreaRelationSchema } from '../areas/models/templateAreaRelation.schema';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
 import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema';
+import { AreasModule } from '../areas/modules/areas.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema'
       [{ name: 'areateamrelations', schema: TeamAreaRelationSchema }],
       'apiDb',
     ),
+    AreasModule,
   ],
   controllers: [TemplatesController],
   providers: [
