@@ -1083,6 +1083,7 @@ components:
             $ref: '#/components/schemas/QuestionModel'
         answersCount:
           type: integer
+<<<<<<< HEAD
         areas:
           type: array
           items:
@@ -1092,6 +1093,12 @@ components:
                 type: string
               name:
                 type: string
+=======
+        isLatest:
+          type: boolean
+        editGroupId:
+          type: string
+>>>>>>> dev
     ChildQuestionModel:
       type: object
       x-examples:
