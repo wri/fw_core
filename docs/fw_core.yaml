@@ -245,7 +245,7 @@ paths:
           $ref: '#/components/responses/Template-Response'
         '401':
           description: Unauthorized
-      description: Updates the template with the given id
+      description: Creates a new version of the template that shares the same `editGroupId` with the template.
       requestBody:
         $ref: '#/components/requestBodies/UpdateTemplateBody'
       tags:
@@ -880,6 +880,24 @@ paths:
           $ref: '#/components/responses/Error'
       operationId: get-v3-gfw-assignments-allOpenUserForArea-areaId
       description: Returns all assignments the user has created or is assigned to for a given area
+  '/v3/gfw/templates/versions/{editGroupId}/latest':
+    get:
+      summary: Get latest version
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignment-Response'
+        '':
+          $ref: '#/components/responses/Template-Response'
+      operationId: 'get-v3-gfw-templates-versions-:id-latest'
+      description: Fetches the latest version in a given template group
+    parameters:
+      - schema:
+          type: string
+        name: editGroupId
+        in: path
+        required: true
+        description: Edit group id for which the latest version is to be fetched
 components:
   schemas:
     AssignmentModel:
@@ -1826,12 +1844,6 @@ components:
                   type: string
               notes:
                 type: string
-              status:
-                type: string
-                enum:
-                  - open
-                  - on hold
-                  - completed
               areaId:
                 type: string
               templateIds:
@@ -1844,7 +1856,6 @@ components:
               - priority
               - monitors
               - notes
-              - status
               - areaId
               - templateIds
           examples:
@@ -1999,6 +2010,33 @@ components:
         application/json:
           schema:
             type: object
+            x-examples:
+              example-1:
+                name: string
+                questions:
+                  - type: string
+                    label:
+                      en: string
+                    name: string
+                    defaultValue: string
+                    values: string
+                    required: true
+                    order: 0
+                    childQuestions:
+                      type: string
+                      label:
+                        en: string
+                      name: string
+                      defaultValue: string
+                      values: string
+                      required: true
+                      order: 0
+                      conditionalValue: 0
+                languages:
+                  - string
+                status: string
+                public: true
+                defaultLanguage: string
             properties:
               name:
                 type: string
@@ -2050,39 +2088,10 @@ components:
                 type: array
                 items:
                   type: string
-              status:
-                type: string
               public:
                 type: boolean
               defaultLanguage:
                 type: string
-            x-examples:
-              example-1:
-                name: string
-                questions:
-                  - type: string
-                    label:
-                      en: string
-                    name: string
-                    defaultValue: string
-                    values: string
-                    required: true
-                    order: 0
-                    childQuestions:
-                      type: string
-                      label:
-                        en: string
-                      name: string
-                      defaultValue: string
-                      values: string
-                      required: true
-                      order: 0
-                      conditionalValue: 0
-                languages:
-                  - string
-                status: string
-                public: true
-                defaultLanguage: string
           examples: {}
     AnswerBody:
       content:
