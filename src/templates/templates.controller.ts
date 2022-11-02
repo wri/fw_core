@@ -30,6 +30,7 @@ import mongoose from 'mongoose';
 import { CreateTemplateInput } from './input/create-template.input';
 import { UserRole } from '../common/user-role.enum';
 import { MongooseObjectId } from '../common/objectId';
+import { UpdateStatusInput } from './input/update-status.input';
 
 @Controller('templates')
 export class TemplatesController {
@@ -308,7 +309,7 @@ export class TemplatesController {
   async updateStatus(
     @Param('id') templateId: string,
     @Req() request: Request,
-    @Body('status') status: ETemplateStatus,
+    @Body() body: UpdateStatusInput,
   ): Promise<ITemplateResponse> {
     const user = request.user;
 
@@ -321,7 +322,7 @@ export class TemplatesController {
       throw new ForbiddenException();
     }
 
-    template.status = status;
+    template.status = body.status;
     await template.save();
 
     return { data: serializeTemplate(template) };

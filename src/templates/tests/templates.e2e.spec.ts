@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import request from 'supertest';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { UserService } from '../../common/user.service';
 import { getModelToken } from '@nestjs/mongoose';
@@ -18,7 +18,7 @@ import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import constants from './templates.constants';
 import { TemplateAreaRelationService } from '../../areas/services/templateAreaRelation.service';
-import { TemplateDocument } from '../models/template.schema';
+import { ETemplateStatus, TemplateDocument } from '../models/template.schema';
 import { MongooseObjectId } from '../../common/objectId';
 import { response } from 'express';
 
@@ -59,6 +59,7 @@ describe('Templates', () => {
       .compile();
 
     app = moduleRef.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
     await app.init();
     teamsDbConnection = moduleRef
       .get<DatabaseService>(DatabaseService)
@@ -1658,6 +1659,124 @@ describe('Templates', () => {
       const t = response.body.data;
       const responseCount = t.attributes.answersCount;
       expect(responseCount).toBe(6);
+    });
+  });
+
+  describe('PATCH /templates/:id/status', () => {
+    afterEach(async () => {
+      await formsDbConnection.collection('reports').deleteMany({});
+    });
+
+    it('should update the status to published', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate, status: 'unpublished' });
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}/status`)
+        .set('Authorization', 'USER')
+        .send({ status: ETemplateStatus.PUBLISHED })
+        .expect(200);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+
+      expect(templateDb).toBeTruthy();
+      expect(templateDb?.status).toBe('published');
+    });
+
+    it('should update status to unpublished', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate, status: 'published' });
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}/status`)
+        .set('Authorization', 'USER')
+        .send({ status: ETemplateStatus.UNPUBLISHED })
+        .expect(200);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+
+      expect(templateDb).toBeTruthy();
+      expect(templateDb?.status).toBe('unpublished');
+    });
+
+    it('should fail if status not given', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate, status: 'unpublished' });
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}/status`)
+        .set('Authorization', 'USER')
+        .send({})
+        .expect(400);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+
+      expect(templateDb).toBeTruthy();
+      expect(templateDb?.status).toBe('unpublished');
+    });
+
+    it('should fail if status is not a valid value', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate, status: 'unpublished' });
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}/status`)
+        .set('Authorization', 'USER')
+        .send({ status: 'notValid' })
+        .expect(400);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+
+      expect(templateDb).toBeTruthy();
+      expect(templateDb?.status).toBe('unpublished');
+    });
+
+    it("should fail if user doesn't own template and is not admin", async () => {
+      const template = await formsDbConnection.collection('reports').insertOne({
+        ...constants.userTemplate,
+        status: 'unpublished',
+        user: new MongooseObjectId(),
+      });
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}/status`)
+        .set('Authorization', 'USER')
+        .send({ status: ETemplateStatus.PUBLISHED })
+        .expect(403);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+
+      expect(templateDb).toBeTruthy();
+      expect(templateDb?.status).toBe('unpublished');
+    });
+
+    it('should update status if user is admin and not owner', async () => {
+      const template = await formsDbConnection.collection('reports').insertOne({
+        ...constants.userTemplate,
+        status: 'unpublished',
+        user: new MongooseObjectId(),
+      });
+      await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}/status`)
+        .set('Authorization', 'ADMIN')
+        .send({ status: ETemplateStatus.PUBLISHED })
+        .expect(200);
+
+      const templateDb = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+
+      expect(templateDb).toBeTruthy();
+      expect(templateDb?.status).toBe('published');
     });
   });
 
