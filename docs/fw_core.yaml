@@ -1951,7 +1951,6 @@ components:
             required:
               - priority
               - monitors
-              - notes
               - areaId
               - templateIds
           examples:
