@@ -1932,6 +1932,8 @@ components:
                   type: string
               geostore:
                 $ref: '#/components/schemas/GeojsonModel'
+              areaName:
+                type: string
             required:
               - priority
               - monitors
