@@ -31,6 +31,7 @@ import { CreateTemplateInput } from './input/create-template.input';
 import { UserRole } from '../common/user-role.enum';
 import { MongooseObjectId } from '../common/objectId';
 import { UpdateStatusInput } from './input/update-status.input';
+import { AuthUser } from '../common/decorators';
 import { ValidateMongoId } from '../common/objectIdValidator.pipe';
 
 @Controller('templates')
@@ -44,8 +45,11 @@ export class TemplatesController {
   private readonly logger = new Logger(TemplatesController.name);
 
   @Post()
-  async create(@Req() request: Request): Promise<ITemplateResponse> {
-    const { body, user }: { body: CreateTemplateInput; user: IUser } = request;
+  async create(
+    @Req() request: Request,
+    @AuthUser() user: IUser,
+  ): Promise<ITemplateResponse> {
+    const { body }: { body: CreateTemplateInput; user: IUser } = request;
     if (body.public && user.role !== 'ADMIN')
       throw new HttpException(
         'You must be an administrator to create a public template',
@@ -72,10 +76,8 @@ export class TemplatesController {
 
   @Get('/latest')
   async findAllLatestVersionsByUser(
-    @Req() request: Request,
+    @AuthUser() user: IUser,
   ): Promise<ITemplateResponse> {
-    const user = request.user as IUser;
-
     this.logger.log(
       `Obtaining the latest version of all reports owned by user ${user.id}`,
     );
@@ -99,9 +101,10 @@ export class TemplatesController {
   }
 
   @Get('/versions/:id')
-  async findAllVersionsByGroupIdForUser(@Req() request: Request) {
-    const user = request.user as IUser;
-    const editGroupId = request.params.id;
+  async findAllVersionsByGroupIdForUser(
+    @AuthUser() user: IUser,
+    @Param('id') editGroupId?: string,
+  ) {
     if (!editGroupId) {
       throw new BadRequestException('The id path parameter must be provided');
     }
@@ -132,9 +135,10 @@ export class TemplatesController {
   }
 
   @Get('/versions/:id/latest')
-  async findLatestVersionByGroupIdForUser(@Req() request: Request) {
-    const user = request.user as IUser;
-    const editGroupId = request.params.id;
+  async findLatestVersionByGroupIdForUser(
+    @AuthUser() user: IUser,
+    @Param('id') editGroupId?: string,
+  ) {
     if (!editGroupId) {
       throw new BadRequestException('The id path parameter must be provided');
     }
@@ -164,8 +168,7 @@ export class TemplatesController {
   }
 
   @Get()
-  async findAll(@Req() request: Request): Promise<ITemplateResponse> {
-    const user = request.user;
+  async findAll(@AuthUser() user: IUser): Promise<ITemplateResponse> {
     const filter = {
       $and: [
         {
@@ -202,10 +205,8 @@ export class TemplatesController {
   }
 
   @Get('/allAnswers')
-  async getAllAnswers(@Req() request: Request): Promise<IAnswerReturn> {
+  async getAllAnswers(@AuthUser() user: IUser): Promise<IAnswerReturn> {
     this.logger.log(`Obtaining all answers for user`);
-
-    const user = request.user;
 
     // get teams the user is part of
     const userTeams = await this.teamsService.findAllByUserId(user.id);
@@ -233,10 +234,8 @@ export class TemplatesController {
   @Get('/:id')
   async findOne(
     @Param('id', ValidateMongoId) id: string,
-    @Req() request: Request,
+    @AuthUser() user: IUser,
   ): Promise<ITemplateResponse> {
-    const user = request.user;
-
     this.logger.log('Obtaining template', id);
     const template = await this.templatesService.findOne({
       _id: new mongoose.Types.ObjectId(id),
@@ -270,10 +269,8 @@ export class TemplatesController {
   async update(
     @Param('id') templateId: string,
     @Body() body: UpdateTemplateDto,
-    @Req() request: Request,
+    @AuthUser() user: IUser,
   ): Promise<ITemplateResponse> {
-    const user = request.user;
-
     if (user.role !== UserRole.ADMIN && body.public !== undefined)
       throw new ForbiddenException('Only admin can change the public property');
 
@@ -331,11 +328,9 @@ export class TemplatesController {
   @Patch('/:id/status')
   async updateStatus(
     @Param('id') templateId: string,
-    @Req() request: Request,
+    @AuthUser() user: IUser,
     @Body() body: UpdateStatusInput,
   ): Promise<ITemplateResponse> {
-    const user = request.user;
-
     const template = await this.templatesService.findById(templateId);
 
     if (
@@ -352,19 +347,15 @@ export class TemplatesController {
   }
 
   @Delete('/allAnswers')
-  async deleteAllAnswers(@Req() request: Request): Promise<void> {
-    const user = request.user;
-
+  async deleteAllAnswers(@AuthUser() user: IUser): Promise<void> {
     await this.answersService.deleteMany({ user: user.id });
   }
 
   @Delete('/:id')
   async remove(
     @Param('id') id: string,
-    @Req() request: Request,
+    @AuthUser() user: IUser,
   ): Promise<void> {
-    const user = request.user;
-
     const template = await this.templatesService.findById(id);
 
     if (!template) {

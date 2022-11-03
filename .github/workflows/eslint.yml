@@ -1,9 +1,9 @@
-name: eslint
+name: Build and lint
 
 on: [pull_request]
 
 jobs:
-  docker:
+  build-and-lint:
     timeout-minutes: 10
     runs-on: ubuntu-latest
 
@@ -16,14 +16,13 @@ jobs:
     - name: Install packages
       run: npm install
 
+    - name: Build
+      run: npm run build
+
     - name: Run eslint
-      run : make lint
+      run : npm run lint
 
     - name: Commit prettier changes
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: "auto commit: apply eslint fixes"
-
-    - name: Stop containers
-      if: always()
-      run: make down

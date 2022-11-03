@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  Req,
   HttpException,
   HttpStatus,
   BadRequestException,
@@ -14,7 +13,6 @@ import {
 import { AssignmentsService } from './assignments.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
-import { Request } from 'express';
 import mongoose from 'mongoose';
 import {
   AssignmentDocument,
@@ -24,6 +22,7 @@ import serializeAssignments from './serializers/assignments.serializer';
 import { AreasService } from '../areas/services/areas.service';
 import { IUser } from '../common/user.model';
 import { GeostoreService } from '../areas/services/geostore.service';
+import { AuthUser } from '../common/decorators';
 
 @Controller('assignments')
 export class AssignmentsController {
@@ -35,11 +34,9 @@ export class AssignmentsController {
 
   @Post()
   async create(
-    @Req() request: Request,
     @Body() createAssignmentDto: CreateAssignmentDto,
+    @AuthUser() user: IUser,
   ): Promise<IAssignmentResponse> {
-    const user = request.user;
-
     if (!(createAssignmentDto.location || createAssignmentDto.geostore))
       throw new BadRequestException(
         'Assignment must contain either a location, alert or geojson',
@@ -60,9 +57,8 @@ export class AssignmentsController {
 
   @Get('/user')
   async findUserAssignments(
-    @Req() request: Request,
+    @AuthUser() user: IUser,
   ): Promise<IAssignmentResponse> {
-    const user = request.user;
     const assignments = await this.assignmentsService.findUser(user.id);
 
     const assignmentResponse = await this.buildAssignmentResponse(
@@ -75,11 +71,9 @@ export class AssignmentsController {
 
   @Get('/allOpenUserForArea/:areaId')
   async findAllOpenAssignmentsForArea(
-    @Req() request: Request,
+    @AuthUser() user: IUser,
     @Param('areaId') areaId: string,
   ): Promise<IAssignmentResponse> {
-    const user = request.user;
-
     const area = await this.areasService.getAreaMICROSERVICE(areaId);
     if (!area)
       throw new HttpException('This area does not exist', HttpStatus.NOT_FOUND);
@@ -99,9 +93,8 @@ export class AssignmentsController {
 
   @Get('/open')
   async findOpenAssignments(
-    @Req() request: Request,
+    @AuthUser() user: IUser,
   ): Promise<IAssignmentResponse> {
-    const user = request.user;
     const assignments = await this.assignmentsService.findOpen(user.id);
 
     const assignmentResponse = await this.buildAssignmentResponse(
@@ -114,11 +107,9 @@ export class AssignmentsController {
 
   @Get('/areas/:areaId')
   async findAreaAssignments(
-    @Req() request: Request,
     @Param('areaId') areaId: string,
+    @AuthUser() user: IUser,
   ): Promise<IAssignmentResponse> {
-    const user = request.user;
-
     const area = await this.areasService.getAreaMICROSERVICE(areaId);
     if (!area)
       throw new HttpException('This area does not exist', HttpStatus.NOT_FOUND);
@@ -138,10 +129,9 @@ export class AssignmentsController {
 
   @Get('/:id')
   async findOne(
-    @Req() request: Request,
+    @AuthUser() user: IUser,
     @Param('id') id: string,
   ): Promise<IAssignmentResponse> {
-    const user = request.user;
     const assignment = await this.assignmentsService.findOne({
       _id: new mongoose.Types.ObjectId(id),
     });
@@ -162,11 +152,10 @@ export class AssignmentsController {
 
   @Patch('/:id')
   async update(
-    @Req() request: Request,
     @Param('id') id: string,
     @Body() updateAssignmentDto: UpdateAssignmentDto,
+    @AuthUser() user: IUser,
   ): Promise<IAssignmentResponse> {
-    const user = request.user;
     const filter = {
       createdBy: user.id,
       status: { $in: ['open', 'on hold'] },
@@ -194,10 +183,9 @@ export class AssignmentsController {
 
   @Delete('/:id')
   async remove(
-    @Req() request: Request,
+    @AuthUser() user: IUser,
     @Param('id') id: string,
   ): Promise<void> {
-    const user = request.user;
     const filter = {
       createdBy: user.id,
       _id: new mongoose.Types.ObjectId(id),
