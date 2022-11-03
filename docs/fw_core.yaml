@@ -965,15 +965,6 @@ paths:
               required:
                 - status
         description: ''
-  /v3/gfw/templates/public:
-    get:
-      summary: Get all public templates
-      tags: []
-      responses:
-        '200':
-          $ref: '#/components/responses/Templates-Response'
-      operationId: get-v3-gfw-templates-public
-      description: Returns a list of all public templates.
 components:
   schemas:
     AssignmentModel:
@@ -1181,7 +1172,15 @@ components:
           type: boolean
         editGroupId:
           type: string
-      description: ''
+        areas:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
     ChildQuestionModel:
       type: object
       x-examples:
@@ -1237,8 +1236,6 @@ components:
           order: 1
           conditionalValue: 1
       examples: []
-      description: ''
-      title: Question Model
       properties:
         type:
           type: string
@@ -1252,14 +1249,7 @@ components:
         defaultValue:
           type: string
         values:
-          type: object
-          additionalProperties:
-            type: object
-            properties:
-              label:
-                type: string
-              value:
-                type: integer
+          type: string
         required:
           type: boolean
         order:
@@ -1272,6 +1262,8 @@ components:
         - name
         - values
         - required
+      description: ''
+      title: Question Model
     AnswerModel:
       type: object
       x-examples:
