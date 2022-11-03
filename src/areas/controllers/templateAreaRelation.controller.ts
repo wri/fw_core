@@ -56,10 +56,13 @@ export class TemplateAreaRelationController {
     if (!area)
       throw new HttpException("Area doesn't exist", HttpStatus.NOT_FOUND);
     const relations = await this.templateAreaRelationService.find({ areaId });
-    const publicRelations =
-      await this.templatesService.getAllPublicTemplateIds();
+    const publicRelations = await this.templatesService.findAllPublicTemplates({
+      projection: ['_id'],
+    });
+    const publicRelationsIds = publicRelations.map<string>((t) => t.id);
+
     const relationIds = relations.map((relation) => relation.templateId);
-    publicRelations.forEach((id) => {
+    publicRelationsIds.forEach((id) => {
       if (!relationIds.includes(id)) relationIds.push(id);
     });
     return relationIds;
