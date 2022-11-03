@@ -9,7 +9,7 @@ export interface IAssignment {
   geostore?: string | IGeostore;
   priority: number;
   monitors: string[];
-  notes: string;
+  notes?: string;
   status: string;
   areaId: string;
   templateIds: string[];
@@ -39,7 +39,7 @@ export class Assignment {
   @Prop({ required: true })
   monitors: string[];
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   notes: string;
 
   @Prop({ type: String, enum: AssignmentStatus, required: true })

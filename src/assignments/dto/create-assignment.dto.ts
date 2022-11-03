@@ -6,7 +6,7 @@ export class CreateAssignmentDto {
   geostore?: IGeojson;
   priority: number;
   monitors: string[];
-  notes: string;
+  notes?: string;
   status: AssignmentStatus;
   areaId: string;
   templateIds: string[];
