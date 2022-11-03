@@ -883,7 +883,8 @@ paths:
   '/v3/gfw/templates/versions/{editGroupId}/latest':
     get:
       summary: Get latest version
-      tags: []
+      tags:
+        - Templates
       responses:
         '200':
           $ref: '#/components/responses/Assignment-Response'
@@ -901,7 +902,8 @@ paths:
   /v3/gfw/templates/latest:
     get:
       summary: Get latest versions of all user templates
-      tags: []
+      tags:
+        - Templates
       responses:
         '200':
           $ref: '#/components/responses/Templates-Response'
@@ -917,7 +919,8 @@ paths:
         description: The edit group id for the template group
     get:
       summary: Get all versions of a group
-      tags: []
+      tags:
+        - Templates
       responses:
         '200':
           $ref: '#/components/responses/Templates-Response'
@@ -934,7 +937,8 @@ paths:
         description: Id for the template to be updated
     patch:
       summary: Update template status
-      tags: []
+      tags:
+        - Templates
       responses:
         '200':
           $ref: '#/components/responses/Template-Response'
@@ -968,7 +972,8 @@ paths:
   /v3/gfw/templates/public:
     get:
       summary: Get all public templates
-      tags: []
+      tags:
+        - Templates
       responses:
         '200':
           $ref: '#/components/responses/Templates-Response'
