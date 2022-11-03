@@ -436,7 +436,7 @@ describe('Templates', () => {
     it('should return the default template', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.defaultTemplate);
+        .insertOne({ ...constants.defaultTemplate });
       const response = await request(app.getHttpServer())
         .get(`/templates`)
         .set('Authorization', 'USER')
@@ -454,7 +454,7 @@ describe('Templates', () => {
     it('should return the default template and users templates', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.defaultTemplate);
+        .insertOne({ ...constants.defaultTemplate });
       await formsDbConnection
         .collection('reports')
         .insertOne(constants.managerTemplate);
@@ -513,7 +513,7 @@ describe('Templates', () => {
     it('should return a template with user answers count for user', async () => {
       const template3 = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.defaultTemplate);
+        .insertOne({ ...constants.defaultTemplate });
       await formsDbConnection.collection('answers').insertOne({
         report: template3.insertedId,
         reportName: 'answer 1',
@@ -627,7 +627,7 @@ describe('Templates', () => {
     it('should return all user answers and team answers of teams user manages', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.defaultTemplate);
+        .insertOne({ ...constants.defaultTemplate });
       await formsDbConnection
         .collection('reports')
         .insertOne(constants.managerTemplate);
@@ -726,7 +726,7 @@ describe('Templates', () => {
     it('should return all user answers but not team answers if not manager', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.defaultTemplate);
+        .insertOne({ ...constants.defaultTemplate });
       await formsDbConnection
         .collection('reports')
         .insertOne(constants.managerTemplate);
@@ -1183,7 +1183,7 @@ describe('Templates', () => {
         .insertOne(constants.userTemplate);
       const template2 = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.defaultTemplate);
+        .insertOne({ ...constants.defaultTemplate });
       const answer1 = await formsDbConnection.collection('answers').insertOne({
         report: template.insertedId,
         reportName: 'answer 1',
@@ -1872,6 +1872,82 @@ describe('Templates', () => {
 
       expect(templateDb).toBeTruthy();
       expect(templateDb?.status).toBe('published');
+    });
+  });
+
+  describe('GET /templates/public', () => {
+    afterEach(async () => {
+      await formsDbConnection.collection('reports').deleteMany({});
+    });
+
+    it('should fetch all public templates', async () => {
+      const templates = await formsDbConnection
+        .collection('reports')
+        .insertMany([
+          {
+            ...constants.defaultTemplate,
+            public: true,
+          },
+          {
+            ...constants.defaultTemplate,
+            public: true,
+          },
+          {
+            ...constants.defaultTemplate,
+            public: true,
+          },
+        ]);
+
+      const templateIds = Object.values(templates.insertedIds).map((v) =>
+        v.toString(),
+      );
+
+      const response = await request(app.getHttpServer())
+        .get('/templates/public')
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body.data).toHaveLength(3);
+      expect(response.body.data.map((d) => d.id).sort()).toEqual(
+        templateIds.sort(),
+      );
+    });
+
+    it('should fetch only public templates', async () => {
+      const templates = await formsDbConnection
+        .collection('reports')
+        .insertMany([
+          {
+            ...constants.defaultTemplate,
+            public: false,
+          },
+          {
+            ...constants.defaultTemplate,
+            public: true,
+          },
+          {
+            ...constants.defaultTemplate,
+            public: true,
+          },
+          {
+            ...constants.defaultTemplate,
+            public: true,
+          },
+        ]);
+
+      const publicTemplateIds = Object.values(templates.insertedIds)
+        .map((v) => v.toString())
+        .slice(1);
+
+      const response = await request(app.getHttpServer())
+        .get('/templates/public')
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body.data).toHaveLength(3);
+      expect(response.body.data.map((d) => d.id).sort()).toEqual(
+        publicTemplateIds.sort(),
+      );
     });
   });
 

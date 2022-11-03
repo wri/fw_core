@@ -83,6 +83,9 @@ export class TemplatesService extends BaseService<
   async findAllPublicTemplates(opts?: {
     projection: (keyof TemplateDocument)[];
   }): Promise<TemplateDocument[]> {
-    return this.model.find({ public: true }, { projection: opts?.projection });
+    if (opts?.projection) {
+      return this.model.find({ public: true }, { projection: opts.projection });
+    }
+    return this.model.find({ public: true });
   }
 }
