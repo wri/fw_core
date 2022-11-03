@@ -965,6 +965,15 @@ paths:
               required:
                 - status
         description: ''
+  /v3/gfw/templates/public:
+    get:
+      summary: Get all public templates
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Templates-Response'
+      operationId: get-v3-gfw-templates-public
+      description: Returns a list of all public templates
 components:
   schemas:
     AssignmentModel:
