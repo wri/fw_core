@@ -37,9 +37,12 @@ export class TemplateAreaRelationService {
     const areaTemplateIds = areaTemplates.map(
       (template) => template.templateId,
     );
-    const publicTemplates =
-      await this.templateService.getAllPublicTemplateIds();
-    publicTemplates.forEach((id) => {
+    const publicTemplates = await this.templateService.findAllPublicTemplates({
+      projection: ['_id'],
+    });
+    const publicTemplatesIds = publicTemplates.map<string>((t) => t.id);
+
+    publicTemplatesIds.forEach((id) => {
       if (!areaTemplateIds.includes(id)) areaTemplateIds.push(id);
     });
     return areaTemplateIds;

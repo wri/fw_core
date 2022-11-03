@@ -74,6 +74,13 @@ export class TemplatesController {
     return { data: serializeTemplate(savedTemplate) };
   }
 
+  @Get('/public')
+  async findAllPublicTemplates() {
+    const templates = await this.templatesService.findAllPublicTemplates();
+
+    return { data: serializeTemplate(templates) };
+  }
+
   @Get('/latest')
   async findAllLatestVersionsByUser(
     @AuthUser() user: IUser,

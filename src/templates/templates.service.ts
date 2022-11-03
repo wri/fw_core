@@ -74,8 +74,15 @@ export class TemplatesService extends BaseService<
     return await this.model.findOne(filter);
   }
 
-  async getAllPublicTemplateIds(): Promise<string[]> {
-    const templates = await this.model.find({ public: true });
-    return templates.map((template) => template.id);
+  /**
+   * Fetch a list of all documents that are public
+   * @param opts A list of additional options
+   * - A list of template keys that should be included in the response
+   * @returns A list of public documents
+   */
+  async findAllPublicTemplates(opts?: {
+    projection: (keyof TemplateDocument)[];
+  }): Promise<TemplateDocument[]> {
+    return this.model.find({ public: true }, { projection: opts?.projection });
   }
 }
