@@ -61,13 +61,4 @@ export class UserService {
       return null;
     }
   }
-
-  getUserFromRequest(request) {
-    return Object.assign(
-      {},
-      request.query.loggedUser
-        ? JSON.parse(request.query.loggedUser)
-        : request.body.loggedUser,
-    );
-  }
 }

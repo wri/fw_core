@@ -25,6 +25,9 @@ import {
 } from '../models/teamMember.schema';
 import serializeTeamMember from '../serializers/teamMember.serializer';
 import { CreateTeamMemberDto } from '../dto/createTeamMember.dto';
+import { AuthUser } from '../../common/decorators';
+import { IUser } from '../../common/user.model';
+import { MongooseObjectId } from '../../common/objectId';
 
 @Controller('teams/:teamId/users')
 export class TeamMembersController {
@@ -40,14 +43,10 @@ export class TeamMembersController {
   // Return all users on a team
   @Get()
   async findAllTeamMembers(
-    @Req() request: Request,
     @Param() params,
+    @AuthUser() user: IUser,
   ): Promise<any> {
-    let loggedUser;
-    if (request.query && request.query.loggedUser)
-      loggedUser = (request.query as any).loggedUser;
-    else throw new HttpException('No user found', HttpStatus.NOT_FOUND);
-    const { id: userId } = JSON.parse(loggedUser);
+    const { id: userId } = user;
     const { teamId } = params;
     const teamMember = await this.teamMembersService.findTeamMember(
       teamId,
@@ -120,10 +119,9 @@ export class TeamMembersController {
   // Reassign the admin role to a different user
   // Only admin can access this router
   @Patch('/reassignAdmin/:userId')
-  async reassignAdmin(@Req() request: Request, @Param() params): Promise<any> {
+  async reassignAdmin(@Param() params, @AuthUser() user: IUser): Promise<any> {
     const { userId, teamId } = params;
-    const { body } = request;
-    const { id: loggedUserId } = body.loggedUser;
+    const { id: loggedUserId } = user;
 
     const teamUser = await this.teamMembersService.findTeamMember(
       teamId,
@@ -202,13 +200,9 @@ export class TeamMembersController {
   // Only Admin and Managers and the member themselves can remove members
   // Can't remove the Admin
   @Delete('/:memberId')
-  async deleteMember(@Req() request: Request, @Param() params): Promise<void> {
+  async deleteMember(@Param() params, @AuthUser() user: IUser): Promise<void> {
     const { memberId, teamId } = params;
-    let loggedUser;
-    if (request.query && request.query.loggedUser)
-      loggedUser = (request.query as any).loggedUser;
-    else throw new HttpException('No user found', HttpStatus.NOT_FOUND);
-    const { id: loggedUserId } = JSON.parse(loggedUser);
+    const { id: loggedUserId } = user;
 
     const teamMemberToDelete = await this.teamMembersService.findById(memberId);
     const currentUser = await this.teamMembersService.findTeamMember(
@@ -256,10 +250,10 @@ export class TeamMembersController {
   async acceptInvitation(
     @Req() request: Request,
     @Param() params,
+    @AuthUser() user: IUser,
   ): Promise<any> {
     const { userId, teamId } = params;
-    const { body } = request;
-    const { id: loggedUserId, email: loggedEmail } = body.loggedUser;
+    const { id: loggedUserId, email: loggedEmail } = user;
 
     if (userId !== loggedUserId)
       throw new HttpException(
@@ -271,7 +265,7 @@ export class TeamMembersController {
       teamId,
       loggedEmail,
       {
-        userId: loggedUserId,
+        userId: new MongooseObjectId(loggedUserId),
         status: EMemberStatus.Confirmed,
       },
     );
@@ -284,12 +278,11 @@ export class TeamMembersController {
   // Only if JWT's userid match the one in the URL
   @Patch('/:userId/decline')
   async declineInvitation(
-    @Req() request: Request,
+    @AuthUser() user: IUser,
     @Param() params,
   ): Promise<any> {
     const { userId, teamId } = params;
-    const { body } = request;
-    const { id: loggedUserId, email: loggedEmail } = body.loggedUser;
+    const { id: loggedUserId, email: loggedEmail } = user;
 
     if (userId !== loggedUserId)
       throw new HttpException(
@@ -301,7 +294,7 @@ export class TeamMembersController {
       teamId,
       loggedEmail,
       {
-        userId: loggedUserId,
+        userId: new MongooseObjectId(loggedUserId),
         status: EMemberStatus.Declined,
       },
     );
@@ -314,10 +307,9 @@ export class TeamMembersController {
   // Only if JWT's userid match the one in the URL
   // Unless auth user is admin
   @Patch('/:userId/leave')
-  async leaveTeam(@Req() request: Request, @Param() params): Promise<any> {
+  async leaveTeam(@Param() params, @AuthUser() user: IUser): Promise<any> {
     const { teamId, userId } = params;
-    const { body } = request;
-    const { id: loggedUserId, email: loggedEmail } = body.loggedUser;
+    const { id: loggedUserId, email: loggedEmail } = user;
 
     if (userId !== loggedUserId)
       throw new HttpException(

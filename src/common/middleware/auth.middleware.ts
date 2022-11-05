@@ -24,16 +24,7 @@ export class AuthMiddleware implements NestMiddleware {
       userData.id,
     );
     userData.name = username;
-    if (['GET', 'DELETE'].includes(req.method.toUpperCase())) {
-      req.query = {
-        ...req.query,
-        loggedUser: JSON.stringify(userData),
-      };
-      req.user = userData;
-    } else if (['POST', 'PATCH', 'PUT'].includes(req.method.toUpperCase())) {
-      req.body.loggedUser = userData;
-      req.user = userData;
-    }
+    req.user = userData;
     next();
   }
 }

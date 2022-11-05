@@ -33,8 +33,8 @@ export class IsTeamMemberMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     const { teamId } = <TParams>req.params;
-    const { body, query } = <TRequest>req;
-    const { id: userId } = body.loggedUser || JSON.parse(query.loggedUser); // ToDo: loggedUser Type
+    const { user } = <TRequest>req;
+    const { id: userId } = user; // ToDo: loggedUser Type
 
     // ToDo: move this to a new middleware
     const numOfTeams = await this.teamModel.count({ _id: teamId });

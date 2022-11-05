@@ -17,6 +17,8 @@ import { TeamMembersService } from '../services/teamMembers.service';
 import { EMemberRole, TeamMemberDocument } from '../models/teamMember.schema';
 import serializeTeam from '../serializers/team.serializer';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
+import { AuthUser } from '../../common/decorators';
+import { IUser } from '../../common/user.model';
 
 @Controller('teams')
 export class TeamsController {
@@ -28,12 +30,8 @@ export class TeamsController {
   private readonly logger = new Logger(TeamsController.name);
 
   @Get('/myinvites')
-  async findMyInvites(@Req() request: Request, @Param() _params): Promise<any> {
-    let loggedUser;
-    if (request.query && request.query.loggedUser)
-      loggedUser = (request.query as any).loggedUser;
-    else throw new HttpException('No user found', HttpStatus.NOT_FOUND);
-    const { email: loggedEmail } = JSON.parse(loggedUser);
+  async findMyInvites(@AuthUser() user: IUser, @Param() _params): Promise<any> {
+    const { email: loggedEmail } = user;
 
     const teams: TeamDocument[] = await this.teamsService.findAllInvites(
       loggedEmail,
@@ -67,13 +65,9 @@ export class TeamsController {
   // Return the user's teams that have admin, manager or monitor roles
   // ToDo: What security is need?
   @Get('/user/:id')
-  async getUserTeams(@Req() request: Request, @Param() params): Promise<any> {
+  async getUserTeams(@AuthUser() user: IUser, @Param() params): Promise<any> {
     const { id } = params;
-    let loggedUser;
-    if (request.query && request.query.loggedUser)
-      loggedUser = (request.query as any).loggedUser;
-    else throw new HttpException('No user found', HttpStatus.NOT_FOUND);
-    const { id: userId } = JSON.parse(loggedUser);
+    const { id: userId } = user;
 
     this.logger.log(`Getting all teams for user ${userId}`);
 
@@ -123,14 +117,11 @@ export class TeamsController {
   }
 
   @Post()
-  async create(@Req() request: Request): Promise<any> {
+  async create(@Req() request: Request, @AuthUser() user: IUser): Promise<any> {
     const { body } = request;
     if (!body.name)
       throw new HttpException('Team must have a name', HttpStatus.BAD_REQUEST);
-    const team: TeamDocument = await this.teamsService.create(
-      body.name,
-      body.loggedUser,
-    );
+    const team: TeamDocument = await this.teamsService.create(body.name, user);
     return { data: serializeTeam(team) };
   }
 
