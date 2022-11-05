@@ -25,6 +25,7 @@ import { AreasModule } from '../../areas/modules/areas.module';
 import { AreasService } from '../../areas/services/areas.service';
 import { CreateTemplateDto } from '../dto/create-template.dto';
 import { CreateTemplateInput } from '../input/create-template.input';
+import { UpdateTemplateInput } from '../input/update-template.input';
 
 describe('Templates', () => {
   let app: INestApplication;
@@ -817,6 +818,21 @@ describe('Templates', () => {
       await formsDbConnection.collection('answers').deleteMany({});
     });
 
+    const createTemplateInput: Partial<CreateTemplateInput> = {
+      defaultLanguage: 'en',
+      languages: ['en'],
+      name: { en: 'template' },
+      public: false,
+      questions: [
+        {
+          type: 'text',
+          name: 'question-name',
+          label: { en: 'question' },
+        },
+      ],
+      status: ETemplateStatus.PUBLISHED,
+    };
+
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
         .patch(`/templates/${2}`)
@@ -869,7 +885,7 @@ describe('Templates', () => {
       const response = await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId}`)
         .set('Authorization', 'USER')
-        .send({ name: 'CHANGED NAME' })
+        .send({ name: { en: 'CHANGED NAME' } })
         .expect(200);
 
       const updatedTemplateDb = await formsDbConnection
@@ -880,6 +896,7 @@ describe('Templates', () => {
 
       expect(updatedTemplateDb).not.toBeNull();
       expect(updatedTemplateDb).toMatchObject({
+        name: { en: 'CHANGED NAME' },
         editGroupId: constants.userTemplate.editGroupId,
       });
     });
@@ -893,7 +910,7 @@ describe('Templates', () => {
         .patch(`/templates/${template.insertedId}`)
         .set('Authorization', 'USER')
         .send({
-          name: 'CHANGED NAME',
+          name: { fr: 'French name' },
           languages: ['fr'],
           defaultLanguage: 'fr',
           questions: [
@@ -915,7 +932,7 @@ describe('Templates', () => {
 
       expect(updatedTemplateDb).toBeDefined();
       expect(updatedTemplateDb).toMatchObject({
-        name: 'CHANGED NAME',
+        name: { fr: 'French name' },
         languages: ['fr'],
         defaultLanguage: 'fr',
         questions: [
@@ -937,7 +954,7 @@ describe('Templates', () => {
       const response = await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId}`)
         .set('Authorization', 'USER')
-        .send({ name: 'CHANGED NAME' })
+        .send({ name: { en: 'CHANGED NAME' } })
         .expect(200);
 
       const templateDb = await formsDbConnection
@@ -986,16 +1003,15 @@ describe('Templates', () => {
       const response = await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId.toString()}`)
         .set('Authorization', 'USER')
-        .send({ name: 'different name' })
+        .send({ name: { en: 'CHANGED NAME' } })
         .expect(200);
 
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('id');
       expect(response.body.data).toHaveProperty('attributes');
-      expect(response.body.data.attributes).toHaveProperty(
-        'name',
-        'different name',
-      );
+      expect(response.body.data.attributes).toHaveProperty('name', {
+        en: 'CHANGED NAME',
+      });
     });
 
     it('should return a template with every answers count', async () => {
@@ -1012,7 +1028,7 @@ describe('Templates', () => {
       const response = await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId.toString()}`)
         .set('Authorization', 'USER')
-        .send({ name: 'different name' })
+        .send({ name: { en: 'CHANGED NAME' } })
         .expect(200);
 
       expect(response.body).toHaveProperty('data');

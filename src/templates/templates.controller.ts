@@ -34,6 +34,8 @@ import { MongooseObjectId } from '../common/objectId';
 import { UpdateStatusInput } from './input/update-status.input';
 import { AuthUser } from '../common/decorators';
 import { ValidateMongoId } from '../common/objectIdValidator.pipe';
+import { UpdateTemplateInput } from './input/update-template.input';
+import { ValidateBodyIsNotEmptyPipe } from '../common/pipes/validate-body-is-not-empty.pipe';
 
 @Controller('templates')
 export class TemplatesController {
@@ -54,47 +56,8 @@ export class TemplatesController {
     @Body() body: CreateTemplateInput,
     @AuthUser() user: IUser,
   ): Promise<ITemplateResponse> {
-    const getMissingLangs = (val: { [key: string]: any }) =>
-      body.languages.filter((lang) => !val[lang]);
-    // Check if the template name has missing language translations
-    const templateNameMissingLanguages = getMissingLangs(body.name);
-    if (templateNameMissingLanguages.length > 0)
-      throw new BadRequestException(
-        `name doesn't have label for '${templateNameMissingLanguages}'`,
-      );
-
-    // Check each question and child question has the translated string for all languages
-    body.questions.forEach((question, i) => {
-      const labelMissingLanguages = getMissingLangs(question.label);
-      if (labelMissingLanguages.length > 0)
-        throw new BadRequestException(
-          `question.${i} doesn't have label for '${labelMissingLanguages}'`,
-        );
-
-      const valuesMissingLanguages = question.values
-        ? getMissingLangs(question.values)
-        : [];
-      if (valuesMissingLanguages.length > 0)
-        throw new BadRequestException(
-          `question.${i}.values doesn't have label for '${valuesMissingLanguages}'`,
-        );
-
-      question.childQuestions?.forEach((childQuestion, j) => {
-        const labelMissingLanguages = getMissingLangs(childQuestion.label);
-        if (labelMissingLanguages.length > 0)
-          throw new BadRequestException(
-            `question.${i}.childQuestions.${j} doesn't have label for '${labelMissingLanguages}'`,
-          );
-
-        const valuesMissingLanguages = childQuestion.values
-          ? getMissingLangs(childQuestion.values)
-          : [];
-        if (valuesMissingLanguages.length > 0)
-          throw new BadRequestException(
-            `question.${i}.childQuestions.${j}values doesn't have label for '${valuesMissingLanguages}'`,
-          );
-      });
-    });
+    // Validate all translatable strings have the translations for all mentioned languages
+    this.validateCreateTemplateLanguagesOrFail(body);
 
     if (user.role !== UserRole.ADMIN && body.public)
       throw new ForbiddenException('Only admins can make a template public');
@@ -318,20 +281,18 @@ export class TemplatesController {
   @Patch('/:id')
   async update(
     @Param('id') templateId: string,
-    @Body() body: UpdateTemplateDto,
+    @Body(ValidateBodyIsNotEmptyPipe) body: UpdateTemplateInput,
     @AuthUser() user: IUser,
   ): Promise<ITemplateResponse> {
-    if (user.role !== UserRole.ADMIN && body.public !== undefined)
-      throw new ForbiddenException('Only admin can change the public property');
-
     const template = await this.templatesService.findById(templateId);
 
     if (
       !template ||
       (user.role !== UserRole.ADMIN && user.id !== template.user.toString())
-    ) {
-      throw new ForbiddenException();
-    }
+    )
+      throw new ForbiddenException(
+        'User does not have permission to edit this template',
+      );
 
     if (template.isLatest === false)
       throw new ForbiddenException('Cannot update older versions of templates');
@@ -352,11 +313,13 @@ export class TemplatesController {
       languages: body.languages ?? template.languages,
       defaultLanguage: body.defaultLanguage ?? template.defaultLanguage,
       questions: body.questions ?? template.questions,
-      public: body.public ?? template.public,
-      status: ETemplateStatus.UNPUBLISHED,
+      public: template.public,
+      status: template.status,
       editGroupId: template.editGroupId,
       isLatest: true,
     };
+
+    this.validateCreateTemplateLanguagesOrFail(newTemplateDto);
 
     const updatedTemplate = await this.templatesService.create(newTemplateDto);
 
@@ -434,5 +397,60 @@ export class TemplatesController {
 
     await this.templatesService.delete(id);
     await this.templateAreaRelationService.deleteMany({ report: id });
+  }
+
+  private validateCreateTemplateLanguagesOrFail(
+    input: CreateTemplateInput | CreateTemplateDto,
+  ): void {
+    const getMissingLangs = (val: { [key: string]: any }) =>
+      input.languages.filter((lang) => !val[lang]);
+
+    const isDefaultLangInLanguages = input.languages.includes(
+      input.defaultLanguage,
+    );
+    if (!isDefaultLangInLanguages)
+      throw new BadRequestException(
+        `default language '${input.defaultLanguage}' is not in languages`,
+      );
+
+    // Check if the template name has missing language translations
+    const templateNameMissingLanguages = getMissingLangs(input.name);
+    if (templateNameMissingLanguages.length > 0)
+      throw new BadRequestException(
+        `name doesn't have label for '${templateNameMissingLanguages}'`,
+      );
+
+    // Check each question and child question has the translated string for all languages
+    input.questions.forEach((question, i) => {
+      const labelMissingLanguages = getMissingLangs(question.label);
+      if (labelMissingLanguages.length > 0)
+        throw new BadRequestException(
+          `question.${i} doesn't have label for '${labelMissingLanguages}'`,
+        );
+
+      const valuesMissingLanguages = question.values
+        ? getMissingLangs(question.values)
+        : [];
+      if (valuesMissingLanguages.length > 0)
+        throw new BadRequestException(
+          `question.${i}.values doesn't have label for '${valuesMissingLanguages}'`,
+        );
+
+      question.childQuestions?.forEach((childQuestion, j) => {
+        const labelMissingLanguages = getMissingLangs(childQuestion.label);
+        if (labelMissingLanguages.length > 0)
+          throw new BadRequestException(
+            `question.${i}.childQuestions.${j} doesn't have label for '${labelMissingLanguages}'`,
+          );
+
+        const valuesMissingLanguages = childQuestion.values
+          ? getMissingLangs(childQuestion.values)
+          : [];
+        if (valuesMissingLanguages.length > 0)
+          throw new BadRequestException(
+            `question.${i}.childQuestions.${j}values doesn't have label for '${valuesMissingLanguages}'`,
+          );
+      });
+    });
   }
 }

@@ -47,7 +47,7 @@ export class CreateTemplateInput {
   createdAt?: string;
 }
 
-class CreateTemplateQuestionInput {
+export class CreateTemplateQuestionInput {
   @IsString()
   @IsNotEmpty()
   type: string;
