@@ -7,19 +7,13 @@ import {
   Param,
   Delete,
   Logger,
-  Req,
-  HttpStatus,
-  HttpException,
   NotFoundException,
   BadRequestException,
   ForbiddenException,
-  UsePipes,
 } from '@nestjs/common';
 import { TemplatesService } from './templates.service';
 import { CreateTemplateDto } from './dto/create-template.dto';
-import { UpdateTemplateDto } from './dto/update-template.dto';
 import { IUser } from '../common/user.model';
-import { Request } from 'express';
 import { AnswersService } from '../answers/services/answers.service';
 import serializeTemplate from './serializers/template.serializer';
 import { ETemplateStatus, ITemplateResponse } from './models/template.schema';
@@ -27,7 +21,6 @@ import { IAnswerReturn } from '../answers/models/answer.model';
 import { TeamsService } from '../teams/services/teams.service';
 import serializeAnswers from '../answers/serializers/answers.serializer';
 import { TemplateAreaRelationService } from '../areas/services/templateAreaRelation.service';
-import mongoose from 'mongoose';
 import { CreateTemplateInput } from './input/create-template.input';
 import { UserRole } from '../common/user-role.enum';
 import { MongooseObjectId } from '../common/objectId';
@@ -64,13 +57,13 @@ export class TemplatesController {
 
     const template: CreateTemplateDto = {
       name: body.name,
-      user: new mongoose.Types.ObjectId(user.id),
+      user: new MongooseObjectId(user.id),
       languages: body.languages,
       defaultLanguage: body.defaultLanguage,
       questions: body.questions,
       public: body.public ?? false,
       status: body.status,
-      editGroupId: new mongoose.Types.ObjectId(),
+      editGroupId: new MongooseObjectId(),
       isLatest: true,
     };
 
@@ -236,12 +229,10 @@ export class TemplatesController {
       answer.templateName = template?.name[answer.language];
     }
 
-    if (!answers) {
-      throw new HttpException(
-        'Answers not found for this user',
-        HttpStatus.NOT_FOUND,
-      );
-    } else return { data: serializeAnswers(answers) };
+    if (!answers)
+      throw new NotFoundException('Answers not found for this user');
+
+    return { data: serializeAnswers(answers) };
   }
 
   @Get('/:id')
@@ -251,7 +242,7 @@ export class TemplatesController {
   ): Promise<ITemplateResponse> {
     this.logger.log('Obtaining template', id);
     const template = await this.templatesService.findOne({
-      _id: new mongoose.Types.ObjectId(id),
+      _id: new MongooseObjectId(id),
     });
 
     if (!template) throw new NotFoundException();
@@ -371,29 +362,21 @@ export class TemplatesController {
   ): Promise<void> {
     const template = await this.templatesService.findById(id);
 
-    if (!template) {
-      throw new ForbiddenException();
-    }
+    if (!template) throw new ForbiddenException();
 
-    if (
-      template.status === ETemplateStatus.PUBLISHED &&
-      user.role !== 'ADMIN'
-    ) {
+    if (template.status === ETemplateStatus.PUBLISHED && user.role !== 'ADMIN')
       throw new ForbiddenException(
         'You cannot delete a published template. Please unpublish first.',
       );
-    }
 
     const answers = await this.answersService.find({ report: id });
-    if (answers.length > 0 && user.role !== 'ADMIN') {
+    if (answers.length > 0 && user.role !== 'ADMIN')
       throw new ForbiddenException(
         'This report has answers, you cannot delete. Please unpublish instead.',
       );
-    }
 
-    if (answers.length > 0) {
+    if (answers.length > 0)
       await this.answersService.deleteMany({ report: id });
-    }
 
     await this.templatesService.delete(id);
     await this.templateAreaRelationService.deleteMany({ report: id });
