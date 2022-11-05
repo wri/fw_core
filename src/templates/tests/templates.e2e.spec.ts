@@ -962,22 +962,6 @@ describe('Templates', () => {
       });
     });
 
-    it('should make the template public if admin', async () => {
-      const template = await formsDbConnection
-        .collection('reports')
-        .insertOne(constants.userTemplate);
-      const response = await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId.toString()}`)
-        .set('Authorization', 'ADMIN')
-        .send({ public: true })
-        .expect(200);
-
-      const changedTemplate = await formsDbConnection
-        .collection('reports')
-        .findOne({ _id: new MongooseObjectId(response.body.data.id) });
-      expect(changedTemplate).toHaveProperty('public', true);
-    });
-
     it('should return the template', async () => {
       const template = await formsDbConnection
         .collection('reports')
