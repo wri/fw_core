@@ -2108,33 +2108,30 @@ components:
             type: object
             x-examples:
               example-1:
-                name: string
-                questions:
-                  - type: string
-                    label:
-                      en: string
-                    name: string
-                    defaultValue: string
-                    values: string
-                    required: true
-                    order: 0
-                    childQuestions:
-                      type: string
-                      label:
-                        en: string
-                      name: string
-                      defaultValue: string
-                      values: string
-                      required: true
-                      order: 0
-                      conditionalValue: 0
+                name: str
                 languages:
-                  - string
-                status: string
-                public: true
-                defaultLanguage: string
+                  - en
+                defaultLanguage: en
+                questions:
+                  - type: text
+                    name: name
+                    label:
+                      en: label
+                    values: {}
+                    childQuestions:
+                      - type: text
+                        name: name
+                        label:
+                          en: label
+                values: {}
             properties:
               name:
+                type: string
+              languages:
+                type: array
+                items:
+                  type: string
+              defaultLanguage:
                 type: string
               questions:
                 type: array
@@ -2143,51 +2140,27 @@ components:
                   properties:
                     type:
                       type: string
-                    label:
-                      type: object
-                      properties:
-                        en:
-                          type: string
                     name:
                       type: string
-                    defaultValue:
-                      type: string
-                    values:
-                      type: string
-                    required:
-                      type: boolean
-                    order:
-                      type: integer
-                    childQuestions:
+                    label:
                       type: object
-                      properties:
-                        type:
-                          type: string
-                        label:
-                          type: object
-                          properties:
-                            en:
-                              type: string
-                        name:
-                          type: string
-                        defaultValue:
-                          type: string
-                        values:
-                          type: string
-                        required:
-                          type: boolean
-                        order:
-                          type: integer
-                        conditionalValue:
-                          type: integer
-              languages:
-                type: array
-                items:
-                  type: string
-              public:
-                type: boolean
-              defaultLanguage:
-                type: string
+                    values:
+                      type: object
+                    childQuestions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                          name:
+                            type: string
+                          label:
+                            type: object
+                          values:
+                            type: object
+              values:
+                type: object
           examples: {}
     AnswerBody:
       content:

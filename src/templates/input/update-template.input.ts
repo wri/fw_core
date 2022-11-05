@@ -35,8 +35,4 @@ export class UpdateTemplateInput {
   @ValidateNested()
   @Type(() => CreateTemplateQuestionInput)
   questions?: CreateTemplateQuestionInput[];
-
-  @IsOptional()
-  @IsNumberString()
-  createdAt?: string;
 }
