@@ -4,7 +4,7 @@ import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
 export class ValidateBodyIsNotEmptyPipe implements PipeTransform {
   transform(value: any) {
     const keys = Object.keys(value);
-    if (!value || keys.every((key) => key === 'loggedUser'))
+    if (!value || keys.length === 0)
       throw new BadRequestException('body cannot be empty');
     return value;
   }
