@@ -839,30 +839,11 @@ describe('Templates', () => {
         .expect(401);
     });
 
-    it('should fail if user is not admin and public is changed', async () => {
-      const template = await formsDbConnection
-        .collection('reports')
-        .insertOne(constants.userTemplate);
-
-      await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId}`)
-        .set('Authorization', 'USER')
-        .send({ public: true })
-        .expect(403);
-
-      const templateDb = await formsDbConnection
-        .collection('reports')
-        .findOne<TemplateDocument>({ _id: template.insertedId });
-
-      expect(templateDb).not.toBeNull();
-      expect(templateDb?.public).toBe(constants.userTemplate.public);
-    });
-
     it('should fail if no template found', async () => {
       return await request(app.getHttpServer())
         .patch(`/templates/${new MongooseObjectId()}`)
         .set('Authorization', 'USER')
-        .send({})
+        .send({ name: { en: 'NAME' } })
         .expect(403);
     });
 
@@ -874,6 +855,7 @@ describe('Templates', () => {
       return await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId.toString()}`)
         .set('Authorization', 'USER')
+        .send({ name: { en: 'NAME' } })
         .expect(403);
     });
 
@@ -978,22 +960,6 @@ describe('Templates', () => {
       expect(templateDb).toMatchObject({
         isLatest: false,
       });
-    });
-
-    it('should make the template public if admin', async () => {
-      const template = await formsDbConnection
-        .collection('reports')
-        .insertOne(constants.userTemplate);
-      const response = await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId.toString()}`)
-        .set('Authorization', 'ADMIN')
-        .send({ public: true })
-        .expect(200);
-
-      const changedTemplate = await formsDbConnection
-        .collection('reports')
-        .findOne({ _id: new MongooseObjectId(response.body.data.id) });
-      expect(changedTemplate).toHaveProperty('public', true);
     });
 
     it('should return the template', async () => {
