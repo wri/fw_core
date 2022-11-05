@@ -9,10 +9,10 @@ export enum ETemplateStatus {
 
 interface ITemplateChildQuestion {
   type: string;
-  label: mongoose.Schema.Types.Mixed;
+  label: { [language: string]: string };
   name: string;
-  defaultValue?: mongoose.Schema.Types.Mixed;
-  values: mongoose.Schema.Types.Mixed;
+  defaultValue?: number;
+  values?: { [language: string]: { label: string; value: number }[] };
   required: boolean;
   order?: number;
   conditionalValue?: number;
@@ -20,10 +20,10 @@ interface ITemplateChildQuestion {
 
 export interface ITemplateQuestion {
   type: string;
-  label: mongoose.Schema.Types.Mixed;
+  label: { [language: string]: string };
   name: string;
-  defaultValue?: mongoose.Schema.Types.Mixed;
-  values: mongoose.Schema.Types.Mixed;
+  defaultValue?: number;
+  values?: { [language: string]: { label: string; value: number }[] };
   required: boolean;
   order?: number;
   childQuestions?: ITemplateChildQuestion[];
@@ -31,9 +31,9 @@ export interface ITemplateQuestion {
 }
 
 export interface ITemplate {
-  name: string;
+  name: { [language: string]: string };
   user: mongoose.Types.ObjectId;
-  languages: mongoose.Schema.Types.Mixed[];
+  languages: string[];
   defaultLanguage: string;
   public: boolean;
   status: ETemplateStatus;

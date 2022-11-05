@@ -2,9 +2,9 @@ import mongoose from 'mongoose';
 import { ETemplateStatus } from '../models/template.schema';
 
 export class CreateTemplateDto {
-  name: string;
+  name: { [language: string]: string };
   user: mongoose.Types.ObjectId;
-  languages: mongoose.Schema.Types.Mixed[];
+  languages: string[];
   defaultLanguage: string;
   public: boolean;
   status: ETemplateStatus;
@@ -17,11 +17,11 @@ export class CreateTemplateDto {
 
 class CreateTemplateQuestionDto {
   type: string;
-  label: mongoose.Schema.Types.Mixed;
+  label: { [language: string]: string };
   name: string;
-  defaultValue?: mongoose.Schema.Types.Mixed;
-  values: mongoose.Schema.Types.Mixed;
-  required: boolean;
+  defaultValue?: number | string;
+  values?: { [language: string]: { label: string; value: number }[] };
+  required?: boolean;
   order?: number;
   childQuestions?: CreateTemplateChildQuestionDto[];
   conditions?: { name?: string; value?: number }[];
@@ -29,11 +29,11 @@ class CreateTemplateQuestionDto {
 
 class CreateTemplateChildQuestionDto {
   type: string;
-  label: mongoose.Schema.Types.Mixed;
+  label: { [language: string]: string };
   name: string;
-  defaultValue?: mongoose.Schema.Types.Mixed;
-  values: mongoose.Schema.Types.Mixed;
-  required: boolean;
+  defaultValue?: number | string;
+  values?: { [language: string]: { label: string; value: number }[] };
+  required?: boolean;
   order?: number;
   conditionalValue?: number;
 }

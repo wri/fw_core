@@ -13,6 +13,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  UsePipes,
 } from '@nestjs/common';
 import { TemplatesService } from './templates.service';
 import { CreateTemplateDto } from './dto/create-template.dto';
@@ -44,17 +45,59 @@ export class TemplatesController {
   ) {}
   private readonly logger = new Logger(TemplatesController.name);
 
+  helper(langs: string[], val: { [key: string]: string }): string[] {
+    return langs.filter((lang) => !val[lang]);
+  }
+
   @Post()
   async create(
-    @Req() request: Request,
+    @Body() body: CreateTemplateInput,
     @AuthUser() user: IUser,
   ): Promise<ITemplateResponse> {
-    const { body }: { body: CreateTemplateInput; user: IUser } = request;
-    if (body.public && user.role !== 'ADMIN')
-      throw new HttpException(
-        'You must be an administrator to create a public template',
-        HttpStatus.FORBIDDEN,
+    const getMissingLangs = (val: { [key: string]: any }) =>
+      body.languages.filter((lang) => !val[lang]);
+    // Check if the template name has missing language translations
+    const templateNameMissingLanguages = getMissingLangs(body.name);
+    if (templateNameMissingLanguages.length > 0)
+      throw new BadRequestException(
+        `name doesn't have label for '${templateNameMissingLanguages}'`,
       );
+
+    // Check each question and child question has the translated string for all languages
+    body.questions.forEach((question, i) => {
+      const labelMissingLanguages = getMissingLangs(question.label);
+      if (labelMissingLanguages.length > 0)
+        throw new BadRequestException(
+          `question.${i} doesn't have label for '${labelMissingLanguages}'`,
+        );
+
+      const valuesMissingLanguages = question.values
+        ? getMissingLangs(question.values)
+        : [];
+      if (valuesMissingLanguages.length > 0)
+        throw new BadRequestException(
+          `question.${i}.values doesn't have label for '${valuesMissingLanguages}'`,
+        );
+
+      question.childQuestions?.forEach((childQuestion, j) => {
+        const labelMissingLanguages = getMissingLangs(childQuestion.label);
+        if (labelMissingLanguages.length > 0)
+          throw new BadRequestException(
+            `question.${i}.childQuestions.${j} doesn't have label for '${labelMissingLanguages}'`,
+          );
+
+        const valuesMissingLanguages = childQuestion.values
+          ? getMissingLangs(childQuestion.values)
+          : [];
+        if (valuesMissingLanguages.length > 0)
+          throw new BadRequestException(
+            `question.${i}.childQuestions.${j}values doesn't have label for '${valuesMissingLanguages}'`,
+          );
+      });
+    });
+
+    if (user.role !== UserRole.ADMIN && body.public)
+      throw new ForbiddenException('Only admins can make a template public');
 
     const template: CreateTemplateDto = {
       name: body.name,
