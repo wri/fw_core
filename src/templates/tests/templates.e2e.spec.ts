@@ -23,6 +23,9 @@ import { ETemplateStatus, TemplateDocument } from '../models/template.schema';
 import { MongooseObjectId } from '../../common/objectId';
 import { AreasModule } from '../../areas/modules/areas.module';
 import { AreasService } from '../../areas/services/areas.service';
+import { CreateTemplateDto } from '../dto/create-template.dto';
+import { CreateTemplateInput } from '../input/create-template.input';
+import { UpdateTemplateInput } from '../input/update-template.input';
 
 describe('Templates', () => {
   let app: INestApplication;
@@ -93,322 +96,177 @@ describe('Templates', () => {
       await formsDbConnection.collection('answers').deleteMany({});
     });
 
+    const createTemplateInput: Partial<CreateTemplateInput> = {
+      defaultLanguage: 'en',
+      languages: ['en'],
+      name: { en: 'template' },
+      public: false,
+      questions: [
+        {
+          type: 'text',
+          name: 'question-name',
+          label: { en: 'question' },
+        },
+      ],
+      status: ETemplateStatus.PUBLISHED,
+    };
+
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer()).post(`/templates`).expect(401);
     });
 
     it('should fail if no name supplied', async () => {
+      const body = { ...createTemplateInput };
+      delete body.name;
       const response = await request(app.getHttpServer())
         .post(`/templates`)
         .set('Authorization', 'USER')
-        .send({ defaultLanguage: 'en' })
+        .send(body)
         .expect(400);
 
-      expect(response.body).toHaveProperty(
-        'message',
-        "Request body is missing field 'name'",
+      expect(response.body.message).toContainEqual(
+        'name should not be null or undefined',
       );
     });
 
     it('should fail if no questions supplied', async () => {
-      const response = await request(app.getHttpServer())
-        .post(`/templates`)
-        .set('Authorization', 'USER')
-        .send({
-          name: 'test',
-          defaultLanguage: 'en',
-        })
-        .expect(400);
-
-      expect(response.body).toHaveProperty(
-        'message',
-        "Request body is missing field 'questions'",
-      );
-    });
-
-    it('should fail if no languages supplied', async () => {
-      const response = await request(app.getHttpServer())
-        .post(`/templates`)
-        .set('Authorization', 'USER')
-        .send({
-          name: 'test',
-          questions: [],
-          defaultLanguage: 'en',
-        })
-        .expect(400);
-
-      expect(response.body).toHaveProperty(
-        'message',
-        "Request body is missing field 'languages'",
-      );
-    });
-
-    it('should fail if no status supplied', async () => {
-      const response = await request(app.getHttpServer())
-        .post(`/templates`)
-        .set('Authorization', 'USER')
-        .send({
-          name: 'test',
-          questions: [],
-          languages: [],
-          defaultLanguage: 'en',
-        })
-        .expect(400);
-
-      expect(response.body).toHaveProperty(
-        'message',
-        "Request body is missing field 'status'",
-      );
-    });
-
-    it('should fail if wrong status supplied', async () => {
-      const response = await request(app.getHttpServer())
-        .post(`/templates`)
-        .set('Authorization', 'USER')
-        .send({
-          name: 'test',
-          questions: [],
-          languages: [],
-          status: 'status',
-          defaultLanguage: 'en',
-        })
-        .expect(400);
-
-      expect(response.body).toHaveProperty(
-        'message',
-        'Status must be published or unpublished',
-      );
-    });
-
-    it('should fail if report name doesnt match languages', async () => {
-      const response = await request(app.getHttpServer())
-        .post(`/templates`)
-        .set('Authorization', 'USER')
-        .send({
-          name: {
-            fr: 'test',
-          },
-          questions: [
-            {
-              type: 'text',
-              name: 'question-1',
-              conditions: [],
-              childQuestions: [],
-              order: 0,
-              required: false,
-              label: {
-                en: 'test',
-              },
-            },
-          ],
-          languages: ['en'],
-          status: 'published',
-          defaultLanguage: 'en',
-        })
-        .expect(400);
-
-      expect(response.body.length).toBeGreaterThanOrEqual(1);
-      expect(response.body[0]).toHaveProperty(
-        'Report name',
-        'values do not match language options',
-      );
-    });
-
-    it('should fail if question label doesnt match languages', async () => {
-      const response = await request(app.getHttpServer())
-        .post(`/templates`)
-        .set('Authorization', 'USER')
-        .send({
-          name: {
-            en: 'test',
-          },
-          questions: [
-            {
-              type: 'text',
-              name: 'question-1',
-              conditions: [],
-              childQuestions: [],
-              order: 0,
-              required: false,
-              label: {
-                fr: 'test',
-              },
-            },
-          ],
-          languages: ['en'],
-          status: 'published',
-          defaultLanguage: 'en',
-        })
-        .expect(400);
-
-      expect(response.body.length).toBeGreaterThanOrEqual(1);
-      expect(response.body[0]).toHaveProperty(
-        'name',
-        'Question question-1: label does not match language options',
-      );
-    });
-
-    it('should succeed with a 201', async () => {
+      const body = { ...createTemplateInput };
+      delete body.questions;
       await request(app.getHttpServer())
         .post(`/templates`)
         .set('Authorization', 'USER')
-        .send({
-          name: {
-            en: 'test',
-          },
-          questions: [
-            {
-              type: 'text',
-              name: 'question-1',
-              conditions: [],
-              childQuestions: [],
-              order: 0,
-              required: false,
-              label: {
-                en: 'test',
-              },
-            },
-          ],
-          languages: ['en'],
-          status: 'published',
-          defaultLanguage: 'en',
-        })
+        .send(body)
+        .expect(400);
+    });
+
+    it('should fail if no languages supplied', async () => {
+      const body = { ...createTemplateInput };
+      delete body.languages;
+      await request(app.getHttpServer())
+        .post(`/templates`)
+        .set('Authorization', 'USER')
+        .send(body)
+        .expect(400);
+    });
+
+    it('should fail if no status supplied', async () => {
+      const body = { ...createTemplateInput };
+      delete body.status;
+      await request(app.getHttpServer())
+        .post(`/templates`)
+        .set('Authorization', 'USER')
+        .send(body)
+        .expect(400);
+    });
+
+    it('should fail if wrong status supplied', async () => {
+      const body = { ...createTemplateInput, status: 'WRONG' };
+      await request(app.getHttpServer())
+        .post(`/templates`)
+        .set('Authorization', 'USER')
+        .send(body)
+        .expect(400);
+    });
+
+    it('should fail if report name doesnt match languages', async () => {
+      const body = { ...createTemplateInput, name: { fr: 'template' } };
+      await request(app.getHttpServer())
+        .post(`/templates`)
+        .set('Authorization', 'USER')
+        .send(body)
+        .expect(400);
+    });
+
+    it('should fail if question label doesnt match languages', async () => {
+      const body = {
+        ...createTemplateInput,
+        questions: [
+          { type: 'text', name: 'question-name', label: { fr: 'question' } },
+        ],
+      };
+      await request(app.getHttpServer())
+        .post(`/templates`)
+        .set('Authorization', 'USER')
+        .send(body)
+        .expect(400);
+    });
+
+    it('should succeed with a 201', async () => {
+      const body = { ...createTemplateInput };
+      await request(app.getHttpServer())
+        .post(`/templates`)
+        .set('Authorization', 'USER')
+        .send(body)
         .expect(201);
     });
 
     it('should return the saved template', async () => {
+      const body = { ...createTemplateInput };
       const response = await request(app.getHttpServer())
         .post(`/templates`)
         .set('Authorization', 'USER')
-        .send({
-          name: {
-            en: 'test',
-          },
-          questions: [
-            {
-              type: 'text',
-              name: 'question-1',
-              conditions: [],
-              childQuestions: [],
-              order: 0,
-              required: false,
-              label: {
-                en: 'test',
-              },
-            },
-          ],
-          languages: ['en'],
-          status: 'published',
-          defaultLanguage: 'en',
-        })
+        .send(body)
         .expect(201);
 
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('id');
       expect(response.body.data).toHaveProperty('attributes');
       expect(response.body.data.attributes).toHaveProperty('name');
-      expect(response.body.data.attributes.name).toHaveProperty('en', 'test');
+      expect(response.body.data.attributes.name).toHaveProperty(
+        'en',
+        'template',
+      );
     });
 
     it('should create a template', async () => {
-      const response = await request(app.getHttpServer())
+      const body = { ...createTemplateInput };
+      const responseCreate = await request(app.getHttpServer())
         .post(`/templates`)
         .set('Authorization', 'USER')
-        .send({
-          name: {
-            en: 'test',
-          },
-          questions: [
-            {
-              type: 'text',
-              name: 'question-1',
-              conditions: [],
-              childQuestions: [],
-              order: 0,
-              required: false,
-              label: {
-                en: 'test',
-              },
-            },
-          ],
-          languages: ['en'],
-          status: 'published',
-          defaultLanguage: 'en',
-        })
+        .send(body)
         .expect(201);
 
-      const template = await formsDbConnection
-        .collection('reports')
-        .findOne({ _id: new mongoose.Types.ObjectId(response.body.data.id) });
-      expect(template).toBeDefined();
-      expect(template).toHaveProperty(
-        '_id',
-        new mongoose.Types.ObjectId(response.body.data.id),
-      );
-      expect(template).toHaveProperty('name');
-      expect(template?.name).toHaveProperty('en', 'test');
+      const responseGet = await request(app.getHttpServer())
+        .get(`/templates/${responseCreate.body.data.id}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(responseGet.body.data.id).toBe(responseCreate.body.data.id);
+      expect(responseGet.body.data.attributes).toMatchObject({
+        status: ETemplateStatus.PUBLISHED,
+        name: { en: 'template' },
+        languages: ['en'],
+        defaultLanguage: 'en',
+        public: false,
+        questions: [
+          { type: 'text', name: 'question-name', label: { en: 'question' } },
+        ],
+      });
     });
 
     it('should fail to create a public template if not ADMIN', async () => {
+      const body = { ...createTemplateInput, public: true };
       await request(app.getHttpServer())
         .post(`/templates`)
         .set('Authorization', 'USER')
-        .send({
-          name: {
-            en: 'test',
-          },
-          questions: [
-            {
-              type: 'text',
-              name: 'question-1',
-              conditions: [],
-              childQuestions: [],
-              order: 0,
-              required: false,
-              label: {
-                en: 'test',
-              },
-            },
-          ],
-          languages: ['en'],
-          status: 'published',
-          defaultLanguage: 'en',
-          public: true,
-        })
+        .send(body)
         .expect(403);
     });
 
     it('should create a public template if ADMIN', async () => {
-      const response = await request(app.getHttpServer())
+      const body = { ...createTemplateInput, public: true };
+      const responseCreate = await request(app.getHttpServer())
         .post(`/templates`)
         .set('Authorization', 'ADMIN')
-        .send({
-          name: {
-            en: 'test',
-          },
-          questions: [
-            {
-              type: 'text',
-              name: 'question-1',
-              conditions: [],
-              childQuestions: [],
-              order: 0,
-              required: false,
-              label: {
-                en: 'test',
-              },
-            },
-          ],
-          languages: ['en'],
-          status: 'published',
-          defaultLanguage: 'en',
-          public: true,
-        })
+        .send(body)
         .expect(201);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body.data).toHaveProperty('attributes');
-      expect(response.body.data.attributes).toHaveProperty('public', true);
+      const responseGet = await request(app.getHttpServer())
+        .get(`/templates/${responseCreate.body.data.id}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(responseGet.body.data.attributes.public).toBe(true);
     });
   });
 
@@ -960,36 +818,32 @@ describe('Templates', () => {
       await formsDbConnection.collection('answers').deleteMany({});
     });
 
+    const createTemplateInput: Partial<CreateTemplateInput> = {
+      defaultLanguage: 'en',
+      languages: ['en'],
+      name: { en: 'template' },
+      public: false,
+      questions: [
+        {
+          type: 'text',
+          name: 'question-name',
+          label: { en: 'question' },
+        },
+      ],
+      status: ETemplateStatus.PUBLISHED,
+    };
+
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
         .patch(`/templates/${2}`)
         .expect(401);
     });
 
-    it('should fail if user is not admin and public is changed', async () => {
-      const template = await formsDbConnection
-        .collection('reports')
-        .insertOne(constants.userTemplate);
-
-      await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId}`)
-        .set('Authorization', 'USER')
-        .send({ public: true })
-        .expect(403);
-
-      const templateDb = await formsDbConnection
-        .collection('reports')
-        .findOne<TemplateDocument>({ _id: template.insertedId });
-
-      expect(templateDb).not.toBeNull();
-      expect(templateDb?.public).toBe(constants.userTemplate.public);
-    });
-
     it('should fail if no template found', async () => {
       return await request(app.getHttpServer())
         .patch(`/templates/${new MongooseObjectId()}`)
         .set('Authorization', 'USER')
-        .send({})
+        .send({ name: { en: 'NAME' } })
         .expect(403);
     });
 
@@ -1001,6 +855,7 @@ describe('Templates', () => {
       return await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId.toString()}`)
         .set('Authorization', 'USER')
+        .send({ name: { en: 'NAME' } })
         .expect(403);
     });
 
@@ -1012,7 +867,7 @@ describe('Templates', () => {
       const response = await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId}`)
         .set('Authorization', 'USER')
-        .send({ name: 'CHANGED NAME' })
+        .send({ name: { en: 'CHANGED NAME' } })
         .expect(200);
 
       const updatedTemplateDb = await formsDbConnection
@@ -1023,6 +878,7 @@ describe('Templates', () => {
 
       expect(updatedTemplateDb).not.toBeNull();
       expect(updatedTemplateDb).toMatchObject({
+        name: { en: 'CHANGED NAME' },
         editGroupId: constants.userTemplate.editGroupId,
       });
     });
@@ -1036,7 +892,7 @@ describe('Templates', () => {
         .patch(`/templates/${template.insertedId}`)
         .set('Authorization', 'USER')
         .send({
-          name: 'CHANGED NAME',
+          name: { fr: 'French name' },
           languages: ['fr'],
           defaultLanguage: 'fr',
           questions: [
@@ -1058,7 +914,7 @@ describe('Templates', () => {
 
       expect(updatedTemplateDb).toBeDefined();
       expect(updatedTemplateDb).toMatchObject({
-        name: 'CHANGED NAME',
+        name: { fr: 'French name' },
         languages: ['fr'],
         defaultLanguage: 'fr',
         questions: [
@@ -1080,7 +936,7 @@ describe('Templates', () => {
       const response = await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId}`)
         .set('Authorization', 'USER')
-        .send({ name: 'CHANGED NAME' })
+        .send({ name: { en: 'CHANGED NAME' } })
         .expect(200);
 
       const templateDb = await formsDbConnection
@@ -1106,22 +962,6 @@ describe('Templates', () => {
       });
     });
 
-    it('should make the template public if admin', async () => {
-      const template = await formsDbConnection
-        .collection('reports')
-        .insertOne(constants.userTemplate);
-      const response = await request(app.getHttpServer())
-        .patch(`/templates/${template.insertedId.toString()}`)
-        .set('Authorization', 'ADMIN')
-        .send({ public: true })
-        .expect(200);
-
-      const changedTemplate = await formsDbConnection
-        .collection('reports')
-        .findOne({ _id: new MongooseObjectId(response.body.data.id) });
-      expect(changedTemplate).toHaveProperty('public', true);
-    });
-
     it('should return the template', async () => {
       const template = await formsDbConnection
         .collection('reports')
@@ -1129,16 +969,15 @@ describe('Templates', () => {
       const response = await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId.toString()}`)
         .set('Authorization', 'USER')
-        .send({ name: 'different name' })
+        .send({ name: { en: 'CHANGED NAME' } })
         .expect(200);
 
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('id');
       expect(response.body.data).toHaveProperty('attributes');
-      expect(response.body.data.attributes).toHaveProperty(
-        'name',
-        'different name',
-      );
+      expect(response.body.data.attributes).toHaveProperty('name', {
+        en: 'CHANGED NAME',
+      });
     });
 
     it('should return a template with every answers count', async () => {
@@ -1155,7 +994,7 @@ describe('Templates', () => {
       const response = await request(app.getHttpServer())
         .patch(`/templates/${template.insertedId.toString()}`)
         .set('Authorization', 'USER')
-        .send({ name: 'different name' })
+        .send({ name: { en: 'CHANGED NAME' } })
         .expect(200);
 
       expect(response.body).toHaveProperty('data');

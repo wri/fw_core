@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import request from 'supertest';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { TeamsService } from '../services/teams.service';
 import { UserService } from '../../common/user.service';
@@ -48,6 +48,7 @@ describe('Teams', () => {
       .compile();
 
     app = moduleRef.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
     await app.init();
     teamsDbConnection = moduleRef
       .get<DatabaseService>(DatabaseService)

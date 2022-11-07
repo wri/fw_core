@@ -1,24 +1,138 @@
-import { IsDefined, IsNotEmpty } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsBoolean,
+  IsDefined,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsNumberString,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { ETemplateStatus } from '../models/template.schema';
 
 export class CreateTemplateInput {
   @IsDefined()
+  @IsObject()
+  name: { [language: string]: string };
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsNotEmpty({ each: true })
+  languages: string[];
+
+  @IsString()
+  @IsNotEmpty()
+  defaultLanguage: string;
+
+  @IsEnum(ETemplateStatus)
+  status: ETemplateStatus;
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested()
+  @Type(() => CreateTemplateQuestionInput)
+  questions: CreateTemplateQuestionInput[];
+
+  @IsOptional()
+  @IsBoolean()
+  public?: boolean;
+
+  @IsOptional()
+  @IsNumberString()
+  createdAt?: string;
+}
+
+export class CreateTemplateQuestionInput {
+  @IsString()
+  @IsNotEmpty()
+  type: string;
+
+  @IsDefined()
+  @IsObject()
+  label: { [language: string]: string };
+
+  @IsString()
   @IsNotEmpty()
   name: string;
 
-  @IsDefined()
+  @IsOptional()
+  @IsNumber()
   @IsNotEmpty()
-  questions: [];
+  defaultValue?: number | string;
 
-  @IsDefined()
+  @IsOptional()
+  @IsObject()
+  values?: { [language: string]: { label: string; value: number }[] };
+
+  @IsOptional()
+  @IsBoolean()
+  required?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  order?: number;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateTemplateChildQuestionInput)
+  childQuestions?: CreateTemplateChildQuestionInput[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested()
+  conditions?: CreateTemplateQuestionConditionInput[];
+}
+
+class CreateTemplateQuestionConditionInput {
+  @IsOptional()
   @IsNotEmpty()
-  languages: [];
+  @IsString()
+  name?: string;
 
-  @IsDefined()
+  @IsOptional()
   @IsNotEmpty()
-  status: ETemplateStatus;
+  @IsString()
+  value?: number;
+}
 
-  public?: boolean;
+class CreateTemplateChildQuestionInput {
+  @IsString()
+  @IsNotEmpty()
+  type: string;
 
-  defaultLanguage: string;
+  @IsObject()
+  @IsDefined()
+  label: { [language: string]: string };
+
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsOptional()
+  @IsNumber()
+  @IsNotEmpty()
+  defaultValue?: number | string;
+
+  @IsOptional()
+  @IsObject()
+  values?: { [language: string]: { label: string; value: number }[] };
+
+  @IsOptional()
+  @IsBoolean()
+  required?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  order?: number;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested()
+  conditions?: CreateTemplateQuestionConditionInput[];
 }

@@ -42,6 +42,7 @@ export class UserService {
           authorization: `Bearer ${this.configService.get('service.token')}`,
         },
       };
+      console.log({ token: process.env.microservice_token });
       const response = await axios.get(url, getUserDetailsRequestConfig);
       const user = response.data;
       if (!user || !user.data) return null;
@@ -59,14 +60,5 @@ export class UserService {
       Logger.error(`Error finding user ${userId}`, e);
       return null;
     }
-  }
-
-  getUserFromRequest(request) {
-    return Object.assign(
-      {},
-      request.query.loggedUser
-        ? JSON.parse(request.query.loggedUser)
-        : request.body.loggedUser,
-    );
   }
 }

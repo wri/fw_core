@@ -7,18 +7,15 @@ import {
   Param,
   Delete,
   Logger,
-  Req,
-  HttpStatus,
-  HttpException,
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { TemplatesService } from './templates.service';
 import { CreateTemplateDto } from './dto/create-template.dto';
-import { UpdateTemplateDto } from './dto/update-template.dto';
 import { IUser } from '../common/user.model';
-import { Request } from 'express';
 import { AnswersService } from '../answers/services/answers.service';
 import serializeTemplate from './serializers/template.serializer';
 import { ETemplateStatus, ITemplateResponse } from './models/template.schema';
@@ -26,15 +23,17 @@ import { IAnswerReturn } from '../answers/models/answer.model';
 import { TeamsService } from '../teams/services/teams.service';
 import serializeAnswers from '../answers/serializers/answers.serializer';
 import { TemplateAreaRelationService } from '../areas/services/templateAreaRelation.service';
-import mongoose from 'mongoose';
 import { CreateTemplateInput } from './input/create-template.input';
 import { UserRole } from '../common/user-role.enum';
 import { MongooseObjectId } from '../common/objectId';
 import { UpdateStatusInput } from './input/update-status.input';
 import { AuthUser } from '../common/decorators';
 import { ValidateMongoId } from '../common/objectIdValidator.pipe';
+import { UpdateTemplateInput } from './input/update-template.input';
+import { ValidateBodyIsNotEmptyPipe } from '../common/pipes/validate-body-is-not-empty.pipe';
 
 @Controller('templates')
+@UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
 export class TemplatesController {
   constructor(
     private readonly templatesService: TemplatesService,
@@ -44,27 +43,30 @@ export class TemplatesController {
   ) {}
   private readonly logger = new Logger(TemplatesController.name);
 
+  helper(langs: string[], val: { [key: string]: string }): string[] {
+    return langs.filter((lang) => !val[lang]);
+  }
+
   @Post()
   async create(
-    @Req() request: Request,
+    @Body() body: CreateTemplateInput,
     @AuthUser() user: IUser,
   ): Promise<ITemplateResponse> {
-    const { body }: { body: CreateTemplateInput; user: IUser } = request;
-    if (body.public && user.role !== 'ADMIN')
-      throw new HttpException(
-        'You must be an administrator to create a public template',
-        HttpStatus.FORBIDDEN,
-      );
+    // Validate all translatable strings have the translations for all mentioned languages
+    this.validateCreateTemplateLanguagesOrFail(body);
+
+    if (user.role !== UserRole.ADMIN && body.public)
+      throw new ForbiddenException('Only admins can make a template public');
 
     const template: CreateTemplateDto = {
       name: body.name,
-      user: new mongoose.Types.ObjectId(user.id),
+      user: new MongooseObjectId(user.id),
       languages: body.languages,
       defaultLanguage: body.defaultLanguage,
       questions: body.questions,
       public: body.public ?? false,
       status: body.status,
-      editGroupId: new mongoose.Types.ObjectId(),
+      editGroupId: new MongooseObjectId(),
       isLatest: true,
     };
 
@@ -230,12 +232,10 @@ export class TemplatesController {
       answer.templateName = template?.name[answer.language];
     }
 
-    if (!answers) {
-      throw new HttpException(
-        'Answers not found for this user',
-        HttpStatus.NOT_FOUND,
-      );
-    } else return { data: serializeAnswers(answers) };
+    if (!answers)
+      throw new NotFoundException('Answers not found for this user');
+
+    return { data: serializeAnswers(answers) };
   }
 
   @Get('/:id')
@@ -245,7 +245,7 @@ export class TemplatesController {
   ): Promise<ITemplateResponse> {
     this.logger.log('Obtaining template', id);
     const template = await this.templatesService.findOne({
-      _id: new mongoose.Types.ObjectId(id),
+      _id: new MongooseObjectId(id),
     });
 
     if (!template) throw new NotFoundException();
@@ -275,20 +275,18 @@ export class TemplatesController {
   @Patch('/:id')
   async update(
     @Param('id') templateId: string,
-    @Body() body: UpdateTemplateDto,
+    @Body(ValidateBodyIsNotEmptyPipe) body: UpdateTemplateInput,
     @AuthUser() user: IUser,
   ): Promise<ITemplateResponse> {
-    if (user.role !== UserRole.ADMIN && body.public !== undefined)
-      throw new ForbiddenException('Only admin can change the public property');
-
     const template = await this.templatesService.findById(templateId);
 
     if (
       !template ||
       (user.role !== UserRole.ADMIN && user.id !== template.user.toString())
-    ) {
-      throw new ForbiddenException();
-    }
+    )
+      throw new ForbiddenException(
+        'User does not have permission to edit this template',
+      );
 
     if (template.isLatest === false)
       throw new ForbiddenException('Cannot update older versions of templates');
@@ -309,11 +307,13 @@ export class TemplatesController {
       languages: body.languages ?? template.languages,
       defaultLanguage: body.defaultLanguage ?? template.defaultLanguage,
       questions: body.questions ?? template.questions,
-      public: body.public ?? template.public,
-      status: ETemplateStatus.UNPUBLISHED,
+      public: template.public,
+      status: template.status,
       editGroupId: template.editGroupId,
       isLatest: true,
     };
+
+    this.validateCreateTemplateLanguagesOrFail(newTemplateDto);
 
     const updatedTemplate = await this.templatesService.create(newTemplateDto);
 
@@ -365,31 +365,78 @@ export class TemplatesController {
   ): Promise<void> {
     const template = await this.templatesService.findById(id);
 
-    if (!template) {
-      throw new ForbiddenException();
-    }
+    if (!template) throw new ForbiddenException();
 
-    if (
-      template.status === ETemplateStatus.PUBLISHED &&
-      user.role !== 'ADMIN'
-    ) {
+    if (template.status === ETemplateStatus.PUBLISHED && user.role !== 'ADMIN')
       throw new ForbiddenException(
         'You cannot delete a published template. Please unpublish first.',
       );
-    }
 
     const answers = await this.answersService.find({ report: id });
-    if (answers.length > 0 && user.role !== 'ADMIN') {
+    if (answers.length > 0 && user.role !== 'ADMIN')
       throw new ForbiddenException(
         'This report has answers, you cannot delete. Please unpublish instead.',
       );
-    }
 
-    if (answers.length > 0) {
+    if (answers.length > 0)
       await this.answersService.deleteMany({ report: id });
-    }
 
     await this.templatesService.delete(id);
     await this.templateAreaRelationService.deleteMany({ report: id });
+  }
+
+  private validateCreateTemplateLanguagesOrFail(
+    input: CreateTemplateInput | CreateTemplateDto,
+  ): void {
+    const getMissingLangs = (val: { [key: string]: any }) =>
+      input.languages.filter((lang) => !val[lang]);
+
+    const isDefaultLangInLanguages = input.languages.includes(
+      input.defaultLanguage,
+    );
+    if (!isDefaultLangInLanguages)
+      throw new BadRequestException(
+        `default language '${input.defaultLanguage}' is not in languages`,
+      );
+
+    // Check if the template name has missing language translations
+    const templateNameMissingLanguages = getMissingLangs(input.name);
+    if (templateNameMissingLanguages.length > 0)
+      throw new BadRequestException(
+        `name doesn't have label for '${templateNameMissingLanguages}'`,
+      );
+
+    // Check each question and child question has the translated string for all languages
+    input.questions.forEach((question, i) => {
+      const labelMissingLanguages = getMissingLangs(question.label);
+      if (labelMissingLanguages.length > 0)
+        throw new BadRequestException(
+          `question.${i} doesn't have label for '${labelMissingLanguages}'`,
+        );
+
+      const valuesMissingLanguages = question.values
+        ? getMissingLangs(question.values)
+        : [];
+      if (valuesMissingLanguages.length > 0)
+        throw new BadRequestException(
+          `question.${i}.values doesn't have label for '${valuesMissingLanguages}'`,
+        );
+
+      question.childQuestions?.forEach((childQuestion, j) => {
+        const labelMissingLanguages = getMissingLangs(childQuestion.label);
+        if (labelMissingLanguages.length > 0)
+          throw new BadRequestException(
+            `question.${i}.childQuestions.${j} doesn't have label for '${labelMissingLanguages}'`,
+          );
+
+        const valuesMissingLanguages = childQuestion.values
+          ? getMissingLangs(childQuestion.values)
+          : [];
+        if (valuesMissingLanguages.length > 0)
+          throw new BadRequestException(
+            `question.${i}.childQuestions.${j}values doesn't have label for '${valuesMissingLanguages}'`,
+          );
+      });
+    });
   }
 }
