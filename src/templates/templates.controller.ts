@@ -43,10 +43,6 @@ export class TemplatesController {
   ) {}
   private readonly logger = new Logger(TemplatesController.name);
 
-  helper(langs: string[], val: { [key: string]: string }): string[] {
-    return langs.filter((lang) => !val[lang]);
-  }
-
   @Post()
   async create(
     @Body() body: CreateTemplateInput,
