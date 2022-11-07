@@ -11,17 +11,6 @@ import { TeamMembersService } from '../services/teamMembers.service';
 import { EMemberRole, TeamMemberDocument } from '../models/teamMember.schema';
 import { TeamDocument } from '../models/team.schema';
 
-type TRequest = {
-  body: {
-    loggedUser: any;
-  };
-  query: any;
-} & Request;
-
-type TParams = {
-  teamId: string;
-};
-
 @Injectable()
 export class IsAdminMiddleware implements NestMiddleware {
   constructor(

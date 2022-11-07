@@ -1,4 +1,4 @@
-import { ITemplate } from 'src/templates/models/template.schema';
+import { ITemplate } from '../../templates/models/template.schema';
 import { IGeostore } from './geostore.entity';
 
 export class Area {}

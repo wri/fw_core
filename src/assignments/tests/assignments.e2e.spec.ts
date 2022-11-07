@@ -24,6 +24,7 @@ import { AreasService } from '../../areas/services/areas.service';
 import { GeostoreService } from '../../areas/services/geostore.service';
 import { CoverageService } from '../../areas/services/coverage.service';
 import { DatasetService } from '../../areas/services/dataset.service';
+import templatesConstants from './templates.constants';
 
 describe('Assignments', () => {
   let app: INestApplication;
@@ -325,6 +326,64 @@ describe('Assignments', () => {
       expect(response.body.data[1].attributes.geostore).toHaveProperty(
         'id',
         assignments.geostore.id,
+      );
+    });
+
+    it('should return assignments containing an array of templates', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...templatesConstants.defaultTemplate });
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
+        name: 'name',
+        templateIds: [template.insertedId.toString()],
+        monitors: [ROLES.USER.id],
+        createdBy: ROLES.ADMIN.id,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/assignments/user`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data.length).toBe(1);
+      const returnedAssignment = response.body.data[0];
+      expect(returnedAssignment).toHaveProperty('attributes');
+      expect(returnedAssignment.attributes).toHaveProperty('templates');
+      expect(returnedAssignment.attributes.templates[0]).toHaveProperty(
+        '_id',
+        template.insertedId.toString(),
+      );
+    });
+
+    it('should return assignments containing an array of monitor names', async () => {
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
+        name: 'name',
+        monitors: [ROLES.USER.id],
+        createdBy: ROLES.ADMIN.id,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/assignments/user`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data.length).toBe(1);
+      const returnedAssignment = response.body.data[0];
+      expect(returnedAssignment).toHaveProperty('attributes');
+      expect(returnedAssignment.attributes).toHaveProperty('monitorNames');
+      expect(returnedAssignment.attributes.monitorNames[0]).toHaveProperty(
+        'id',
+        ROLES.USER.id,
+      );
+      expect(returnedAssignment.attributes.monitorNames[0]).toHaveProperty(
+        'name',
+        'Full Name',
       );
     });
   });

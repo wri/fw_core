@@ -1,3 +1,4 @@
+import { TemplateDocument } from '../../templates/models/template.schema';
 import { IGeojson } from '../../areas/models/area.entity';
 import { AssignmentStatus } from '../assignment-status.enum';
 
@@ -12,4 +13,6 @@ export class CreateAssignmentDto {
   templateIds: string[];
   createdBy?: string;
   name?: string;
+  monitorNames?: { id: string; name: string }[];
+  templates?: (TemplateDocument | null)[];
 }

@@ -10,6 +10,9 @@ import { TeamMemberSchema } from '../teams/models/teamMember.schema';
 import { UserService } from '../common/user.service';
 import { ConfigService } from '@nestjs/config';
 import { AreasModule } from '../areas/modules/areas.module';
+import { S3Service } from '../answers/services/s3Service';
+import { TemplatesService } from '../templates/templates.service';
+import { TemplatesModule } from '../templates/templates.module';
 
 @Module({
   imports: [
@@ -26,6 +29,7 @@ import { AreasModule } from '../areas/modules/areas.module';
       'teamsDb',
     ),
     AreasModule,
+    TemplatesModule,
   ],
   controllers: [AssignmentsController],
   providers: [
@@ -34,6 +38,8 @@ import { AreasModule } from '../areas/modules/areas.module';
     TeamMembersService,
     UserService,
     ConfigService,
+    S3Service,
+    TemplatesService,
   ],
   exports: [AssignmentsService],
 })

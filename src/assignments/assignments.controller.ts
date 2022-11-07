@@ -9,6 +9,8 @@ import {
   HttpException,
   HttpStatus,
   BadRequestException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { AssignmentsService } from './assignments.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
@@ -23,6 +25,10 @@ import { AreasService } from '../areas/services/areas.service';
 import { IUser } from '../common/user.model';
 import { GeostoreService } from '../areas/services/geostore.service';
 import { AuthUser } from '../common/decorators';
+import { UserService } from '../common/user.service';
+import { TemplatesService } from '../templates/templates.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { TemplateDocument } from '../templates/models/template.schema';
 
 @Controller('assignments')
 export class AssignmentsController {
@@ -30,10 +36,14 @@ export class AssignmentsController {
     private readonly assignmentsService: AssignmentsService,
     private readonly areasService: AreasService,
     private readonly geostoreService: GeostoreService,
+    private readonly userService: UserService,
+    private readonly templateService: TemplatesService,
   ) {}
 
   @Post()
+  @UseInterceptors(FileInterceptor('image', { dest: './tmp' }))
   async create(
+    @UploadedFile() image: Express.Multer.File,
     @Body() createAssignmentDto: CreateAssignmentDto,
     @AuthUser() user: IUser,
   ): Promise<IAssignmentResponse> {
@@ -45,6 +55,7 @@ export class AssignmentsController {
     const createdAssignment = await this.assignmentsService.create(
       createAssignmentDto,
       user,
+      image,
     );
 
     const [assignmentResponse] = await this.buildAssignmentResponse(
@@ -205,17 +216,34 @@ export class AssignmentsController {
     user: IUser,
   ): Promise<AssignmentDocument[]> {
     const assignmentResponsePromises = assignments.map(async (assignment) => {
-      if (!assignment.geostore || typeof assignment.geostore !== 'string')
-        return assignment;
+      if (assignment.geostore && typeof assignment.geostore === 'string') {
+        const geostoreId = assignment.geostore;
+        const geostore = await this.geostoreService.getGeostore(
+          geostoreId,
+          user.token ?? '',
+        );
 
-      const geostoreId = assignment.geostore;
-      const geostore = await this.geostoreService.getGeostore(
-        geostoreId,
-        user.token ?? '',
+        assignment.geostore = geostore ?? assignment.geostore;
+      }
+
+      // get monitor names
+      const monitorNames: { id: string; name: string }[] = await Promise.all(
+        assignment.monitors.map(async (monitor) => {
+          const name = await this.userService.getNameByIdMICROSERVICE(monitor);
+          return { id: monitor, name };
+        }),
       );
 
-      assignment.geostore = geostore ?? assignment.geostore;
+      assignment.monitorNames = monitorNames;
 
+      // get templates
+      const templates: (TemplateDocument | null)[] = await Promise.all(
+        assignment.templateIds.map(async (templateId) => {
+          return await this.templateService.findById(templateId);
+        }),
+      );
+
+      assignment.templates = templates;
       return assignment;
     });
 

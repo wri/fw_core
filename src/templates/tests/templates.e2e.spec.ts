@@ -23,9 +23,7 @@ import { ETemplateStatus, TemplateDocument } from '../models/template.schema';
 import { MongooseObjectId } from '../../common/objectId';
 import { AreasModule } from '../../areas/modules/areas.module';
 import { AreasService } from '../../areas/services/areas.service';
-import { CreateTemplateDto } from '../dto/create-template.dto';
 import { CreateTemplateInput } from '../input/create-template.input';
-import { UpdateTemplateInput } from '../input/update-template.input';
 
 describe('Templates', () => {
   let app: INestApplication;

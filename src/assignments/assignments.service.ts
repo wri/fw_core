@@ -18,6 +18,7 @@ import mongoose from 'mongoose';
 import { AreasService } from '../areas/services/areas.service';
 import { GeostoreService } from '../areas/services/geostore.service';
 import { IUser } from '../common/user.model';
+import { S3Service } from '../answers/services/s3Service';
 
 const allowedKeys = [
   'name',
@@ -36,11 +37,13 @@ export class AssignmentsService {
     private readonly teamsService: TeamsService,
     private readonly areasService: AreasService,
     private readonly geostoreService: GeostoreService,
+    private readonly s3Service: S3Service,
   ) {}
 
   async create(
     assignmentDto: CreateAssignmentDto,
     user: IUser,
+    image: Express.Multer.File,
   ): Promise<AssignmentDocument> {
     // get number of assignments in area for assignment name code
     const count = await this.assignmentModel.count({ createdBy: user.id });
@@ -84,6 +87,12 @@ export class AssignmentsService {
       createdAt: Date.now(),
       name: `${userInitials}-${String(count + 1).padStart(4, '0')}`,
     };
+
+    // save image
+    if (image) {
+      const url = await this.s3Service.uploadFile(image.path, image.filename);
+      newAssignment.image = url;
+    }
 
     // create geostore
     if (assignmentDto.geostore) {

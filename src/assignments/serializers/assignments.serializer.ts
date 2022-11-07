@@ -4,6 +4,7 @@ const whitelist = [
   'geostore',
   'monitors',
   'notes',
+  'image',
   'status',
   'areaId',
   'templateIds',
@@ -12,6 +13,8 @@ const whitelist = [
   'location',
   'alert',
   'areaName',
+  'monitorNames',
+  'templates',
 ];
 
 const serializeResource = (data) => {
