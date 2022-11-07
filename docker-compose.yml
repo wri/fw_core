@@ -83,7 +83,7 @@ services:
       - redis
     networks:
       - gfw-nest-network
-    command: yarn test src/assignments/tests/assignments.e2e.spec.ts
+    command: yarn test
   docs:
     build: .
     ports:
