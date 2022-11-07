@@ -254,6 +254,33 @@ describe('Assignments', () => {
         assignments.geostore.id,
       );
     });
+
+    it('should save an image', async () => {
+      const filename = 'image.png';
+      const fileData = Buffer.from('TestFileContent', 'utf8');
+
+      const response = await request(app.getHttpServer())
+        .post(`/assignments`)
+        .attach('image', fileData, filename)
+        .field('monitors', [ROLES.USER.id])
+        .field('location[0][lat]', 1)
+        .field('location[0][lon]', 1)
+        .field('location[0][alertType]', 'null')
+        .field('priority', 1)
+        .field('status', 'open')
+        .field('areaId', areaConstants.testArea.id)
+        .field('areaName', areaConstants.testArea.attributes.name)
+        .field('templateIds', [])
+        .set('Authorization', 'USER')
+        .expect(201);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('attributes');
+      expect(response.body.data.attributes).toHaveProperty(
+        'image',
+        `https://s3.amazonaws.com/bucket/folder/uuid.ext`,
+      );
+    });
   });
 
   describe('GET /assignments/user', () => {
@@ -897,6 +924,34 @@ describe('Assignments', () => {
           monitors: [ROLES.USER.id, ROLES.MANAGER.id],
         })
         .expect(403);
+    });
+
+    it('should save an image', async () => {
+      const assignment = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
+          name: 'name',
+          monitors: [ROLES.USER.id],
+          createdBy: ROLES.ADMIN.id,
+        });
+
+      const filename = 'image.png';
+      const fileData = Buffer.from('TestFileContent', 'utf8');
+
+      const response = await request(app.getHttpServer())
+        .patch(`/assignments/${assignment.insertedId.toString()}`)
+        .attach('image', fileData, filename)
+        .set('Authorization', 'ADMIN')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('attributes');
+      expect(response.body.data.attributes).toHaveProperty(
+        'image',
+        `https://s3.amazonaws.com/bucket/folder/uuid.ext`,
+      );
     });
   });
 

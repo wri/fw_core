@@ -149,6 +149,7 @@ export class AssignmentsService {
   async update(
     id: string,
     updateAssignmentDto: UpdateAssignmentDto,
+    image: Express.Multer.File | null,
   ): Promise<AssignmentDocument> {
     const assignmentToUpdate = await this.assignmentModel.findOne({
       _id: new mongoose.Types.ObjectId(id),
@@ -164,6 +165,12 @@ export class AssignmentsService {
         "Status must be one of 'open', 'on hold', 'completed'",
         HttpStatus.BAD_REQUEST,
       );
+
+    // save image
+    if (image) {
+      const url = await this.s3Service.uploadFile(image.path, image.filename);
+      assignmentToUpdate.image = url;
+    }
 
     for (const [key, value] of Object.entries(updateAssignmentDto)) {
       if (!allowedKeys.includes(key)) continue;

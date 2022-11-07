@@ -162,7 +162,9 @@ export class AssignmentsController {
   }
 
   @Patch('/:id')
+  @UseInterceptors(FileInterceptor('image', { dest: './tmp' }))
   async update(
+    @UploadedFile() image: Express.Multer.File,
     @Param('id') id: string,
     @Body() updateAssignmentDto: UpdateAssignmentDto,
     @AuthUser() user: IUser,
@@ -182,6 +184,7 @@ export class AssignmentsController {
     const updatedAssignment = await this.assignmentsService.update(
       id,
       updateAssignmentDto,
+      image,
     );
 
     const [assignmentResponse] = await this.buildAssignmentResponse(
