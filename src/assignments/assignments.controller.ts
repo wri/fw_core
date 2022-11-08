@@ -219,7 +219,7 @@ export class AssignmentsController {
     user: IUser,
   ): Promise<AssignmentDocument[]> {
     const assignmentResponsePromises = assignments.map(async (assignment) => {
-      if (assignment.geostore && typeof assignment.geostore === 'string') {
+      if (typeof assignment.geostore === 'string') {
         const geostoreId = assignment.geostore;
         const geostore = await this.geostoreService.getGeostore(
           geostoreId,
