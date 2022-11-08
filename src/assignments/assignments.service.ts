@@ -43,7 +43,7 @@ export class AssignmentsService {
   async create(
     assignmentDto: CreateAssignmentDto,
     user: IUser,
-    image: Express.Multer.File,
+    image?: Express.Multer.File,
   ): Promise<AssignmentDocument> {
     // get number of assignments in area for assignment name code
     const count = await this.assignmentModel.count({ createdBy: user.id });
