@@ -376,12 +376,8 @@ describe('Assignments', () => {
 
 expect(response.body.data.length).toBe(1);
       const returnedAssignment = response.body.data[0];
-      expect(returnedAssignment).toHaveProperty('attributes');
-      expect(returnedAssignment.attributes).toHaveProperty('templates');
-      expect(returnedAssignment.attributes.templates[0]).toHaveProperty(
-        '_id',
-        template.insertedId.toString(),
-      );
+     
+      expect(returnedAssignment.attributes.templates[0]._id).toBe(template.insertedId.toString());
     });
 
     it('should return assignments containing an array of monitor names', async () => {
