@@ -953,7 +953,7 @@ describe('Assignments', () => {
           createdBy: ROLES.MANAGER.id,
           alert: 'something',
         })
-        .expect(200);
+        .expect(400);
 
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty(
