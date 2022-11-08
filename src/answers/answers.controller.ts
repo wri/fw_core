@@ -156,13 +156,9 @@ export class AnswersController {
     const answerModel = await this.answersService.create(answer);
 
     if (assignment.status !== AssignmentStatus.COMPLETED)
-      await this.assignmentService.update(
-        assignmentId,
-        {
-          status: AssignmentStatus.COMPLETED,
-        },
-        null,
-      );
+      await this.assignmentService.update(assignmentId, {
+        status: AssignmentStatus.COMPLETED,
+      });
 
     return { data: serializeAnswers(answerModel) };
   }
