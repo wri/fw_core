@@ -71,7 +71,7 @@ export class Assignment {
   createdAt: Date;
 
   @Prop({ required: false })
-  monitorNames: mongoose.Schema.Types.Mixed;
+  monitorNames?: mongoose.Schema.Types.Mixed;
 
   @Prop({ required: false })
   templates: mongoose.Schema.Types.Mixed;
