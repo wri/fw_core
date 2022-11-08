@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -180,7 +181,10 @@ export class AssignmentsService {
     }
 
     for (const [key, value] of Object.entries(updateAssignmentDto)) {
-      if (!allowedKeys.includes(key)) continue;
+      if (!allowedKeys.includes(key))
+        throw new BadRequestException(
+          'You cannot update one or more of the requested fields',
+        );
       assignmentToUpdate[key] = value;
     }
 
