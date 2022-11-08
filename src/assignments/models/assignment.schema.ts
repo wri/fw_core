@@ -74,7 +74,7 @@ export class Assignment {
   monitorNames?: mongoose.Schema.Types.Mixed;
 
   @Prop({ required: false })
-  templates: mongoose.Schema.Types.Mixed;
+  templates?: mongoose.Schema.Types.Mixed;
 }
 
 export interface AssignmentDocument extends IAssignment, mongoose.Document {}
