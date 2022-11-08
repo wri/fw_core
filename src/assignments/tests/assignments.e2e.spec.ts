@@ -374,8 +374,7 @@ describe('Assignments', () => {
         .set('Authorization', 'USER')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body.data.length).toBe(1);
+expect(response.body.data.length).toBe(1);
       const returnedAssignment = response.body.data[0];
       expect(returnedAssignment).toHaveProperty('attributes');
       expect(returnedAssignment.attributes).toHaveProperty('templates');
