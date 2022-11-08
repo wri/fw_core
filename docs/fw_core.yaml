@@ -909,7 +909,7 @@ paths:
           $ref: '#/components/responses/Templates-Response'
       operationId: get-v3-gfw-templates-latest
       description: Returns a list of all user templates with the latest version of each template. The answer count refers to the sum of the answers for the edit group the template is in.
-  '/v3/gfw/templates/version/{editGroupId}':
+  '/v3/gfw/templates/versions/{editGroupId}':
     parameters:
       - schema:
           type: string
