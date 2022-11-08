@@ -979,6 +979,86 @@ paths:
           $ref: '#/components/responses/Templates-Response'
       operationId: get-v3-gfw-templates-public
       description: Returns a list of all public templates
+  '/v3/gfw/arearelations/teams/areaTeams/{areaId}':
+    parameters:
+      - schema:
+          type: string
+        name: areaId
+        in: path
+        required: true
+    get:
+      summary: Get All Area Team Ids
+      tags:
+        - Area-Team Relations
+      responses:
+        '200':
+          $ref: '#/components/responses/String-Array-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-areaTeams-areaId
+      description: Returns an array of team ids associated with the area
+  '/v3/gfw/arearelations/teams/teamAreas/{teamId}':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+    get:
+      summary: Get All Team Area Ids
+      tags:
+        - Area-Team Relations
+      responses:
+        '200':
+          $ref: '#/components/responses/String-Array-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-arearelations-teams-teamAreas-teamId
+      description: Returns an array of area ids relating to a team
+  '/v3/gfw/arearelations/templates/areaTemplates/{areaId}':
+    parameters:
+      - schema:
+          type: string
+        name: areaId
+        in: path
+        required: true
+    get:
+      summary: Get All Area Template Ids
+      tags:
+        - Area-Template Relations
+      responses:
+        '200':
+          $ref: '#/components/responses/String-Array-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/String-Array-Response'
+      operationId: get-v3-gfw-arearelations-templates-areaTemplates-areaId
+      description: Returns an array of template ids related to an area
+  '/v3/gfw/arearelations/templates/templateAreas/{templateId}':
+    parameters:
+      - schema:
+          type: string
+        name: templateId
+        in: path
+        required: true
+    get:
+      summary: Get All Template Area Ids
+      tags:
+        - Area-Template Relations
+      responses:
+        '200':
+          $ref: '#/components/responses/String-Array-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-arearelations-templates-templateAreas-templateId
+      description: Returns an array of area ids related to a template
 components:
   schemas:
     AssignmentModel:
@@ -1896,6 +1976,17 @@ components:
                       type: string
                     attributes:
                       $ref: '#/components/schemas/TeamMemberModel'
+    String-Array-Response:
+      description: Array of ids
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: string
   requestBodies:
     AssignmentBody:
       content:

@@ -68,6 +68,21 @@ export class TemplateAreaRelationController {
     return relationIds;
   }
 
+  // GET /arearelations/templates/templateAreas/:templateId
+  // Returns array of area ids linked to template
+  @Get('/templateAreas/:templateId')
+  async getAllAreasForTeam(
+    @Param('templateId') templateId: string,
+  ): Promise<string[]> {
+    const template = await this.templatesService.findById(templateId);
+    if (!template)
+      throw new HttpException("Template doesn't exist", HttpStatus.NOT_FOUND);
+    const relations = await this.templateAreaRelationService.find({
+      templateId,
+    });
+    return relations.map((relation) => relation.areaId);
+  }
+
   // INTERNAL USE ONLY
   @Delete('/deleteAllForTemplate/:templateId')
   deleteAllTemplateRelations(@Param('templateId') templateId: string): void {
