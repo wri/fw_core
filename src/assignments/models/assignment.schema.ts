@@ -47,7 +47,7 @@ export class Assignment {
   notes: string;
 
   @Prop({ required: false })
-  image: string;
+  image?: string;
 
   @Prop({ type: String, enum: AssignmentStatus, required: true })
   status: AssignmentStatus;
