@@ -13,7 +13,7 @@ import {
   IAssignment,
 } from './models/assignment.schema';
 import { Model } from 'mongoose';
-import { TeamsService } from '../teams/services/teams.service';
+import { TeamMembersService } from '../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import { AreasService } from '../areas/services/areas.service';
 import { GeostoreService } from '../areas/services/geostore.service';
@@ -34,7 +34,7 @@ export class AssignmentsService {
   constructor(
     @InjectModel(Assignment.name, 'formsDb')
     private assignmentModel: Model<AssignmentDocument>,
-    private readonly teamsService: TeamsService,
+    private readonly teamMembersService: TeamMembersService,
     private readonly areasService: AreasService,
     private readonly geostoreService: GeostoreService,
     private readonly s3Service: S3Service,
@@ -114,7 +114,14 @@ export class AssignmentsService {
   }
 
   async findUser(userId: string): Promise<AssignmentDocument[]> {
-    return await this.assignmentModel.find({ monitors: userId });
+    // get user's managed teams
+    const managedUsers = await this.teamMembersService.findAllUsersManaged(
+      userId,
+    );
+    managedUsers.push(userId);
+    return await this.assignmentModel.find({
+      $or: [{ monitors: { $in: managedUsers } }, { createdBy: userId }],
+    });
   }
 
   async findOpen(userId: string): Promise<AssignmentDocument[]> {

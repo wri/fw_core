@@ -25,6 +25,7 @@ import { GeostoreService } from '../../areas/services/geostore.service';
 import { CoverageService } from '../../areas/services/coverage.service';
 import { DatasetService } from '../../areas/services/dataset.service';
 import templatesConstants from './templates.constants';
+import { EMemberRole } from '../../teams/models/teamMember.schema';
 
 describe('Assignments', () => {
   let app: INestApplication;
@@ -298,7 +299,7 @@ describe('Assignments', () => {
         .expect(401);
     });
 
-    it('should return an array of user assignments', async () => {
+    it('should return assignments assigned to user', async () => {
       const assignment = await formsDbConnection
         .collection('assignments')
         .insertOne({
@@ -353,6 +354,100 @@ describe('Assignments', () => {
       expect(response.body.data[1].attributes.geostore).toHaveProperty(
         'id',
         assignments.geostore.id,
+      );
+    });
+
+    it('should return assignments created by the user', async () => {
+      const assignment = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
+          name: 'name',
+          monitors: [ROLES.USER.id],
+          createdBy: ROLES.ADMIN.id,
+        });
+
+      const assignment2 = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
+          name: 'some other name',
+          monitors: [ROLES.MANAGER.id, ROLES.USER.id],
+          createdBy: ROLES.ADMIN.id,
+        });
+
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
+        name: 'not visible',
+        monitors: [ROLES.MANAGER.id],
+        createdBy: ROLES.USER.id,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/assignments/user`)
+        .set('Authorization', 'ADMIN')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data.length).toBe(2);
+      expect(response.body.data[0]).toHaveProperty(
+        'id',
+        assignment.insertedId.toString(),
+      );
+      expect(response.body.data[1]).toHaveProperty(
+        'id',
+        assignment2.insertedId.toString(),
+      );
+    });
+
+    it('should return assignments assigned to managed users', async () => {
+      const team = await teamsDbConnection
+        .collection('gfwteams')
+        .insertOne({ name: 'test team' });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
+        email: 'email',
+        role: EMemberRole.Administrator,
+      });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: 'email',
+        role: EMemberRole.Monitor,
+      });
+
+      const assignment = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
+          name: 'name',
+          monitors: [ROLES.USER.id],
+          createdBy: ROLES.ADMIN.id,
+        });
+
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
+        name: 'not visible',
+        monitors: [],
+        createdBy: ROLES.USER.id,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/assignments/user`)
+        .set('Authorization', 'MANAGER')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data.length).toBe(1);
+      expect(response.body.data[0]).toHaveProperty(
+        'id',
+        assignment.insertedId.toString(),
       );
     });
 

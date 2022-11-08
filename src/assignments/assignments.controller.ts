@@ -66,6 +66,10 @@ export class AssignmentsController {
     return { data: serializeAssignments(assignmentResponse) };
   }
 
+  // Gets all user assignments - that is,
+  // - all assignments created by the user
+  // - all assignments assigned to the user
+  // - all assignments assigned to monitors of teams the user is manager of
   @Get('/user')
   async findUserAssignments(
     @AuthUser() user: IUser,
