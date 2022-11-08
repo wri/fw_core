@@ -47,7 +47,7 @@ export class Assignment {
   notes: string;
 
   @Prop({ required: false })
-  image: string;
+  image?: string;
 
   @Prop({ type: String, enum: AssignmentStatus, required: true })
   status: AssignmentStatus;
@@ -71,10 +71,10 @@ export class Assignment {
   createdAt: Date;
 
   @Prop({ required: false })
-  monitorNames: mongoose.Schema.Types.Mixed;
+  monitorNames?: mongoose.Schema.Types.Mixed;
 
   @Prop({ required: false })
-  templates: mongoose.Schema.Types.Mixed;
+  templates?: mongoose.Schema.Types.Mixed;
 }
 
 export interface AssignmentDocument extends IAssignment, mongoose.Document {}

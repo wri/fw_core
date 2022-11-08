@@ -25,6 +25,7 @@ import { GeostoreService } from '../../areas/services/geostore.service';
 import { CoverageService } from '../../areas/services/coverage.service';
 import { DatasetService } from '../../areas/services/dataset.service';
 import templatesConstants from './templates.constants';
+import { EMemberRole } from '../../teams/models/teamMember.schema';
 
 describe('Assignments', () => {
   let app: INestApplication;
@@ -254,6 +255,33 @@ describe('Assignments', () => {
         assignments.geostore.id,
       );
     });
+
+    it('should save an image', async () => {
+      const filename = 'image.png';
+      const fileData = Buffer.from('TestFileContent', 'utf8');
+
+      const response = await request(app.getHttpServer())
+        .post(`/assignments`)
+        .attach('image', fileData, filename)
+        .field('monitors', [ROLES.USER.id])
+        .field('location[0][lat]', 1)
+        .field('location[0][lon]', 1)
+        .field('location[0][alertType]', 'null')
+        .field('priority', 1)
+        .field('status', 'open')
+        .field('areaId', areaConstants.testArea.id)
+        .field('areaName', areaConstants.testArea.attributes.name)
+        .field('templateIds', [])
+        .set('Authorization', 'USER')
+        .expect(201);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('attributes');
+      expect(response.body.data.attributes).toHaveProperty(
+        'image',
+        `https://s3.amazonaws.com/bucket/folder/uuid.ext`,
+      );
+    });
   });
 
   describe('GET /assignments/user', () => {
@@ -271,7 +299,7 @@ describe('Assignments', () => {
         .expect(401);
     });
 
-    it('should return an array of user assignments', async () => {
+    it('should return assignments assigned to user', async () => {
       const assignment = await formsDbConnection
         .collection('assignments')
         .insertOne({
@@ -329,6 +357,100 @@ describe('Assignments', () => {
       );
     });
 
+    it('should return assignments created by the user', async () => {
+      const assignment = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
+          name: 'name',
+          monitors: [ROLES.USER.id],
+          createdBy: ROLES.ADMIN.id,
+        });
+
+      const assignment2 = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
+          name: 'some other name',
+          monitors: [ROLES.MANAGER.id, ROLES.USER.id],
+          createdBy: ROLES.ADMIN.id,
+        });
+
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
+        name: 'not visible',
+        monitors: [ROLES.MANAGER.id],
+        createdBy: ROLES.USER.id,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/assignments/user`)
+        .set('Authorization', 'ADMIN')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data.length).toBe(2);
+      expect(response.body.data[0]).toHaveProperty(
+        'id',
+        assignment.insertedId.toString(),
+      );
+      expect(response.body.data[1]).toHaveProperty(
+        'id',
+        assignment2.insertedId.toString(),
+      );
+    });
+
+    it('should return assignments assigned to managed users', async () => {
+      const team = await teamsDbConnection
+        .collection('gfwteams')
+        .insertOne({ name: 'test team' });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
+        email: 'email',
+        role: EMemberRole.Administrator,
+      });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: 'email',
+        role: EMemberRole.Monitor,
+      });
+
+      const assignment = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
+          name: 'name',
+          monitors: [ROLES.USER.id],
+          createdBy: ROLES.ADMIN.id,
+        });
+
+      await formsDbConnection.collection('assignments').insertOne({
+        ...assignments.defaultAssignment,
+        geostore: assignments.geostore.id,
+        name: 'not visible',
+        monitors: [],
+        createdBy: ROLES.USER.id,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/assignments/user`)
+        .set('Authorization', 'MANAGER')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data.length).toBe(1);
+      expect(response.body.data[0]).toHaveProperty(
+        'id',
+        assignment.insertedId.toString(),
+      );
+    });
+
     it('should return assignments containing an array of templates', async () => {
       const template = await formsDbConnection
         .collection('reports')
@@ -347,13 +469,10 @@ describe('Assignments', () => {
         .set('Authorization', 'USER')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
       expect(response.body.data.length).toBe(1);
       const returnedAssignment = response.body.data[0];
-      expect(returnedAssignment).toHaveProperty('attributes');
-      expect(returnedAssignment.attributes).toHaveProperty('templates');
-      expect(returnedAssignment.attributes.templates[0]).toHaveProperty(
-        '_id',
+
+      expect(returnedAssignment.attributes.templates[0]._id).toBe(
         template.insertedId.toString(),
       );
     });
@@ -897,6 +1016,34 @@ describe('Assignments', () => {
           monitors: [ROLES.USER.id, ROLES.MANAGER.id],
         })
         .expect(403);
+    });
+
+    it('should save an image', async () => {
+      const assignment = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
+          name: 'name',
+          monitors: [ROLES.USER.id],
+          createdBy: ROLES.ADMIN.id,
+        });
+
+      const filename = 'image.png';
+      const fileData = Buffer.from('TestFileContent', 'utf8');
+
+      const response = await request(app.getHttpServer())
+        .patch(`/assignments/${assignment.insertedId.toString()}`)
+        .attach('image', fileData, filename)
+        .set('Authorization', 'ADMIN')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('attributes');
+      expect(response.body.data.attributes).toHaveProperty(
+        'image',
+        `https://s3.amazonaws.com/bucket/folder/uuid.ext`,
+      );
     });
   });
 

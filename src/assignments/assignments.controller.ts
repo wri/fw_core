@@ -66,6 +66,10 @@ export class AssignmentsController {
     return { data: serializeAssignments(assignmentResponse) };
   }
 
+  // Gets all user assignments - that is,
+  // - all assignments created by the user
+  // - all assignments assigned to the user
+  // - all assignments assigned to monitors of teams the user is manager of
   @Get('/user')
   async findUserAssignments(
     @AuthUser() user: IUser,
@@ -162,7 +166,9 @@ export class AssignmentsController {
   }
 
   @Patch('/:id')
+  @UseInterceptors(FileInterceptor('image', { dest: './tmp' }))
   async update(
+    @UploadedFile() image: Express.Multer.File,
     @Param('id') id: string,
     @Body() updateAssignmentDto: UpdateAssignmentDto,
     @AuthUser() user: IUser,
@@ -182,6 +188,7 @@ export class AssignmentsController {
     const updatedAssignment = await this.assignmentsService.update(
       id,
       updateAssignmentDto,
+      image,
     );
 
     const [assignmentResponse] = await this.buildAssignmentResponse(
@@ -216,7 +223,7 @@ export class AssignmentsController {
     user: IUser,
   ): Promise<AssignmentDocument[]> {
     const assignmentResponsePromises = assignments.map(async (assignment) => {
-      if (assignment.geostore && typeof assignment.geostore === 'string') {
+      if (typeof assignment.geostore === 'string') {
         const geostoreId = assignment.geostore;
         const geostore = await this.geostoreService.getGeostore(
           geostoreId,

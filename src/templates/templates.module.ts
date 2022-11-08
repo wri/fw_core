@@ -54,12 +54,6 @@ import { AreasModule } from '../areas/modules/areas.module';
     TeamMembersService,
     UserService,
   ],
-  exports: [
-    TemplatesService,
-    MongooseModule.forFeature(
-      [{ name: 'reports', schema: TemplateSchema }],
-      'formsDb',
-    ),
-  ],
+  exports: [TemplatesService],
 })
 export class TemplatesModule {}

@@ -13,6 +13,7 @@ import { AreasModule } from '../areas/modules/areas.module';
 import { S3Service } from '../answers/services/s3Service';
 import { TemplatesService } from '../templates/templates.service';
 import { TemplatesModule } from '../templates/templates.module';
+import { TemplateSchema } from '../templates/models/template.schema';
 
 @Module({
   imports: [
@@ -27,6 +28,10 @@ import { TemplatesModule } from '../templates/templates.module';
     MongooseModule.forFeature(
       [{ name: 'teamuserrelations', schema: TeamMemberSchema }],
       'teamsDb',
+    ),
+    MongooseModule.forFeature(
+      [{ name: 'reports', schema: TemplateSchema }],
+      'formsDb',
     ),
     AreasModule,
     TemplatesModule,

@@ -42,7 +42,6 @@ export class UserService {
           authorization: `Bearer ${this.configService.get('service.token')}`,
         },
       };
-      //console.log({ token: process.env.microservice_token });
       const response = await axios.get(url, getUserDetailsRequestConfig);
       const user = response.data;
       if (!user || !user.data) return null;

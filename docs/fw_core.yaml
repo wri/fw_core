@@ -1137,6 +1137,21 @@ components:
           type: string
         geostore:
           $ref: '#/components/schemas/GeostoreModel'
+        templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateModel'
+        monitorNames:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+        image:
+          type: string
       required:
         - name
         - priority
@@ -1990,7 +2005,7 @@ components:
   requestBodies:
     AssignmentBody:
       content:
-        application/json:
+        multipart/form-data:
           schema:
             type: object
             x-examples:
@@ -2038,6 +2053,9 @@ components:
               geostore:
                 $ref: '#/components/schemas/GeojsonModel'
               areaName:
+                type: string
+              image:
+                description: Image file
                 type: string
             required:
               - priority
@@ -2198,30 +2216,33 @@ components:
             type: object
             x-examples:
               example-1:
-                name: str
-                languages:
-                  - en
-                defaultLanguage: en
+                name: string
                 questions:
-                  - type: text
-                    name: name
+                  - type: string
                     label:
-                      en: label
-                    values: {}
+                      en: string
+                    name: string
+                    defaultValue: string
+                    values: string
+                    required: true
+                    order: 0
                     childQuestions:
-                      - type: text
-                        name: name
-                        label:
-                          en: label
-                values: {}
+                      type: string
+                      label:
+                        en: string
+                      name: string
+                      defaultValue: string
+                      values: string
+                      required: true
+                      order: 0
+                      conditionalValue: 0
+                languages:
+                  - string
+                status: string
+                public: true
+                defaultLanguage: string
             properties:
               name:
-                type: string
-              languages:
-                type: array
-                items:
-                  type: string
-              defaultLanguage:
                 type: string
               questions:
                 type: array
@@ -2230,27 +2251,51 @@ components:
                   properties:
                     type:
                       type: string
-                    name:
-                      type: string
                     label:
                       type: object
+                      properties:
+                        en:
+                          type: string
+                    name:
+                      type: string
+                    defaultValue:
+                      type: string
                     values:
-                      type: object
+                      type: string
+                    required:
+                      type: boolean
+                    order:
+                      type: integer
                     childQuestions:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          type:
-                            type: string
-                          name:
-                            type: string
-                          label:
-                            type: object
-                          values:
-                            type: object
-              values:
-                type: object
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        label:
+                          type: object
+                          properties:
+                            en:
+                              type: string
+                        name:
+                          type: string
+                        defaultValue:
+                          type: string
+                        values:
+                          type: string
+                        required:
+                          type: boolean
+                        order:
+                          type: integer
+                        conditionalValue:
+                          type: integer
+              languages:
+                type: array
+                items:
+                  type: string
+              public:
+                type: boolean
+              defaultLanguage:
+                type: string
           examples: {}
     AnswerBody:
       content:
@@ -2354,7 +2399,7 @@ components:
               - name
     UpdateAssignmentBody:
       content:
-        application/json:
+        multipart/form-data:
           schema:
             type: object
             x-examples:
@@ -2385,5 +2430,8 @@ components:
                 type: array
                 items:
                   type: string
+              image:
+                type: string
+                description: Image file
 security:
   - Authorization: []

@@ -13,7 +13,7 @@ import {
   IAssignment,
 } from './models/assignment.schema';
 import { Model } from 'mongoose';
-import { TeamsService } from '../teams/services/teams.service';
+import { TeamMembersService } from '../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import { AreasService } from '../areas/services/areas.service';
 import { GeostoreService } from '../areas/services/geostore.service';
@@ -34,7 +34,7 @@ export class AssignmentsService {
   constructor(
     @InjectModel(Assignment.name, 'formsDb')
     private assignmentModel: Model<AssignmentDocument>,
-    private readonly teamsService: TeamsService,
+    private readonly teamMembersService: TeamMembersService,
     private readonly areasService: AreasService,
     private readonly geostoreService: GeostoreService,
     private readonly s3Service: S3Service,
@@ -43,7 +43,7 @@ export class AssignmentsService {
   async create(
     assignmentDto: CreateAssignmentDto,
     user: IUser,
-    image: Express.Multer.File,
+    image?: Express.Multer.File,
   ): Promise<AssignmentDocument> {
     // get number of assignments in area for assignment name code
     const count = await this.assignmentModel.count({ createdBy: user.id });
@@ -114,7 +114,14 @@ export class AssignmentsService {
   }
 
   async findUser(userId: string): Promise<AssignmentDocument[]> {
-    return await this.assignmentModel.find({ monitors: userId });
+    // get user's managed teams
+    const managedUsers = await this.teamMembersService.findAllUsersManaged(
+      userId,
+    );
+    managedUsers.push(userId);
+    return await this.assignmentModel.find({
+      $or: [{ monitors: { $in: managedUsers } }, { createdBy: userId }],
+    });
   }
 
   async findOpen(userId: string): Promise<AssignmentDocument[]> {
@@ -149,6 +156,7 @@ export class AssignmentsService {
   async update(
     id: string,
     updateAssignmentDto: UpdateAssignmentDto,
+    image?: Express.Multer.File,
   ): Promise<AssignmentDocument> {
     const assignmentToUpdate = await this.assignmentModel.findOne({
       _id: new mongoose.Types.ObjectId(id),
@@ -164,6 +172,12 @@ export class AssignmentsService {
         "Status must be one of 'open', 'on hold', 'completed'",
         HttpStatus.BAD_REQUEST,
       );
+
+    // save image
+    if (image) {
+      const url = await this.s3Service.uploadFile(image.path, image.filename);
+      assignmentToUpdate.image = url;
+    }
 
     for (const [key, value] of Object.entries(updateAssignmentDto)) {
       if (!allowedKeys.includes(key)) continue;
