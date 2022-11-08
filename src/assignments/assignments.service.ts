@@ -149,7 +149,7 @@ export class AssignmentsService {
   async update(
     id: string,
     updateAssignmentDto: UpdateAssignmentDto,
-    image: Express.Multer.File | null,
+    image?: Express.Multer.File,
   ): Promise<AssignmentDocument> {
     const assignmentToUpdate = await this.assignmentModel.findOne({
       _id: new mongoose.Types.ObjectId(id),
