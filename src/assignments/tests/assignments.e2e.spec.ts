@@ -945,7 +945,7 @@ describe('Assignments', () => {
           createdBy: ROLES.ADMIN.id,
         });
 
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .patch(`/assignments/${assignment.insertedId.toString()}`)
         .set('Authorization', 'ADMIN')
         .send({

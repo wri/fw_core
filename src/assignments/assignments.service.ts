@@ -16,7 +16,6 @@ import {
 import { Model } from 'mongoose';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
-import { AreasService } from '../areas/services/areas.service';
 import { GeostoreService } from '../areas/services/geostore.service';
 import { IUser } from '../common/user.model';
 import { S3Service } from '../answers/services/s3Service';
@@ -57,6 +56,7 @@ export class AssignmentsService {
 
     const newAssignment: IAssignment = {
       ...assignmentDto,
+      status: 'open',
       geostore: undefined,
       createdBy: user.id,
       createdAt: Date.now(),

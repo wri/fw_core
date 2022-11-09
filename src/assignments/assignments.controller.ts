@@ -59,12 +59,6 @@ export class AssignmentsController {
     if (!area)
       throw new HttpException('Area does not exist', HttpStatus.NOT_FOUND);
 
-    if (!['open', 'on hold', 'completed'].includes(createAssignmentDto.status))
-      throw new HttpException(
-        "Status must be one of 'open', 'on hold', 'completed'",
-        HttpStatus.BAD_REQUEST,
-      );
-
     if (
       createAssignmentDto.location &&
       !Array.isArray(createAssignmentDto.location)

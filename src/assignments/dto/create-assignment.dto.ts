@@ -8,7 +8,7 @@ export class CreateAssignmentDto {
   priority: number;
   monitors: string[];
   notes?: string;
-  status: AssignmentStatus;
+  status?: AssignmentStatus;
   areaId: string;
   templateIds: string[];
   createdBy?: string;
