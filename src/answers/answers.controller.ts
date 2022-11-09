@@ -91,6 +91,15 @@ export class AnswersController {
         throw new BadRequestException(
           `Expected non-file response for '${question.name}'`,
         );
+
+      if (question.type === QuestionType.IMAGE) {
+        const uploadCount = fileGroups?.[question.name]?.length ?? 0;
+        const maxCount = question.maxImageCount;
+        if (maxCount && uploadCount > maxCount)
+          throw new BadRequestException(
+            `Maximum file count (${maxCount}) exceeded for question '${question.name}'`,
+          );
+      }
     };
     const addResponseOrFail = async (
       question: ITemplateQuestion,
