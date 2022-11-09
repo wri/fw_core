@@ -26,6 +26,8 @@ import { CoverageService } from '../../areas/services/coverage.service';
 import { DatasetService } from '../../areas/services/dataset.service';
 import templatesConstants from './templates.constants';
 import { EMemberRole } from '../../teams/models/teamMember.schema';
+import { CreateAssignmentInput } from '../inputs/create-assignments.input';
+import { MongooseObjectId } from '../../common/objectId';
 
 describe('Assignments', () => {
   let app: INestApplication;
@@ -122,6 +124,14 @@ describe('Assignments', () => {
       await formsDbConnection.collection('assignments').deleteMany({});
     });
 
+    const createAssignmentInput: CreateAssignmentInput = {
+      areaId: 'dummy',
+      monitors: [],
+      priority: 1,
+      templateIds: [],
+      location: [],
+    };
+
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
         .post(`/assignments`)
@@ -210,12 +220,12 @@ describe('Assignments', () => {
       await request(app.getHttpServer())
         .post(`/assignments`)
         .send({
-          ...assignments.defaultAssignment,
+          ...createAssignmentInput,
           areaId: new mongoose.Types.ObjectId(),
           monitors: [ROLES.USER.id],
         })
         .set('Authorization', 'MANAGER')
-        .expect(404);
+        .expect(400);
     });
 
     it('should fail if neither geostore nor location are sent', async () => {
@@ -263,7 +273,7 @@ describe('Assignments', () => {
       const response = await request(app.getHttpServer())
         .post(`/assignments`)
         .attach('image', fileData, filename)
-        .field('monitors', [ROLES.USER.id])
+        .field('monitors[]', ROLES.USER.id)
         .field('location[0][lat]', 1)
         .field('location[0][lon]', 1)
         .field('location[0][alertType]', 'null')
@@ -271,9 +281,10 @@ describe('Assignments', () => {
         .field('status', 'open')
         .field('areaId', areaConstants.testArea.id)
         .field('areaName', areaConstants.testArea.attributes.name)
-        .field('templateIds', [])
-        .set('Authorization', 'USER')
-        .expect(201);
+        .set('Authorization', 'USER');
+      // .expect(201);
+
+      console.log(response.body);
 
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('attributes');
