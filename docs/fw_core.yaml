@@ -888,8 +888,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Assignment-Response'
-        '':
-          $ref: '#/components/responses/Template-Response'
       operationId: 'get-v3-gfw-templates-versions-:id-latest'
       description: Fetches the latest version in a given template group
     parameters:
