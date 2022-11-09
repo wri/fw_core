@@ -46,7 +46,6 @@ export class AnswersController {
     @Req() request: Request,
     @UploadedFiles() fileArray?: Array<Express.Multer.File>,
   ) {
-    console.log(fileArray);
     const { user, template } = request;
 
     const userPosition = fields.userPosition
