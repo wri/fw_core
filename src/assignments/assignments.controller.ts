@@ -52,6 +52,37 @@ export class AssignmentsController {
         'Assignment must contain either a location, alert or geojson',
       ); // alerts are included in the createAssignmentDto.location field
 
+    const area = await this.areasService.getAreaMICROSERVICE(
+      createAssignmentDto.areaId,
+    );
+
+    if (!area)
+      throw new HttpException('Area does not exist', HttpStatus.NOT_FOUND);
+
+    if (!['open', 'on hold', 'completed'].includes(createAssignmentDto.status))
+      throw new HttpException(
+        "Status must be one of 'open', 'on hold', 'completed'",
+        HttpStatus.BAD_REQUEST,
+      );
+
+    if (
+      createAssignmentDto.location &&
+      !Array.isArray(createAssignmentDto.location)
+    )
+      throw new HttpException(
+        'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    if (createAssignmentDto.location)
+      createAssignmentDto.location.forEach((obj) => {
+        if (!(obj.lat && obj.lon))
+          throw new HttpException(
+            'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
+            HttpStatus.BAD_REQUEST,
+          );
+      });
+
     const createdAssignment = await this.assignmentsService.create(
       createAssignmentDto,
       user,

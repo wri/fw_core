@@ -36,7 +36,6 @@ export class AssignmentsService {
     @InjectModel(Assignment.name, 'formsDb')
     private assignmentModel: Model<AssignmentDocument>,
     private readonly teamMembersService: TeamMembersService,
-    private readonly areasService: AreasService,
     private readonly geostoreService: GeostoreService,
     private readonly s3Service: S3Service,
   ) {}
@@ -48,32 +47,7 @@ export class AssignmentsService {
   ): Promise<AssignmentDocument> {
     // get number of assignments in area for assignment name code
     const count = await this.assignmentModel.count({ createdBy: user.id });
-    const area = await this.areasService.getAreaMICROSERVICE(
-      assignmentDto.areaId,
-    );
 
-    if (!area)
-      throw new HttpException('Area does not exist', HttpStatus.NOT_FOUND);
-
-    if (!['open', 'on hold', 'completed'].includes(assignmentDto.status))
-      throw new HttpException(
-        "Status must be one of 'open', 'on hold', 'completed'",
-        HttpStatus.BAD_REQUEST,
-      );
-
-    if (assignmentDto.location && !Array.isArray(assignmentDto.location))
-      throw new HttpException(
-        'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
-        HttpStatus.BAD_REQUEST,
-      );
-    if (assignmentDto.location)
-      assignmentDto.location.forEach((obj) => {
-        if (!(obj.lat && obj.lon))
-          throw new HttpException(
-            'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
-            HttpStatus.BAD_REQUEST,
-          );
-      });
     const userInitials = user.name
       ? user.name
           .split(' ')
