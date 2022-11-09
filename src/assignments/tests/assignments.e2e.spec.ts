@@ -954,25 +954,6 @@ describe('Assignments', () => {
           alert: 'something',
         })
         .expect(400);
-
-      expect(response.body).toHaveProperty('data');
-      expect(response.body.data).toHaveProperty(
-        'id',
-        assignment.insertedId.toString(),
-      );
-      expect(response.body.data).toHaveProperty('attributes');
-      expect(response.body.data.attributes).toHaveProperty(
-        'name',
-        'different name',
-      );
-      expect(response.body.data.attributes).toHaveProperty(
-        'createdBy',
-        ROLES.ADMIN.id,
-      );
-      expect(response.body.data.attributes).toHaveProperty(
-        'alert',
-        assignments.defaultAssignment.alert,
-      );
     });
 
     it('should fail if user did not create assignment', async () => {
