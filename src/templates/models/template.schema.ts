@@ -13,6 +13,7 @@ interface ITemplateChildQuestion {
   name: string;
   defaultValue?: number;
   values?: { [language: string]: { label: string; value: number }[] };
+  maxImageCount?: number;
   required: boolean;
   order?: number;
   conditionalValue?: number;
@@ -24,6 +25,7 @@ export interface ITemplateQuestion {
   name: string;
   defaultValue?: number;
   values?: { [language: string]: { label: string; value: number }[] };
+  maxImageCount?: number;
   required: boolean;
   order?: number;
   childQuestions?: ITemplateChildQuestion[];
@@ -61,6 +63,9 @@ export class TemplateQuestion {
 
   @Prop({ required: true, default: {} })
   values: mongoose.Schema.Types.Mixed;
+
+  @Prop()
+  maxImageCount?: number;
 
   @Prop({ required: true, default: false })
   required: boolean;

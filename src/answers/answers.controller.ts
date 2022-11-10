@@ -27,6 +27,7 @@ import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.serv
 import { AssignmentStatus } from '../assignments/assignment-status.enum';
 import { AssignmentsService } from '../assignments/assignments.service';
 import { ITemplateQuestion } from '../templates/models/template.schema';
+import { QuestionType } from '../templates/question-type.enum';
 
 @Controller('templates/:templateId/answers')
 export class AnswersController {
@@ -51,9 +52,15 @@ export class AnswersController {
       ? fields.userPosition.split(',')
       : [];
 
-    const files = fileArray?.reduce((acc, file) => {
-      return { ...acc, [file.fieldname]: file };
-    }, {} as { [fieldName: string]: Express.Multer.File });
+    // This groups the file uploads by fieldname
+    const fileGroups = fileArray?.reduce((acc, file) => {
+      const questionName = file.fieldname;
+      const value = acc[questionName];
+      return {
+        ...acc,
+        [questionName]: value ? [...value, file] : [file],
+      };
+    }, {} as { [fieldName: string]: Express.Multer.File[] | undefined });
 
     const answer: IAnswer = {
       report: template.id,
@@ -70,9 +77,9 @@ export class AnswersController {
     };
 
     const isFileTypeQuestion = (question: ITemplateQuestion) =>
-      question.type === 'blob' || question.type === 'audio';
+      [QuestionType.AUDIO, QuestionType.IMAGE].includes(question.type);
     const validateResponseTypeOrFail = (question: ITemplateQuestion) => {
-      const hasFileResponse = !!files?.[question.name];
+      const hasFileResponse = !!fileGroups?.[question.name];
       const hasFieldResponse = !!fields[question.name];
 
       if (isFileTypeQuestion(question) && hasFieldResponse)
@@ -84,28 +91,62 @@ export class AnswersController {
         throw new BadRequestException(
           `Expected non-file response for '${question.name}'`,
         );
+
+      if (question.type === QuestionType.IMAGE) {
+        const uploadCount = fileGroups?.[question.name]?.length ?? 0;
+        const maxCount = question.maxImageCount;
+        if (maxCount && uploadCount > maxCount)
+          throw new BadRequestException(
+            `Maximum file count (${maxCount}) exceeded for question '${question.name}'`,
+          );
+      }
     };
-    const addResponseOrFail = async (question: ITemplateQuestion) => {
-      if (isFileTypeQuestion(question)) {
-        const file = files?.[question.name];
-        const fileUrl = file
-          ? await this.s3Service.uploadFile(file.path, file.filename)
-          : undefined;
-        answer.responses.push({ name: question.name, value: fileUrl });
-        return;
+    const addResponseOrFail = async (
+      question: ITemplateQuestion,
+    ): Promise<unknown> => {
+      if (!isFileTypeQuestion(question)) {
+        return answer.responses.push({
+          name: question.name,
+          value: fields[question.name]?.toString(),
+        });
       }
 
-      answer.responses.push({
-        name: question.name,
-        value: fields[question.name]?.toString(),
-      });
+      const files = fileGroups?.[question.name];
+      if (!files) {
+        return answer.responses.push({ name: question.name, value: undefined });
+      }
+
+      if (question.type === QuestionType.AUDIO) {
+        const [file] = files;
+        const fileUrl = await this.s3Service.uploadFile(
+          file.path,
+          file.filename,
+        );
+        return answer.responses.push({ name: question.name, value: fileUrl });
+      }
+
+      if (question.type === QuestionType.IMAGE) {
+        const fileUploadPromises = files?.map((file) =>
+          this.s3Service.uploadFile(file.path, file.filename),
+        );
+        const imageFileUrls = fileUploadPromises
+          ? await Promise.all(fileUploadPromises)
+          : undefined;
+
+        return answer.responses.push({
+          name: question.name,
+          value: imageFileUrls,
+        });
+      }
+
+      return;
     };
 
     for (const question of template.questions) {
       validateResponseTypeOrFail(question);
 
       const name = question.name;
-      if (question.required && !files?.[name] && !fields[name])
+      if (question.required && !fileGroups?.[name] && !fields[name])
         throw new BadRequestException(
           `${question.label[answer.language]} (${question.name}) required`,
         );
@@ -120,7 +161,7 @@ export class AnswersController {
         const name = childQuestion.name;
         const conditionMatches =
           fields[parentName] && childQuestion.conditionalValue === fields[name];
-        const hasResponse = files?.[name] || fields[name];
+        const hasResponse = fileGroups?.[name] || fields[name];
 
         if (childQuestion.required && conditionMatches && !hasResponse)
           throw new BadRequestException(
