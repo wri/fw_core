@@ -207,7 +207,7 @@ export class AreasService {
       };
       const { data } = await axios.delete(url, deleteAreaRequestConfig);
       const area = data.data;
-      this.logger.log(`Area with id ${area.id} deleted`);
+      this.logger.log(`Area with id ${areaId} deleted`);
       return area;
     } catch (error) {
       this.logger.error('Error while deleting area', error);

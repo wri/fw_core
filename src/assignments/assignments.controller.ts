@@ -13,7 +13,6 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { AssignmentsService } from './assignments.service';
-import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import mongoose from 'mongoose';
 import {
@@ -29,6 +28,8 @@ import { UserService } from '../common/user.service';
 import { TemplatesService } from '../templates/templates.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { TemplateDocument } from '../templates/models/template.schema';
+import { CreateAssignmentInput } from './inputs/create-assignments.input';
+import { AssignmentStatus } from './assignment-status.enum';
 
 @Controller('assignments')
 export class AssignmentsController {
@@ -44,16 +45,29 @@ export class AssignmentsController {
   @UseInterceptors(FileInterceptor('image', { dest: './tmp' }))
   async create(
     @UploadedFile() image: Express.Multer.File,
-    @Body() createAssignmentDto: CreateAssignmentDto,
+    @Body() input: CreateAssignmentInput,
     @AuthUser() user: IUser,
   ): Promise<IAssignmentResponse> {
-    if (!(createAssignmentDto.location || createAssignmentDto.geostore))
+    if (!(input.location || input.geostore))
       throw new BadRequestException(
         'Assignment must contain either a location, alert or geojson',
       ); // alerts are included in the createAssignmentDto.location field
 
+    const area = await this.areasService.getAreaMICROSERVICE(input.areaId);
+
+    if (!area) throw new BadRequestException('Area does not exist');
+
+    if (input.location && !Array.isArray(input.location))
+      throw new BadRequestException(
+        'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
+      );
+
     const createdAssignment = await this.assignmentsService.create(
-      createAssignmentDto,
+      {
+        ...input,
+        status: AssignmentStatus.OPEN,
+        templateIds: input.templateIds ?? [],
+      },
       user,
       image,
     );

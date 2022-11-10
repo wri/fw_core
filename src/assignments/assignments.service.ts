@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -15,7 +16,6 @@ import {
 import { Model } from 'mongoose';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
-import { AreasService } from '../areas/services/areas.service';
 import { GeostoreService } from '../areas/services/geostore.service';
 import { IUser } from '../common/user.model';
 import { S3Service } from '../answers/services/s3Service';
@@ -35,7 +35,6 @@ export class AssignmentsService {
     @InjectModel(Assignment.name, 'formsDb')
     private assignmentModel: Model<AssignmentDocument>,
     private readonly teamMembersService: TeamMembersService,
-    private readonly areasService: AreasService,
     private readonly geostoreService: GeostoreService,
     private readonly s3Service: S3Service,
   ) {}
@@ -47,32 +46,7 @@ export class AssignmentsService {
   ): Promise<AssignmentDocument> {
     // get number of assignments in area for assignment name code
     const count = await this.assignmentModel.count({ createdBy: user.id });
-    const area = await this.areasService.getAreaMICROSERVICE(
-      assignmentDto.areaId,
-    );
 
-    if (!area)
-      throw new HttpException('Area does not exist', HttpStatus.NOT_FOUND);
-
-    if (!['open', 'on hold', 'completed'].includes(assignmentDto.status))
-      throw new HttpException(
-        "Status must be one of 'open', 'on hold', 'completed'",
-        HttpStatus.BAD_REQUEST,
-      );
-
-    if (assignmentDto.location && !Array.isArray(assignmentDto.location))
-      throw new HttpException(
-        'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
-        HttpStatus.BAD_REQUEST,
-      );
-    if (assignmentDto.location)
-      assignmentDto.location.forEach((obj) => {
-        if (!(obj.lat && obj.lon))
-          throw new HttpException(
-            'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
-            HttpStatus.BAD_REQUEST,
-          );
-      });
     const userInitials = user.name
       ? user.name
           .split(' ')
@@ -82,6 +56,7 @@ export class AssignmentsService {
 
     const newAssignment: IAssignment = {
       ...assignmentDto,
+      status: 'open',
       geostore: undefined,
       createdBy: user.id,
       createdAt: Date.now(),
@@ -180,7 +155,10 @@ export class AssignmentsService {
     }
 
     for (const [key, value] of Object.entries(updateAssignmentDto)) {
-      if (!allowedKeys.includes(key)) continue;
+      if (!allowedKeys.includes(key))
+        throw new BadRequestException(
+          'You cannot update one or more of the requested fields',
+        );
       assignmentToUpdate[key] = value;
     }
 

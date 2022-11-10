@@ -888,8 +888,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Assignment-Response'
-        '':
-          $ref: '#/components/responses/Template-Response'
       operationId: 'get-v3-gfw-templates-versions-:id-latest'
       description: Fetches the latest version in a given template group
     parameters:
@@ -2057,6 +2055,7 @@ components:
               image:
                 description: Image file
                 type: string
+                format: binary
             required:
               - priority
               - monitors
@@ -2357,8 +2356,9 @@ components:
               geojson:
                 $ref: '#/components/schemas/GeojsonModel'
               image:
-                type: 'null'
+                type: 'string'
                 description: Must be image file
+                format: binary
       description: Body for creating area
     AreaTeamRelationBody:
       content:
@@ -2433,5 +2433,6 @@ components:
               image:
                 type: string
                 description: Image file
+                format: binary
 security:
   - Authorization: []
