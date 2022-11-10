@@ -723,9 +723,9 @@ describe('Answers', () => {
         .post(`/templates/${template.insertedId.toString()}/answers`)
         .set('Authorization', 'USER')
         .attach('question-1', fileData, filename)
-        .field({ reportName: 'name' })
-        .field({ language: 'en' })
         .field({
+          reportName: 'name',
+          language: 'en',
           clickedPosition:
             '[{"lat": -3.875649929046631,"lon": -64.98695373535156}]',
         })
