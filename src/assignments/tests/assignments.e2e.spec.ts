@@ -281,10 +281,8 @@ describe('Assignments', () => {
         .field('status', 'open')
         .field('areaId', areaConstants.testArea.id)
         .field('areaName', areaConstants.testArea.attributes.name)
-        .set('Authorization', 'USER');
-      // .expect(201);
-
-      console.log(response.body);
+        .set('Authorization', 'USER')
+        .expect(201);
 
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('attributes');
