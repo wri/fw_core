@@ -731,16 +731,13 @@ describe('Answers', () => {
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body.data).toHaveProperty('id');
-      expect(response.body.data).toHaveProperty('attributes');
-      expect(response.body.data.attributes).toHaveProperty('responses');
-      expect(response.body.data.attributes.responses[0]).toHaveProperty(
-        'name',
-        'question-1',
-      );
-      expect(response.body.data.attributes.responses[0]).toHaveProperty(
-        'value',
+      const answerResponses = response.body.data.attributes.responses;
+      expect(answerResponses).toHaveLength(1);
+      const firstAnswerResponse = answerResponses[0];
+      expect(firstAnswerResponse.name).toBe('question-1');
+      expect(firstAnswerResponse.value).toBeInstanceOf(Array);
+      expect(firstAnswerResponse.value).toHaveLength(1);
+      expect(firstAnswerResponse.value[0]).toBe(
         'https://s3.amazonaws.com/bucket/folder/uuid.ext',
       );
     });
