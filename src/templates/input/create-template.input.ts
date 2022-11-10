@@ -6,6 +6,7 @@ import {
   IsBoolean,
   IsDefined,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsNumberString,
@@ -74,6 +75,7 @@ export class CreateTemplateQuestionInput {
 
   @IsOptional()
   @IsNumber()
+  @IsInt()
   @Min(1)
   @Max(10)
   maxImageCount?: number;
@@ -134,6 +136,7 @@ class CreateTemplateChildQuestionInput {
 
   @IsOptional()
   @IsNumber()
+  @IsInt()
   @Min(1)
   @Max(10)
   maxImageCount?: number;
