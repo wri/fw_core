@@ -58,7 +58,19 @@ export class AssignmentsController {
 
     if (!area)
       throw new HttpException('Area does not exist', HttpStatus.NOT_FOUND);
-
+    if (
+      createAssignmentDto.location &&
+      typeof createAssignmentDto.location === 'string'
+    ) {
+      try {
+        createAssignmentDto.location = JSON.parse(createAssignmentDto.location);
+      } catch (err) {
+        throw new HttpException(
+          'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
     if (
       createAssignmentDto.location &&
       !Array.isArray(createAssignmentDto.location)
@@ -67,7 +79,7 @@ export class AssignmentsController {
         'location should be an array of objects in the form {lat: number, lon: number, alertType: string}',
         HttpStatus.BAD_REQUEST,
       );
-
+    console.log('fine');
     if (createAssignmentDto.location)
       createAssignmentDto.location.forEach((obj) => {
         if (!(obj.lat && obj.lon))
@@ -222,6 +234,12 @@ export class AssignmentsController {
     );
 
     return { data: serializeAssignments(assignmentResponse) };
+  }
+
+  @Delete('/deleteAllForUser')
+  async removeAll(@AuthUser() user: IUser): Promise<void> {
+    const filter = { createdBy: user.id };
+    return await this.assignmentsService.removeMany(filter);
   }
 
   @Delete('/:id')

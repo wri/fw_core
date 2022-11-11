@@ -171,4 +171,8 @@ export class AssignmentsService {
       _id: new mongoose.Types.ObjectId(id),
     });
   }
+
+  async removeMany(filter): Promise<void> {
+    await this.assignmentModel.deleteMany(filter);
+  }
 }
