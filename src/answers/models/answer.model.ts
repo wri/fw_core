@@ -3,7 +3,7 @@ import * as mongoose from 'mongoose';
 
 export interface IAnswerResponse {
   name: string;
-  value?: string;
+  value?: string | string[];
 }
 
 export interface IAnswer {
@@ -64,7 +64,7 @@ export class Answer {
   user: mongoose.Schema.Types.ObjectId;
 
   @Prop()
-  responses: [IAnswerResponse];
+  responses: IAnswerResponse[];
 
   @Prop({ required: true, default: Date.now() })
   createdAt: Date;

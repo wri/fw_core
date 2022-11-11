@@ -723,24 +723,21 @@ describe('Answers', () => {
         .post(`/templates/${template.insertedId.toString()}/answers`)
         .set('Authorization', 'USER')
         .attach('question-1', fileData, filename)
-        .field({ reportName: 'name' })
-        .field({ language: 'en' })
         .field({
+          reportName: 'name',
+          language: 'en',
           clickedPosition:
             '[{"lat": -3.875649929046631,"lon": -64.98695373535156}]',
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body.data).toHaveProperty('id');
-      expect(response.body.data).toHaveProperty('attributes');
-      expect(response.body.data.attributes).toHaveProperty('responses');
-      expect(response.body.data.attributes.responses[0]).toHaveProperty(
-        'name',
-        'question-1',
-      );
-      expect(response.body.data.attributes.responses[0]).toHaveProperty(
-        'value',
+      const answerResponses = response.body.data.attributes.responses;
+      expect(answerResponses).toHaveLength(1);
+      const firstAnswerResponse = answerResponses[0];
+      expect(firstAnswerResponse.name).toBe('question-1');
+      expect(firstAnswerResponse.value).toBeInstanceOf(Array);
+      expect(firstAnswerResponse.value).toHaveLength(1);
+      expect(firstAnswerResponse.value[0]).toBe(
         'https://s3.amazonaws.com/bucket/folder/uuid.ext',
       );
     });

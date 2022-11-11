@@ -1,16 +1,20 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsBoolean,
   IsDefined,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsNumberString,
   IsObject,
   IsOptional,
   IsString,
+  Max,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { ETemplateStatus } from '../models/template.schema';
@@ -70,6 +74,13 @@ export class CreateTemplateQuestionInput {
   values?: { [language: string]: { label: string; value: number }[] };
 
   @IsOptional()
+  @IsNumber()
+  @IsInt()
+  @Min(1)
+  @Max(10)
+  maxImageCount?: number;
+
+  @IsOptional()
   @IsBoolean()
   required?: boolean;
 
@@ -122,6 +133,13 @@ class CreateTemplateChildQuestionInput {
   @IsOptional()
   @IsObject()
   values?: { [language: string]: { label: string; value: number }[] };
+
+  @IsOptional()
+  @IsNumber()
+  @IsInt()
+  @Min(1)
+  @Max(10)
+  maxImageCount?: number;
 
   @IsOptional()
   @IsBoolean()
