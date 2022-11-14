@@ -101,7 +101,7 @@ paths:
       tags:
         - Assignments
       requestBody:
-        $ref: '#/components/requestBodies/AssignmentBody'
+        $ref: '#/components/requestBodies/UpdateAssignmentBody'
     delete:
       summary: Delete Assignment
       operationId: 'delete-v3-gfw-assignments-:assignmentId'
@@ -2356,7 +2356,7 @@ components:
               geojson:
                 $ref: '#/components/schemas/GeojsonModel'
               image:
-                type: 'string'
+                type: string
                 description: Must be image file
                 format: binary
       description: Body for creating area
