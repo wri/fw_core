@@ -1135,7 +1135,8 @@ components:
         areaName:
           type: string
         geostore:
-          $ref: '#/components/schemas/GeostoreModel'
+          type: string
+          description: A serialized JSON object that represents the geostore object
         templates:
           type: array
           items:
