@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TemplatesService } from '../../templates/templates.service';
+import { IArea } from '../models/area.entity';
 import { TemplateAreaRelationDocument } from '../models/templateAreaRelation.schema';
 import { AreasService } from './areas.service';
 
@@ -59,9 +60,11 @@ export class TemplateAreaRelationService {
       ),
     );
 
-    return areas.map((area) => {
-      return { id: area?.id, name: area?.attributes.name };
-    });
+    return areas
+      .filter((a): a is IArea => a !== null)
+      .map((area) => {
+        return { id: area?.id, name: area?.attributes.name };
+      });
   }
 
   async deleteMany(filter): Promise<void> {

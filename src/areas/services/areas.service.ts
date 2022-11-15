@@ -51,7 +51,8 @@ export class AreasService {
       const { data } = await axios.get(url, getAreasRequestConfig);
       this.logger.log(`Got area with id ${data.data.id}`);
       return data && data.data;
-    } catch (e) {
+    } catch (e: any) {
+      if (e.response.status === 404) return null;
       this.logger.error('Error while fetching area', e);
       throw e;
     }
