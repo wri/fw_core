@@ -2081,6 +2081,26 @@ components:
         application/json:
           schema:
             type: object
+            x-examples:
+              example-1:
+                id: string
+                type: string
+                name: string
+                location: string
+                priority: 0
+                monitors:
+                  - string
+                notes: string
+                status: string
+                alert: string
+                areaId: string
+                templateIds:
+                  - string
+                teamIds:
+                  - string
+                createdAt: 0
+                createdBy: string
+                areaName: string
             properties:
               id:
                 type: string
@@ -2089,7 +2109,19 @@ components:
               name:
                 type: string
               location:
-                type: string
+                type: array
+                items:
+                  type: object
+                  properties:
+                    lat:
+                      type: number
+                    lon:
+                      type: number
+                    alertType:
+                      type: string
+                  required:
+                    - lat
+                    - lon
               priority:
                 type: integer
               monitors:
@@ -2118,12 +2150,20 @@ components:
                 type: string
               areaName:
                 type: string
-            x-examples:
-              example-1:
+            required:
+              - priority
+              - monitors
+              - areaId
+          examples:
+            example-1:
+              value:
                 id: string
                 type: string
                 name: string
-                location: string
+                location:
+                  - lat: 0
+                    lon: 0
+                    alertType: string
                 priority: 0
                 monitors:
                   - string
