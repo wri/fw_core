@@ -1071,7 +1071,7 @@ components:
           status: string;
           alert: string;
           areaId: string;
-          templateId: string;
+          templateIds: 'string[];'
           teamIds: 'string[];'
           createdAt: Date;
           createdBy: '''string;'''
@@ -1087,7 +1087,8 @@ components:
           status: string
           alert: string
           areaId: string
-          templateId: string
+          templateIds: 
+            - string
           teamIds:
             - string
           createdAt: 0
