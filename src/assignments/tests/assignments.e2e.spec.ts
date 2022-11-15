@@ -105,7 +105,7 @@ describe('Assignments', () => {
 
     app = moduleRef.createNestApplication();
     app.enableCors();
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(new ValidationPipe({ transform: true }));
     await app.init();
     teamsDbConnection = moduleRef
       .get<DatabaseService>(DatabaseService)
@@ -145,6 +145,26 @@ describe('Assignments', () => {
           ...assignments.defaultAssignment,
           monitors: [ROLES.USER.id],
         })
+        .set('Authorization', 'MANAGER')
+        .expect(201);
+
+      const createdAssignment = await formsDbConnection
+        .collection('assignments')
+        .findOne({});
+      expect(createdAssignment).toBeDefined();
+      expect(createdAssignment).toHaveProperty('notes', 'some notes');
+    });
+
+    it('should create an assignment by form data', async () => {
+      const fields: any = {
+        ...assignments.defaultAssignment,
+        'monitors[]': ROLES.USER.id,
+        geostore: JSON.stringify(assignments.defaultAssignment.geostore),
+      };
+      delete fields.location;
+      await request(app.getHttpServer())
+        .post(`/assignments`)
+        .field(fields)
         .set('Authorization', 'MANAGER')
         .expect(201);
 

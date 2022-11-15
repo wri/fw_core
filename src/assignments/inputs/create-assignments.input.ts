@@ -19,6 +19,9 @@ export class CreateAssignmentInput {
 
   @IsOptional()
   @IsObject()
+  @Transform(({ value }) =>
+    typeof value === 'object' ? value : JSON.parse(value),
+  )
   geostore?: IGeojson;
 
   @IsNumber()
