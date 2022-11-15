@@ -12,6 +12,7 @@ import {
   HttpException,
   HttpStatus,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AreasService } from '../services/areas.service';
@@ -281,6 +282,8 @@ export class AreasController {
     @AuthUser() user: IUser,
   ): Promise<string> {
     const area = await this.areasService.getArea(id, user);
+
+    if (!area) throw new ForbiddenException();
 
     if (area.attributes.userId.toString() !== user.id.toString())
       throw new HttpException(

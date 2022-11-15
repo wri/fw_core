@@ -5,7 +5,6 @@ import fs from 'fs';
 import FormData from 'form-data';
 import axios from 'axios';
 import { CoverageService } from './coverage.service';
-import { DatasetService } from './dataset.service';
 import { IArea, IGeojson } from '../models/area.entity';
 import { IUser } from '../../common/user.model';
 import { ConfigService } from '@nestjs/config';
@@ -16,12 +15,11 @@ export class AreasService {
   constructor(
     private readonly geostoreService: GeostoreService,
     private readonly coverageService: CoverageService,
-    private readonly datasetService: DatasetService,
     private readonly configService: ConfigService,
   ) {}
   private readonly logger = new Logger(AreasService.name);
 
-  async getArea(areaId: string, user: IUser): Promise<IArea> {
+  async getArea(areaId: string, user: IUser): Promise<IArea | null> {
     try {
       const baseURL = this.configService.get('areasApi.url');
       const url = `${baseURL}/v2/area/${areaId}`;
@@ -33,7 +31,8 @@ export class AreasService {
       const { data } = await axios.get(url, getAreasRequestConfig);
       this.logger.log(`Got area with id ${data.data.id}`);
       return data && data.data;
-    } catch (e) {
+    } catch (e: any) {
+      if (e.response.status === 404) return null;
       this.logger.error('Error while fetching area', e);
       throw e;
     }
@@ -78,7 +77,8 @@ export class AreasService {
         );
         return filteredAreas;
       } else return [];
-    } catch (e) {
+    } catch (e: any) {
+      if (e.response.status === 404) return [];
       this.logger.error('Error while fetching areas', e);
       throw e;
     }
