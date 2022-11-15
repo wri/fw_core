@@ -1087,7 +1087,7 @@ components:
           status: string
           alert: string
           areaId: string
-          templateIds: 
+          templateIds:
             - string
           teamIds:
             - string
@@ -2077,6 +2077,66 @@ components:
                 templateId: string
                 teamIds:
                   - string
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+              name:
+                type: string
+              location:
+                type: string
+              priority:
+                type: integer
+              monitors:
+                type: array
+                items:
+                  type: string
+              notes:
+                type: string
+              status:
+                type: string
+              alert:
+                type: string
+              areaId:
+                type: string
+              templateIds:
+                type: array
+                items:
+                  type: string
+              teamIds:
+                type: array
+                items:
+                  type: string
+              createdAt:
+                type: integer
+              createdBy:
+                type: string
+              areaName:
+                type: string
+            x-examples:
+              example-1:
+                id: string
+                type: string
+                name: string
+                location: string
+                priority: 0
+                monitors:
+                  - string
+                notes: string
+                status: string
+                alert: string
+                areaId: string
+                templateIds:
+                  - string
+                teamIds:
+                  - string
+                createdAt: 0
+                createdBy: string
+                areaName: string
     RouteBody:
       content:
         application/json:
