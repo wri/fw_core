@@ -65,7 +65,10 @@ export class AssignmentsService {
 
     // save image
     if (image) {
-      const url = await this.s3Service.uploadFile(image.path, image.filename);
+      const url = await this.s3Service.uploadFile(
+        image.path,
+        image.originalname,
+      );
       newAssignment.image = url;
     }
 
@@ -150,7 +153,10 @@ export class AssignmentsService {
 
     // save image
     if (image) {
-      const url = await this.s3Service.uploadFile(image.path, image.filename);
+      const url = await this.s3Service.uploadFile(
+        image.path,
+        image.originalname,
+      );
       assignmentToUpdate.image = url;
     }
 

@@ -120,14 +120,14 @@ export class AnswersController {
         const [file] = files;
         const fileUrl = await this.s3Service.uploadFile(
           file.path,
-          file.filename,
+          file.originalname,
         );
         return answer.responses.push({ name: question.name, value: fileUrl });
       }
 
       if (question.type === QuestionType.IMAGE) {
         const fileUploadPromises = files?.map((file) =>
-          this.s3Service.uploadFile(file.path, file.filename),
+          this.s3Service.uploadFile(file.path, file.originalname),
         );
         const imageFileUrls = fileUploadPromises
           ? await Promise.all(fileUploadPromises)
