@@ -22,7 +22,7 @@ export class S3Service {
   }
 
   getExtension(fullFilename: string): string | undefined {
-    return fullFilename.split('.').at(-1);
+    return fullFilename.split('.').slice(-1)[0];
   }
 
   async uploadFile(filePath: string, fullFileName: string): Promise<string> {
