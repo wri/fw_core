@@ -1322,6 +1322,8 @@ components:
           type: number
         conditionalValue:
           type: number
+        maxImageCount:
+          type: number
       required:
         - type
         - label
@@ -1364,6 +1366,8 @@ components:
           type: number
         childQuestions:
           $ref: '#/components/schemas/ChildQuestionModel'
+        maxImageCount:
+          type: number
       required:
         - type
         - label
