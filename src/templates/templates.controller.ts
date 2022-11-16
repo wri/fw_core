@@ -28,7 +28,7 @@ import { UserRole } from '../common/user-role.enum';
 import { MongooseObjectId } from '../common/objectId';
 import { UpdateStatusInput } from './input/update-status.input';
 import { AuthUser } from '../common/decorators';
-import { ValidateMongoId } from '../common/objectIdValidator.pipe';
+import { ValidateMongoId } from '../common/pipes/objectIdValidator.pipe';
 import { UpdateTemplateInput } from './input/update-template.input';
 import { ValidateBodyIsNotEmptyPipe } from '../common/pipes/validate-body-is-not-empty.pipe';
 
