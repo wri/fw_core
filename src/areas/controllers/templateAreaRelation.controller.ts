@@ -8,12 +8,15 @@ import {
   Logger,
   HttpException,
   HttpStatus,
+  ParseArrayPipe,
+  NotFoundException,
 } from '@nestjs/common';
 import { AreasService } from '../services/areas.service';
 import { CreateTemplateAreaRelationDto } from '../dto/createTemplateAreaRelation.dto';
 import { TemplatesService } from '../../templates/templates.service';
 import { TemplateAreaRelationService } from '../services/templateAreaRelation.service';
 import { TemplateAreaRelationDocument } from '../models/templateAreaRelation.schema';
+import { CreateTemplateAreaRelationInput } from '../input/create-template-area-relation.input';
 
 @Controller('arearelations/templates')
 export class TemplateAreaRelationController {
@@ -27,15 +30,26 @@ export class TemplateAreaRelationController {
 
   @Post()
   async createTemplateAreaRelation(
-    @Body() body: CreateTemplateAreaRelationDto,
-  ): Promise<TemplateAreaRelationDocument> {
-    const area = await this.areasService.getAreaMICROSERVICE(body.areaId);
-    if (!area)
-      throw new HttpException("Area doesn't exist", HttpStatus.NOT_FOUND);
-    const template = await this.templatesService.findById(body.templateId);
-    if (!template)
-      throw new HttpException("Template doesn't exist", HttpStatus.NOT_FOUND);
-    return await this.templateAreaRelationService.create(body);
+    @Body(new ParseArrayPipe({ items: CreateTemplateAreaRelationInput }))
+    body: CreateTemplateAreaRelationInput[],
+  ): Promise<TemplateAreaRelationDocument[]> {
+    if (body.length === 0) return [];
+
+    for (const relation of body) {
+      const area = await this.areasService.getAreaMICROSERVICE(relation.areaId);
+      if (!area)
+        throw new NotFoundException(`Area ${relation.areaId} doesnt exist`);
+
+      const team = await this.templatesService.findById(relation.templateId);
+      if (!team)
+        throw new NotFoundException(`Team ${relation.templateId} doesnt exist`);
+    }
+
+    const relations = body.map((relation) =>
+      this.templateAreaRelationService.create(relation),
+    );
+
+    return Promise.all(relations);
   }
 
   @Delete()
