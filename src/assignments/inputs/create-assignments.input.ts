@@ -54,6 +54,10 @@ export class CreateAssignmentInput {
 }
 
 export class CreateAssignmentLocationInput {
+  @IsOptional()
+  @IsNotEmpty()
+  alertId?: string;
+
   @IsNumber()
   @Transform(({ value }) => Number(value))
   lat: number;

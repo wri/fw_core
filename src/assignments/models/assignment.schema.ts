@@ -6,7 +6,12 @@ import { AssignmentStatus } from '../assignment-status.enum';
 
 export interface IAssignment {
   name: string;
-  location?: { lat: number; lon: number; alertType?: string }[];
+  location?: {
+    lat: number;
+    lon: number;
+    alertType?: string;
+    alertId?: string;
+  }[];
   geostore?: string | IGeostore;
   priority: number;
   monitors: string[];
@@ -32,6 +37,7 @@ export class Assignment {
     lat: number;
     lon: number;
     alertType?: string;
+    alertId?: string;
   }[];
 
   @Prop({ required: false })
