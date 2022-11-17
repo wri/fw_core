@@ -1106,7 +1106,7 @@ components:
                 type: integer
               lon:
                 type: integer
-              arrayType:
+              alertType:
                 type: string
         priority:
           type: number
@@ -2440,6 +2440,8 @@ components:
                 type: array
                 items:
                   type: object
+              assignmentId:
+                type: string
             required:
               - reportName
               - areaOfInterest
