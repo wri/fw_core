@@ -135,10 +135,12 @@ describe('Area Template Relations', () => {
       await request(app.getHttpServer())
         .post(`/arearelations/templates`)
         .set('Authorization', `USER`)
-        .send({
-          areaId: constants.testArea.id.toString(),
-          templateId: template.insertedId.toString(),
-        })
+        .send([
+          {
+            areaId: constants.testArea.id.toString(),
+            templateId: template.insertedId.toString(),
+          },
+        ])
         .expect(201);
 
       const relation = await apiDbConnection
@@ -163,10 +165,12 @@ describe('Area Template Relations', () => {
       await request(app.getHttpServer())
         .post(`/arearelations/templates`)
         .set('Authorization', `USER`)
-        .send({
-          areaId: constants.testTeamArea.id.toString(),
-          templateId: template.insertedId.toString(),
-        })
+        .send([
+          {
+            areaId: constants.testTeamArea.id.toString(),
+            templateId: template.insertedId.toString(),
+          },
+        ])
         .expect(404);
     });
 
@@ -174,10 +178,12 @@ describe('Area Template Relations', () => {
       await request(app.getHttpServer())
         .post(`/arearelations/templates`)
         .set('Authorization', `USER`)
-        .send({
-          areaId: constants.testTeamArea.id.toString(),
-          templateId: constants.testTeamArea.id.toString(),
-        })
+        .send([
+          {
+            areaId: constants.testTeamArea.id.toString(),
+            templateId: constants.testTeamArea.id.toString(),
+          },
+        ])
         .expect(404);
     });
 
