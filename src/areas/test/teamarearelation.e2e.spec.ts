@@ -129,10 +129,12 @@ describe('Area Team Relations', () => {
       await request(app.getHttpServer())
         .post(`/arearelations/teams`)
         .set('Authorization', `USER`)
-        .send({
-          areaId: constants.testArea.id.toString(),
-          teamId: team.insertedId.toString(),
-        })
+        .send([
+          {
+            areaId: constants.testArea.id.toString(),
+            teamId: team.insertedId.toString(),
+          },
+        ])
         .expect(201);
 
       const relation = await apiDbConnection
@@ -151,10 +153,12 @@ describe('Area Team Relations', () => {
       await request(app.getHttpServer())
         .post(`/arearelations/teams`)
         .set('Authorization', `USER`)
-        .send({
-          areaId: constants.testTeamArea.id.toString(),
-          teamId: team.insertedId.toString(),
-        })
+        .send([
+          {
+            areaId: constants.testTeamArea.id.toString(),
+            teamId: team.insertedId.toString(),
+          },
+        ])
         .expect(404);
     });
 
@@ -162,10 +166,12 @@ describe('Area Team Relations', () => {
       await request(app.getHttpServer())
         .post(`/arearelations/teams`)
         .set('Authorization', `USER`)
-        .send({
-          areaId: constants.testTeamArea.id.toString(),
-          teamId: constants.testTeamArea.id.toString(),
-        })
+        .send([
+          {
+            areaId: constants.testTeamArea.id.toString(),
+            teamId: constants.testTeamArea.id.toString(),
+          },
+        ])
         .expect(404);
     });
 
@@ -180,10 +186,12 @@ describe('Area Team Relations', () => {
       await request(app.getHttpServer())
         .post(`/arearelations/teams`)
         .set('Authorization', `USER`)
-        .send({
-          areaId: constants.testArea.id.toString(),
-          teamId: team.insertedId.toString(),
-        })
+        .send([
+          {
+            areaId: constants.testArea.id.toString(),
+            teamId: team.insertedId.toString(),
+          },
+        ])
         .expect(400);
     });
   });
