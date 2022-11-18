@@ -1448,6 +1448,8 @@ components:
           type: string
         createdAt:
           type: string
+        assignmentId:
+          type: string
       required:
         - report
         - reportName
