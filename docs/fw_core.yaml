@@ -1108,6 +1108,8 @@ components:
                 type: integer
               alertType:
                 type: string
+              alertId:
+                type: string
         priority:
           type: number
         monitors:
