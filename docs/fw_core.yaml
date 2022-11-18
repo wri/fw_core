@@ -2041,6 +2041,11 @@ components:
                       type: integer
                     alertType:
                       type: string
+                    alertId:
+                      type: string
+                  required:
+                    - lat
+                    - lon
               priority:
                 type: number
               monitors:
@@ -2069,21 +2074,7 @@ components:
               - monitors
               - areaId
               - templateIds
-          examples:
-            example-1:
-              value:
-                name: string
-                location: string
-                priority: 0
-                monitors:
-                  - string
-                notes: string
-                status: string
-                alert: string
-                areaId: string
-                templateId: string
-                teamIds:
-                  - string
+          examples: {}
         application/json:
           schema:
             type: object
@@ -2125,6 +2116,8 @@ components:
                       type: number
                     alertType:
                       type: string
+                    alertId:
+                      type: string
                   required:
                     - lat
                     - lon
@@ -2160,30 +2153,7 @@ components:
               - priority
               - monitors
               - areaId
-          examples:
-            example-1:
-              value:
-                id: string
-                type: string
-                name: string
-                location:
-                  - lat: 0
-                    lon: 0
-                    alertType: string
-                priority: 0
-                monitors:
-                  - string
-                notes: string
-                status: string
-                alert: string
-                areaId: string
-                templateIds:
-                  - string
-                teamIds:
-                  - string
-                createdAt: 0
-                createdBy: string
-                areaName: string
+          examples: {}
     RouteBody:
       content:
         application/json:
