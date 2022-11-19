@@ -33,7 +33,6 @@ import { UpdateTemplateInput } from './input/update-template.input';
 import { ValidateBodyIsNotEmptyPipe } from '../common/pipes/validate-body-is-not-empty.pipe';
 
 @Controller('templates')
-@UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
 export class TemplatesController {
   constructor(
     private readonly templatesService: TemplatesService,
