@@ -1812,12 +1812,16 @@ components:
           schema:
             type: object
             properties:
-              id:
-                type: string
-              type:
-                type: string
-              attributes:
-                $ref: '#/components/schemas/TemplateModel'
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  attributes:
+                    $ref: '#/components/schemas/TemplateModel'
+
     Templates-Response:
       description: Array of Templates
       content:
