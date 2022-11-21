@@ -925,7 +925,7 @@ paths:
       operationId: get-v3-gfw-templates-version-editGroupId
       description: Get a list of templates which are all the versions for the given edit group id. The answer counts on each templates refer to the answer count per individual version.
       x-internal: false
-  '/v3/templates/{templateId}/status':
+  '/v3/gfw/templates/{templateId}/status':
     parameters:
       - schema:
           type: string
