@@ -53,7 +53,7 @@ export class TemplatesService extends BaseService<
    */
   async findAllByUserId(
     id: string,
-    opts?: Partial<{ latest: boolean; unpublished: boolean }>,
+    opts?: Partial<{ latest: boolean; status: ETemplateStatus }>,
   ): Promise<TemplateDocument[]> {
     const filter: mongoose.FilterQuery<TemplateDocument> = { user: id };
 
@@ -61,8 +61,8 @@ export class TemplatesService extends BaseService<
       filter.isLatest = true;
     }
 
-    if (opts?.unpublished !== true) {
-      filter.status = ETemplateStatus.PUBLISHED;
+    if (opts?.status) {
+      filter.status = opts.status;
     }
 
     return this.model.find(filter);
