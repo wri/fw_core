@@ -291,14 +291,13 @@ describe('Templates', () => {
         .send(body)
         .expect(201);
 
-      const area1Relation = await apiDbConnection
+      const relationCount = await apiDbConnection
         .collection('areatemplaterelations')
         .countDocuments({
-          areaId: body.areaIds[0],
           templateId: response.body.data.id,
         });
 
-      expect(area1Relation).toBe(1);
+      expect(relationCount).toBe(2);
     });
   });
 
