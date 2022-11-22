@@ -847,6 +847,7 @@ describe('Templates', () => {
       await teamsDbConnection.collection('teamuserrelations').deleteMany({});
       await formsDbConnection.collection('reports').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
+      jest.clearAllMocks();
     });
 
     const createTemplateInput: Partial<CreateTemplateInput> = {
