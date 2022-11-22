@@ -29,6 +29,8 @@ import { AuthUser } from '../common/decorators';
 import { ValidateMongoId } from '../common/pipes/objectIdValidator.pipe';
 import { UpdateTemplateInput } from './input/update-template.input';
 import { ValidateBodyIsNotEmptyPipe } from '../common/pipes/validate-body-is-not-empty.pipe';
+import { AreasService } from '../areas/services/areas.service';
+import { CreateTeamAreaRelationDto } from '../areas/dto/createTeamAreaRelation.dto';
 
 @Controller('templates')
 export class TemplatesController {
@@ -37,6 +39,7 @@ export class TemplatesController {
     private readonly answersService: AnswersService,
     private readonly teamsService: TeamsService,
     private readonly templateAreaRelationService: TemplateAreaRelationService,
+    private readonly areasService: AreasService,
   ) {}
   private readonly logger = new Logger(TemplatesController.name);
 
@@ -51,6 +54,12 @@ export class TemplatesController {
     if (user.role !== UserRole.ADMIN && body.public)
       throw new ForbiddenException('Only admins can make a template public');
 
+    for (const id of body.areaIds ?? []) {
+      // TODO: Validate if user has permission to access area
+      const area = await this.areasService.getAreaMICROSERVICE(id);
+      if (!area) throw new NotFoundException(`Area ${id} doesn't exist`);
+    }
+
     const template: CreateTemplateDto = {
       name: body.name,
       user: new MongooseObjectId(user.id),
@@ -64,8 +73,19 @@ export class TemplatesController {
     };
 
     const savedTemplate = await this.templatesService.create(template);
-    savedTemplate.areas = [];
 
+    const relations =
+      body.areaIds?.map((areaId) => ({
+        templateId: savedTemplate.id,
+        areaId,
+      })) ?? [];
+    await this.templateAreaRelationService.createMany(relations);
+
+    savedTemplate.areas = body.areaIds
+      ? await this.templateAreaRelationService.findAreasForTemplate(
+          savedTemplate.id,
+        )
+      : [];
     return { data: serializeTemplate(savedTemplate) };
   }
 

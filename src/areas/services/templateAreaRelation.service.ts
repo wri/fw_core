@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { MongooseObjectId } from '../../common/objectId';
 import { TemplatesService } from '../../templates/templates.service';
 import { IArea } from '../models/area.entity';
 import { TemplateAreaRelationDocument } from '../models/templateAreaRelation.schema';
@@ -27,6 +28,26 @@ export class TemplateAreaRelationService {
       templateId,
     });
     return await newRelation.save();
+  }
+
+  /**
+   * Create a relations for a list templates and areas
+   * @param relations The list of relations that need to be created
+   * @returns A list of created/found relations
+   */
+  async createMany(
+    relations: {
+      templateId: MongooseObjectId | string;
+      areaId: MongooseObjectId | string;
+    }[],
+  ): Promise<(TemplateAreaRelationDocument | null)[]> {
+    const createPromises: Promise<TemplateAreaRelationDocument>[] = [];
+    for (const relation of relations) {
+      createPromises.push(this.create(relation));
+    }
+
+    const createResponses = await Promise.all(createPromises);
+    return createResponses;
   }
 
   async find(filter): Promise<TemplateAreaRelationDocument[]> {
