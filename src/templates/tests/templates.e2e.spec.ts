@@ -1240,6 +1240,73 @@ describe('Templates', () => {
         expect(responseCount).toBe(expectedCount);
       });
     });
+
+    it('should return templates missing the isLatest flag', async () => {
+      const collection = formsDbConnection.collection('reports');
+      const templateBoilerplate = {
+        name: {
+          en: 'Default',
+        },
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        questions: [
+          {
+            type: 'text',
+            name: 'question-1',
+            label: {
+              en: 'test',
+            },
+          },
+        ],
+        languages: ['en'],
+        status: 'published',
+        defaultLanguage: 'en',
+      };
+
+      const groupId1 = new mongoose.Types.ObjectId();
+      const groupId2 = new mongoose.Types.ObjectId();
+      const templates = await collection.insertMany([
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId1,
+          isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId1,
+          isLatest: false,
+        },
+        {
+          ...templateBoilerplate,
+          editGroupId: groupId2,
+          isLatest: true,
+        },
+        {
+          ...templateBoilerplate,
+        },
+      ]);
+
+      const latestTemplateIds = [
+        templates.insertedIds[0],
+        templates.insertedIds[2],
+        templates.insertedIds[3],
+      ].map((t) => t.toString());
+
+      const response = await request(app.getHttpServer())
+        .get('/templates/latest')
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body.data).toHaveLength(3);
+      expect(response.body.data).toContainEqual(
+        expect.objectContaining({ id: latestTemplateIds[0] }),
+      );
+      expect(response.body.data).toContainEqual(
+        expect.objectContaining({ id: latestTemplateIds[1] }),
+      );
+      expect(response.body.data).toContainEqual(
+        expect.objectContaining({ id: latestTemplateIds[2] }),
+      );
+    });
   });
 
   describe('GET /templates/versions/:id', () => {

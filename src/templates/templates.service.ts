@@ -58,7 +58,7 @@ export class TemplatesService extends BaseService<
     const filter: mongoose.FilterQuery<TemplateDocument> = { user: id };
 
     if (opts?.latest === true) {
-      filter.isLatest = true;
+      filter.isLatest = { $ne: false };
     }
 
     if (opts?.status) {
