@@ -30,7 +30,6 @@ import { ValidateMongoId } from '../common/pipes/objectIdValidator.pipe';
 import { UpdateTemplateInput } from './input/update-template.input';
 import { ValidateBodyIsNotEmptyPipe } from '../common/pipes/validate-body-is-not-empty.pipe';
 import { AreasService } from '../areas/services/areas.service';
-import { CreateTeamAreaRelationDto } from '../areas/dto/createTeamAreaRelation.dto';
 
 @Controller('templates')
 export class TemplatesController {
