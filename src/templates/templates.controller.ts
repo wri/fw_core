@@ -10,8 +10,6 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { TemplatesService } from './templates.service';
 import { CreateTemplateDto } from './dto/create-template.dto';
@@ -258,9 +256,7 @@ export class TemplatesController {
     const answers = await this.answersService.find(answersFilter);
     template.answersCount = answers.length;
     template.areas =
-      await this.templateAreaRelationService.findAreasForTemplate(
-        template.editGroupId ? template.editGroupId.toString() : template.id,
-      );
+      await this.templateAreaRelationService.findAreasForTemplate(template.id);
 
     return { data: serializeTemplate(template) };
   }
