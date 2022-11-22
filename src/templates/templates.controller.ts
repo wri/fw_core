@@ -299,6 +299,12 @@ export class TemplatesController {
     if (template.isLatest === false)
       throw new ForbiddenException('Cannot update older versions of templates');
 
+    for (const id of body.areaIds ?? []) {
+      // TODO: Validate if user has permission to access area
+      const area = await this.areasService.getAreaMICROSERVICE(id);
+      if (!area) throw new NotFoundException(`Area ${id} doesn't exist`);
+    }
+
     if (!template.editGroupId) {
       template.editGroupId = new MongooseObjectId();
       await template.save();
@@ -328,13 +334,23 @@ export class TemplatesController {
     template.isLatest = false;
     await template.save();
 
+    const areaRelations =
+      body.areaIds?.map((areaId) => ({
+        templateId: updatedTemplate.id,
+        areaId,
+      })) ?? [];
+    await this.templateAreaRelationService.createMany(areaRelations);
+
     // get answer count for each report
     const answersCount = await this.answersService.countByEditGroupId(
       template.editGroupId,
     );
     updatedTemplate.answersCount = answersCount;
-    updatedTemplate.areas =
-      await this.templateAreaRelationService.findAreasForTemplate(template.id);
+    updatedTemplate.areas = body.areaIds
+      ? await this.templateAreaRelationService.findAreasForTemplate(
+          updatedTemplate.id,
+        )
+      : [];
     return { data: serializeTemplate(updatedTemplate) };
   }
 

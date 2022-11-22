@@ -1031,6 +1031,39 @@ describe('Templates', () => {
       expect(response.body).toHaveProperty('data');
       expect(response.body.data.attributes).toHaveProperty('answersCount', 1);
     });
+
+    it('should add area relations', async () => {
+      jest
+        .spyOn(areaService, 'getAreaMICROSERVICE')
+        .mockImplementation(
+          (id) => ({ id, attributes: { name: 'SOME NAME' } } as any),
+        );
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate }, {});
+
+      const areaIds = [new MongooseObjectId(), new MongooseObjectId()].map(
+        (id) => id.toString(),
+      );
+
+      const response = await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}`)
+        .set('Authorization', 'USER')
+        .send({ areaIds })
+        .expect(200);
+
+      const relationCursor = apiDbConnection
+        .collection('areatemplaterelations')
+        .find({ templateId: response.body.data.id });
+
+      await expect(relationCursor.count()).resolves.toBe(2);
+      await expect(
+        relationCursor.filter({ areaId: areaIds[0] }).count(),
+      ).resolves.toBe(1);
+      await expect(
+        relationCursor.filter({ areaId: areaIds[1] }).count(),
+      ).resolves.toBe(1);
+    });
   });
 
   describe('DELETE /templates/allAnswers', () => {
