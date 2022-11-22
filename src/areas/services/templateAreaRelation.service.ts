@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MongooseObjectId } from '../../common/objectId';
@@ -17,17 +17,13 @@ export class TemplateAreaRelationService {
   ) {}
 
   async create({ areaId, templateId }): Promise<TemplateAreaRelationDocument> {
-    if (await this.templateAreaRelationModel.findOne({ areaId, templateId }))
-      throw new HttpException(
-        'Relation already exists',
-        HttpStatus.BAD_REQUEST,
-      );
-
-    const newRelation = new this.templateAreaRelationModel({
+    const relation = await this.templateAreaRelationModel.findOne({
       areaId,
       templateId,
     });
-    return await newRelation.save();
+    if (relation) return relation;
+
+    return this.templateAreaRelationModel.create({ areaId, templateId });
   }
 
   /**
@@ -41,13 +37,8 @@ export class TemplateAreaRelationService {
       areaId: MongooseObjectId | string;
     }[],
   ): Promise<(TemplateAreaRelationDocument | null)[]> {
-    const createPromises: Promise<TemplateAreaRelationDocument>[] = [];
-    for (const relation of relations) {
-      createPromises.push(this.create(relation));
-    }
-
-    const createResponses = await Promise.all(createPromises);
-    return createResponses;
+    const createPromises = relations.map((relation) => this.create(relation));
+    return Promise.all(createPromises);
   }
 
   async find(filter): Promise<TemplateAreaRelationDocument[]> {
