@@ -1533,7 +1533,7 @@ describe('Templates', () => {
       };
 
       const groupId = new mongoose.Types.ObjectId();
-      await templateCollection.insertMany([
+      const templates = await templateCollection.insertMany([
         {
           ...templateBoilerplate,
           editGroupId: groupId,
@@ -1557,11 +1557,11 @@ describe('Templates', () => {
       ]);
 
       await apiDbConnection.collection('areatemplaterelations').insertOne({
-        templateId: groupId.toString(),
+        templateId: templates.insertedIds[2].toString(),
         areaId: areaConstants.testArea.id,
       });
       await apiDbConnection.collection('areatemplaterelations').insertOne({
-        templateId: groupId.toString(),
+        templateId: templates.insertedIds[2].toString(),
         areaId: areaConstants.testTeamArea.id,
       });
 

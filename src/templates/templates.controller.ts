@@ -97,7 +97,7 @@ export class TemplatesController {
       template.answersCount = answersCount;
       template.areas =
         await this.templateAreaRelationService.findAreasForTemplate(
-          template.editGroupId ? template.editGroupId.toString() : template.id,
+          template.id,
         );
     }
 
@@ -131,7 +131,7 @@ export class TemplatesController {
       template.answersCount = answersCount;
       template.areas =
         await this.templateAreaRelationService.findAreasForTemplate(
-          template.editGroupId ? template.editGroupId.toString() : template.id,
+          template.id,
         );
     }
 
@@ -164,9 +164,7 @@ export class TemplatesController {
     );
 
     template.areas =
-      await this.templateAreaRelationService.findAreasForTemplate(
-        template.editGroupId ? template.editGroupId.toString() : template.id,
-      );
+      await this.templateAreaRelationService.findAreasForTemplate(template.id);
 
     return { data: serializeTemplate(template) };
   }
@@ -321,9 +319,7 @@ export class TemplatesController {
     );
     updatedTemplate.answersCount = answersCount;
     updatedTemplate.areas =
-      await this.templateAreaRelationService.findAreasForTemplate(
-        template.editGroupId ? template.editGroupId.toString() : template.id,
-      );
+      await this.templateAreaRelationService.findAreasForTemplate(template.id);
     return { data: serializeTemplate(updatedTemplate) };
   }
 
