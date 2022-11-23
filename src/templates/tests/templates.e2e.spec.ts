@@ -24,6 +24,7 @@ import { MongooseObjectId } from '../../common/objectId';
 import { AreasModule } from '../../areas/modules/areas.module';
 import { AreasService } from '../../areas/services/areas.service';
 import { CreateTemplateInput } from '../input/create-template.input';
+import { IArea } from '../../areas/models/area.entity';
 
 describe('Templates', () => {
   let app: INestApplication;
@@ -31,17 +32,17 @@ describe('Templates', () => {
   let apiDbConnection: Connection;
   let formsDbConnection: Connection;
   const userService = {
-    authorise: (token) => ROLES[token],
-    getNameByIdMICROSERVICE: (_id) => 'Full Name',
+    authorise: jest.fn((token) => ROLES[token]),
+    getNameByIdMICROSERVICE: jest.fn((_id) => 'Full Name'),
   };
   const areaService = {
-    getAreaMICROSERVICE: (_id) => {
+    getAreaMICROSERVICE: jest.fn((_id) => {
       if (_id.toString() === areaConstants.testArea.id)
         return areaConstants.testArea;
       else if (_id.toString() === areaConstants.testTeamArea.id)
         return areaConstants.testTeamArea;
       else return null;
-    },
+    }),
   };
 
   beforeAll(async () => {
@@ -92,6 +93,10 @@ describe('Templates', () => {
       await teamsDbConnection.collection('teamuserrelations').deleteMany({});
       await formsDbConnection.collection('reports').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
+      await formsDbConnection
+        .collection('areatemplaterelations')
+        .deleteMany({});
+      jest.clearAllMocks();
     });
 
     const createTemplateInput: Partial<CreateTemplateInput> = {
@@ -265,6 +270,34 @@ describe('Templates', () => {
         .expect(200);
 
       expect(responseGet.body.data.attributes.public).toBe(true);
+    });
+
+    it('should add area relations', async () => {
+      jest
+        .spyOn(areaService, 'getAreaMICROSERVICE')
+        .mockImplementation(
+          (id) => ({ id, attributes: { name: 'SOME NAME' } } as any),
+        );
+
+      const body = {
+        ...createTemplateInput,
+        areaIds: [new MongooseObjectId(), new MongooseObjectId()].map((id) =>
+          id.toString(),
+        ),
+      };
+      const response = await request(app.getHttpServer())
+        .post(`/templates`)
+        .set('Authorization', 'USER')
+        .send(body)
+        .expect(201);
+
+      const relationCount = await apiDbConnection
+        .collection('areatemplaterelations')
+        .countDocuments({
+          templateId: response.body.data.id,
+        });
+
+      expect(relationCount).toBe(2);
     });
   });
 
@@ -814,6 +847,7 @@ describe('Templates', () => {
       await teamsDbConnection.collection('teamuserrelations').deleteMany({});
       await formsDbConnection.collection('reports').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
+      jest.clearAllMocks();
     });
 
     const createTemplateInput: Partial<CreateTemplateInput> = {
@@ -997,6 +1031,80 @@ describe('Templates', () => {
 
       expect(response.body).toHaveProperty('data');
       expect(response.body.data.attributes).toHaveProperty('answersCount', 1);
+    });
+
+    it('should add area relations', async () => {
+      jest
+        .spyOn(areaService, 'getAreaMICROSERVICE')
+        .mockImplementation(
+          (id) => ({ id, attributes: { name: 'SOME NAME' } } as any),
+        );
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate }, {});
+
+      const areaIds = [new MongooseObjectId(), new MongooseObjectId()].map(
+        (id) => id.toString(),
+      );
+
+      const response = await request(app.getHttpServer())
+        .patch(`/templates/${template.insertedId}`)
+        .set('Authorization', 'USER')
+        .send({ areaIds })
+        .expect(200);
+
+      const relationCursor = apiDbConnection
+        .collection('areatemplaterelations')
+        .find({ templateId: response.body.data.id });
+
+      await expect(relationCursor.count()).resolves.toBe(2);
+      await expect(
+        relationCursor.filter({ areaId: areaIds[0] }).count(),
+      ).resolves.toBe(1);
+      await expect(
+        relationCursor.filter({ areaId: areaIds[1] }).count(),
+      ).resolves.toBe(1);
+    });
+
+    it('should persist old area relations if no area Ids given', async () => {
+      jest
+        .spyOn(areaService, 'getAreaMICROSERVICE')
+        .mockImplementation(
+          (id) => ({ id, attributes: { name: 'SOME NAME' } } as any),
+        );
+
+      const areaIds = [new MongooseObjectId(), new MongooseObjectId()].map(
+        (id) => id.toString(),
+      );
+      const createBody: CreateTemplateInput = {
+        defaultLanguage: 'en',
+        languages: ['en'],
+        name: { en: 'My template' },
+        questions: [
+          { label: { en: 'My question' }, name: 'question-1', type: 'text' },
+        ],
+        status: ETemplateStatus.UNPUBLISHED,
+        areaIds,
+      };
+      const template = await request(app.getHttpServer())
+        .post('/templates')
+        .set('Authorization', 'USER')
+        .send(createBody);
+
+      const response = await request(app.getHttpServer())
+        .patch(`/templates/${template.body.data.id}`)
+        .set('Authorization', 'USER')
+        .send({ name: { en: 'SOMENAME' } })
+        .expect(200);
+
+      const relationCursor = apiDbConnection
+        .collection('areatemplaterelations')
+        .find({ templateId: response.body.data.id });
+
+      await expect(relationCursor.count()).resolves.toBe(2);
+
+      const areaIdsDb = (await relationCursor.toArray()).map((r) => r.areaId);
+      expect(areaIdsDb.sort()).toEqual(areaIds.sort());
     });
   });
 
@@ -1450,6 +1558,7 @@ describe('Templates', () => {
   describe('GET /templates/versions/:id/latest', () => {
     afterEach(async () => {
       await formsDbConnection.collection('reports').deleteMany({});
+      jest.clearAllMocks();
     });
 
     it('should return latest version in a group', async () => {
@@ -1579,6 +1688,11 @@ describe('Templates', () => {
     });
 
     it('should return an array of areas', async () => {
+      jest
+        .spyOn(areaService, 'getAreaMICROSERVICE')
+        .mockImplementation(
+          (id) => ({ id, attributes: { name: 'SOME NAME' } } as any),
+        );
       const templateCollection = formsDbConnection.collection('reports');
       const templateBoilerplate = {
         name: {
@@ -1623,13 +1737,16 @@ describe('Templates', () => {
         },
       ]);
 
+      const areaIds = [new MongooseObjectId(), new MongooseObjectId()].map(
+        (id) => id.toString(),
+      );
       await apiDbConnection.collection('areatemplaterelations').insertOne({
         templateId: templates.insertedIds[2].toString(),
-        areaId: areaConstants.testArea.id,
+        areaId: areaIds[0],
       });
       await apiDbConnection.collection('areatemplaterelations').insertOne({
         templateId: templates.insertedIds[2].toString(),
-        areaId: areaConstants.testTeamArea.id,
+        areaId: areaIds[1],
       });
 
       const response = await request(app.getHttpServer())
@@ -1637,27 +1754,9 @@ describe('Templates', () => {
         .set('Authorization', 'USER')
         .expect(200);
 
-      expect(response.body.data).toBeDefined();
-      const t = response.body.data;
-      expect(t).toHaveProperty('attributes');
-      expect(t.attributes).toHaveProperty('areas');
-      expect(t.attributes.areas.length).toBe(2);
-      expect(t.attributes.areas[0]).toHaveProperty(
-        'id',
-        areaConstants.testArea.id,
-      );
-      expect(t.attributes.areas[0]).toHaveProperty(
-        'name',
-        areaConstants.testArea.attributes.name,
-      );
-      expect(t.attributes.areas[1]).toHaveProperty(
-        'id',
-        areaConstants.testTeamArea.id,
-      );
-      expect(t.attributes.areas[1]).toHaveProperty(
-        'name',
-        areaConstants.testTeamArea.attributes.name,
-      );
+      expect(response.body.data.attributes.areas).toHaveLength(2);
+      expect(response.body.data.attributes.areas[0].id).toBe(areaIds[0]);
+      expect(response.body.data.attributes.areas[1].id).toBe(areaIds[1]);
     });
   });
 

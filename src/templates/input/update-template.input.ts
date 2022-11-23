@@ -3,6 +3,7 @@ import {
   ArrayMinSize,
   IsArray,
   IsDefined,
+  IsMongoId,
   IsNotEmpty,
   IsNumberString,
   IsObject,
@@ -35,4 +36,9 @@ export class UpdateTemplateInput {
   @ValidateNested()
   @Type(() => CreateTemplateQuestionInput)
   questions?: CreateTemplateQuestionInput[];
+
+  @IsOptional()
+  @IsMongoId({ each: true })
+  @IsArray()
+  areaIds?: string[];
 }

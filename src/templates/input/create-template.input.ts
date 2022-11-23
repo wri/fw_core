@@ -1,12 +1,12 @@
 import { Type } from 'class-transformer';
 import {
-  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsBoolean,
   IsDefined,
   IsEnum,
   IsInt,
+  IsMongoId,
   IsNotEmpty,
   IsNumber,
   IsNumberString,
@@ -49,6 +49,12 @@ export class CreateTemplateInput {
   @IsOptional()
   @IsNumberString()
   createdAt?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsMongoId({ each: true })
+  areaIds?: string[];
 }
 
 export class CreateTemplateQuestionInput {
