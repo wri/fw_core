@@ -7,30 +7,32 @@ info:
 servers:
   - url: 'http://localhost:3000'
     description: Local
-  - url: 'https://api.globalforestwatch.org'
-    description: Production
-  - url: 'https://staging-fw-api.globalforestwatch.org'
-    description: Staging
   - url: 'https://dev-fw-api.globalforestwatch.org'
     description: Dev
+  - url: 'https://staging-fw-api.globalforestwatch.org'
+    description: Staging
+  - url: 'https://api.globalforestwatch.org'
+    description: Production
 paths:
   /v3/gfw/assignments:
     post:
-      summary: Create an Assignment
       operationId: post-v3-gfw-assignments
+      summary: Create Assignment
+      description: Creates an assignment
+      tags:
+        - Assignments
       responses:
         '201':
           $ref: '#/components/responses/Assignment-Response'
         '401':
           $ref: '#/components/responses/Error'
       requestBody:
-        $ref: '#/components/requestBodies/AssignmentBody'
-      description: Creates an assignment
-      tags:
-        - Assignments
+        $ref: '#/components/requestBodies/CreateAssignmentBody'
   /v3/gfw/assignments/user:
     get:
+      operationId: get-v3-gfw-user
       summary: Get User Assignments
+      description: Returns a user's assignments
       tags:
         - Assignments
       responses:
@@ -38,24 +40,29 @@ paths:
           $ref: '#/components/responses/Assignments-Response'
         '401':
           $ref: '#/components/responses/Error'
-      operationId: get-v3-gfw-user
-      description: Returns a user's assignments
-    parameters: []
   /v3/gfw/assignments/open:
     get:
-      summary: Get Open User Assignments
-      responses:
-        '200':
-          $ref: '#/components/responses/Assignments-Response'
-        '401':
-          $ref: '#/components/responses/Error'
       operationId: get-v3-gfw-assignments-open
+      summary: Get Open User Assignments
       description: Returns all non-complete user assignments
       tags:
         - Assignments
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignments-Response'
+        '401':
+          $ref: '#/components/responses/Error'
   '/v3/gfw/assignments/areas/{areaId}':
     get:
+      operationId: 'get-v3-gfw-assignments-area-:areaId'
       summary: Get Area Assignments
+      description: Returns all user assignments within an area
+      parameters:
+        - schema:
+            type: string
+          name: areaId
+          in: path
+          required: true
       tags:
         - Assignments
       responses:
@@ -65,14 +72,6 @@ paths:
           $ref: '#/components/responses/Error'
         '404':
           $ref: '#/components/responses/Error'
-      operationId: 'get-v3-gfw-assignments-area-:areaId'
-      description: Returns all user assignments within an area
-    parameters:
-      - schema:
-          type: string
-        name: areaId
-        in: path
-        required: true
   '/v3/gfw/assignments/{assignmentId}':
     get:
       summary: Get Assignment
@@ -205,7 +204,7 @@ paths:
           $ref: '#/components/responses/Error'
       description: Creates a new template
       requestBody:
-        $ref: '#/components/requestBodies/TemplateBody'
+        $ref: '#/components/requestBodies/CreateTemplateBody'
       tags:
         - Templates
     get:
@@ -1608,6 +1607,18 @@ components:
             $ref: '#/components/schemas/FeatureModel'
     GeostoreModel:
       type: object
+      x-examples:
+        example-1:
+          id: string
+          geojson: IGeojson
+          hash: string
+          provider: any
+          areaHa: 1
+          bbox:
+            - 1
+          lock: false
+          info: any
+      examples: []
       properties:
         id:
           type: string
@@ -1627,18 +1638,6 @@ components:
           type: boolean
         info:
           type: string
-      x-examples:
-        example-1:
-          id: string
-          geojson: IGeojson
-          hash: string
-          provider: any
-          areaHa: 1
-          bbox:
-            - 1
-          lock: false
-          info: any
-      examples: []
     AreaTeamRelationModel:
       title: AreaTeamRelationModel
       x-stoplight:
@@ -1753,6 +1752,7 @@ components:
                     type: string
                   attributes:
                     $ref: '#/components/schemas/AssignmentModel'
+          examples: {}
     Assignments-Response:
       description: Array of assignments
       content:
@@ -1821,7 +1821,6 @@ components:
                     type: string
                   attributes:
                     $ref: '#/components/schemas/TemplateModel'
-
     Templates-Response:
       description: Array of Templates
       content:
@@ -2014,7 +2013,7 @@ components:
                 items:
                   type: string
   requestBodies:
-    AssignmentBody:
+    CreateAssignmentBody:
       content:
         multipart/form-data:
           schema:
@@ -2069,18 +2068,35 @@ components:
               geostore:
                 type: string
                 description: A JSON string that represents the geostore object
-              areaName:
-                type: string
               image:
                 description: Image file
                 type: string
                 format: binary
+              name:
+                type: string
             required:
               - priority
               - monitors
               - areaId
               - templateIds
-          examples: {}
+          examples:
+            example-with-location:
+              value:
+                location:
+                  - lat: 22
+                    lon: -22
+                    alertType: RADD
+                    alertId: 637dd25e6dc81eaf766ffa37
+                priority: 0
+                monitors:
+                  - 637dd26df8c280b71f23e56a
+                notes: My Notes
+                areaId: 637dd2739dd154ba5840980f
+                templateIds:
+                  - 637dd27aaa83b6b70f535cda
+                areaName: My Area
+                image: FILE UPLOAD
+                name: My assignment
         application/json:
           schema:
             type: object
@@ -2105,11 +2121,13 @@ components:
                 createdBy: string
                 areaName: string
             properties:
-              id:
-                type: string
-              type:
-                type: string
-              name:
+              priority:
+                type: integer
+              monitors:
+                type: array
+                items:
+                  type: string
+              areaId:
                 type: string
               location:
                 type: array
@@ -2127,39 +2145,40 @@ components:
                   required:
                     - lat
                     - lon
-              priority:
-                type: integer
-              monitors:
-                type: array
-                items:
-                  type: string
+              geostore:
+                $ref: '#/components/schemas/GeostoreModel'
+              name:
+                type: string
               notes:
-                type: string
-              status:
-                type: string
-              alert:
-                type: string
-              areaId:
                 type: string
               templateIds:
                 type: array
                 items:
                   type: string
-              teamIds:
-                type: array
-                items:
-                  type: string
-              createdAt:
-                type: integer
               createdBy:
-                type: string
-              areaName:
                 type: string
             required:
               - priority
               - monitors
               - areaId
-          examples: {}
+          examples:
+            example-with-location:
+              value:
+                priority: 0
+                monitors:
+                  - 637dce839215e5d73042d398
+                areaId: 637dce919485c59d60824c11
+                location:
+                  - lat: 22
+                    lon: -22
+                    alertType: RADD
+                    alertId: 637dce919485c59d60824c11
+                name: First Assignment
+                notes: Some notes regarding the assignment
+                templateIds:
+                  - 637dcf05ff1b63630afae7dd
+                createdBy: 637dcf0c980808252df4973f
+      description: ''
     RouteBody:
       content:
         application/json:
@@ -2226,7 +2245,26 @@ components:
                   type: string
                 startDate:
                   type: integer
-    TemplateBody:
+          examples:
+            example-1:
+              value:
+                - areaId: 637df6490ed1f908b1aa7306
+                  destination:
+                    latitude: 33
+                    longitude: -33
+                  difficulty: easy
+                  endDate: 16691995399
+                  geostoreId: 637df6ccd9c769bd2f6164ac
+                  id: 637df6f34015fb71981389b8
+                  locations:
+                    - accuracy: 5
+                      altitude: 100
+                      latitude: 22
+                      longitude: -22
+                      timestamp: 1669199535
+                  name: string
+                  startDate: 1669199532
+    CreateTemplateBody:
       content:
         application/json:
           schema:
@@ -2242,21 +2280,94 @@ components:
                 user: tring
             properties:
               name:
-                type: string
+                type: object
               questions:
                 type: array
                 items:
-                  $ref: '#/components/schemas/QuestionModel'
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    label:
+                      type: object
+                    name:
+                      type: string
+                    defaultValue:
+                      type: string
+                    values:
+                      type: object
+                      additionalProperties:
+                        type: object
+                        properties:
+                          label: string
+                          value: number
+                    maxImageCount:
+                      type: integer
+                    order:
+                      type: integer
+                    required:
+                      type: boolean
+                    childQuestions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                          label:
+                            type: object
+                          name:
+                            type: string
+                          defaultValue:
+                            type: string
+                          values:
+                            type: object
+                          maxImageCount:
+                            type: string
+                          required:
+                            type: boolean
+                          order:
+                            type: integer
+                          conditions:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              value:
+                                type: number
+                    conditions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          value:
+                            type: string
+                  required:
+                    - type
+                    - label
+                    - name
               languages:
                 type: array
                 items:
                   type: string
               status:
                 type: string
-              public:
-                type: boolean
+                enum:
+                  - unpublished
+                  - published
               defaultLanguage:
                 type: string
+              public:
+                type: boolean
+                default: false
+              createdAt:
+                type: string
+              areaIds:
+                type: array
+                items:
+                  type: string
             required:
               - name
               - questions
@@ -2264,33 +2375,27 @@ components:
               - status
               - defaultLanguage
           examples:
-            example-1:
+            example-mvp:
               value:
-                name: string
+                name:
+                  en: My Template
                 questions:
-                  - type: string
+                  - type: text
                     label:
-                      en: string
-                    name: string
-                    defaultValue: string
-                    values: string
-                    required: true
-                    order: 0
-                    childQuestions:
-                      type: string
-                      label:
-                        en: string
-                      name: string
-                      defaultValue: string
-                      values: string
-                      required: true
-                      order: 0
-                      conditionalValue: 0
+                      en: My text question
+                    name: question-1
+                  - type: audio
+                    label:
+                      en: My audio question
+                    name: question-2
+                  - type: blob
+                    label:
+                      en: My image question
+                    name: question-3
                 languages:
-                  - string
-                status: string
-                public: true
-                defaultLanguage: string
+                  - en
+                status: unpublished
+                defaultLanguage: en
       description: Template Request Body
     UpdateTemplateBody:
       content:
@@ -2326,7 +2431,7 @@ components:
                 defaultLanguage: string
             properties:
               name:
-                type: string
+                type: object
               questions:
                 type: array
                 items:
@@ -2336,15 +2441,12 @@ components:
                       type: string
                     label:
                       type: object
-                      properties:
-                        en:
-                          type: string
                     name:
                       type: string
                     defaultValue:
                       type: string
                     values:
-                      type: string
+                      type: object
                     required:
                       type: boolean
                     order:
@@ -2371,14 +2473,27 @@ components:
                           type: integer
                         conditionalValue:
                           type: integer
+                    conditions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          value:
+                            type: integer
+                    maxImageCount:
+                      type: string
               languages:
                 type: array
                 items:
                   type: string
-              public:
-                type: boolean
               defaultLanguage:
                 type: string
+              areaIds:
+                type: array
+                items:
+                  type: string
           examples: {}
     AnswerBody:
       content:
@@ -2520,5 +2635,17 @@ components:
                 type: string
                 description: Image file
                 format: binary
+          examples:
+            example-1:
+              value:
+                name: My Assignment
+                priority: 0
+                monitors:
+                  - 637dd27aaa83b6b70f535cda
+                notes: My Notes
+                status: open
+                templateIds:
+                  - 637df6490ed1f908b1aa7306
+                image: FILE UPLOAD
 security:
   - Authorization: []
