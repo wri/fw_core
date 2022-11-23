@@ -1065,6 +1065,47 @@ describe('Templates', () => {
         relationCursor.filter({ areaId: areaIds[1] }).count(),
       ).resolves.toBe(1);
     });
+
+    it('should persist old area relations if no area Ids given', async () => {
+      jest
+        .spyOn(areaService, 'getAreaMICROSERVICE')
+        .mockImplementation(
+          (id) => ({ id, attributes: { name: 'SOME NAME' } } as any),
+        );
+
+      const areaIds = [new MongooseObjectId(), new MongooseObjectId()].map(
+        (id) => id.toString(),
+      );
+      const createBody: CreateTemplateInput = {
+        defaultLanguage: 'en',
+        languages: ['en'],
+        name: { en: 'My template' },
+        questions: [
+          { label: { en: 'My question' }, name: 'question-1', type: 'text' },
+        ],
+        status: ETemplateStatus.UNPUBLISHED,
+        areaIds,
+      };
+      const template = await request(app.getHttpServer())
+        .post('/templates')
+        .set('Authorization', 'USER')
+        .send(createBody);
+
+      const response = await request(app.getHttpServer())
+        .patch(`/templates/${template.body.data.id}`)
+        .set('Authorization', 'USER')
+        .send({ name: { en: 'SOMENAME' } })
+        .expect(200);
+
+      const relationCursor = apiDbConnection
+        .collection('areatemplaterelations')
+        .find({ templateId: response.body.data.id });
+
+      await expect(relationCursor.count()).resolves.toBe(2);
+
+      const areaIdsDb = (await relationCursor.toArray()).map((r) => r.areaId);
+      expect(areaIdsDb.sort()).toEqual(areaIds.sort());
+    });
   });
 
   describe('DELETE /templates/allAnswers', () => {

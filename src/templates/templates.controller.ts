@@ -334,12 +334,21 @@ export class TemplatesController {
     template.isLatest = false;
     await template.save();
 
-    const areaRelations =
-      body.areaIds?.map((areaId) => ({
-        templateId: updatedTemplate.id,
-        areaId,
-      })) ?? [];
-    await this.templateAreaRelationService.createMany(areaRelations);
+    const areaIds: string[] = [];
+    if (body.areaIds) {
+      areaIds.push(...body.areaIds);
+    } else {
+      const existingAreaRelations = await this.templateAreaRelationService.find(
+        {
+          templateId,
+        },
+      );
+      areaIds.push(...existingAreaRelations.map((relation) => relation.areaId));
+    }
+
+    await this.templateAreaRelationService.createMany(
+      areaIds.map((areaId) => ({ areaId, templateId: updatedTemplate.id })),
+    );
 
     // get answer count for each report
     const answersCount = await this.answersService.countByEditGroupId(
