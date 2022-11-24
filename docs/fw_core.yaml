@@ -292,7 +292,7 @@ paths:
           $ref: '#/components/responses/Error'
       description: Creates a new answer
       requestBody:
-        $ref: '#/components/requestBodies/AnswerBody'
+        $ref: '#/components/requestBodies/CreateAnswerBody'
       tags:
         - Answers
   '/v3/gfw/templates/{templateId}/answers/area/{areaId}':
@@ -2494,58 +2494,11 @@ components:
                 type: array
                 items:
                   type: string
-          examples: {}
-    AnswerBody:
-      content:
-        application/json:
-          schema:
-            type: object
-            x-examples:
-              example-1:
-                report: template.id
-                reportName: fields.reportName
-                areaOfInterest: new mongoose.Types.ObjectId(fields.areaOfInterest)
-                areaOfInterestName: fields.areaOfInterestName
-                language: fields.language
-                userPosition: ''
-                clickedPosition: '{JSON.parse(fields.clickedPosition)}'
-                user: new mongoose.Types.ObjectId(user.id)
-                date: fields.date
-                responses: []
-            properties:
-              reportName:
-                type: string
-              areaOfInterest:
-                type: string
-              areaOfInterestName:
-                type: string
-              language:
-                type: string
-              userPosition:
-                type: string
-              clickedPosition:
-                type: string
-              user:
-                type: string
-              date:
-                type: string
-              responses:
-                type: array
-                items:
-                  type: object
-              assignmentId:
-                type: string
-            required:
-              - reportName
-              - areaOfInterest
-              - areaOfInterestName
-              - language
-              - userPosition
-              - clickedPosition
-              - user
-              - date
-              - responses
-      description: ''
+          examples:
+            example-1:
+              value:
+                name:
+                  en: My template name
     AreaBody:
       content:
         multipart/form-data:
@@ -2647,5 +2600,48 @@ components:
                 templateIds:
                   - 637df6490ed1f908b1aa7306
                 image: FILE UPLOAD
+    CreateAnswerBody:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              reportName:
+                type: string
+              areaOfInterest:
+                type: string
+              areaOfInterestName:
+                type: string
+              language:
+                type: string
+              userPosition:
+                type: string
+              clickedPosition:
+                type: string
+              date:
+                type: string
+              teamId:
+                type: string
+              assignmentId:
+                type: string
+            required:
+              - reportName
+              - areaOfInterest
+              - language
+              - teamId
+          examples:
+            example-1:
+              value:
+                reportName: My report name
+                areaOfInterest: 637f2b223e4648f5cecf715a
+                areaOfInterestName: My area name
+                language: en
+                userPosition: '22,-22'
+                clickedPosition: '{"lat": 22, "lon":-22}'
+                date: 1669199532
+                teamId: 637f2b223e4648f5cecf715d
+                assignmentId: 637f2b223e4648f5cecf715b
+                question-1: My response
+                question-2: My second response
 security:
   - Authorization: []
