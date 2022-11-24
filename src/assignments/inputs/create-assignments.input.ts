@@ -15,12 +15,15 @@ export class CreateAssignmentInput {
   @IsArray()
   @ValidateNested()
   @Type(() => CreateAssignmentLocationInput)
+  @Transform(({ value }) =>
+    typeof value === 'string' ? JSON.parse(value) : value,
+  )
   location?: CreateAssignmentLocationInput[];
 
   @IsOptional()
   @IsObject()
   @Transform(({ value }) =>
-    typeof value === 'object' ? value : JSON.parse(value),
+    typeof value === 'string' ? JSON.parse(value) : value,
   )
   geostore?: IGeojson;
 
@@ -30,6 +33,9 @@ export class CreateAssignmentInput {
 
   @IsArray()
   @IsNotEmpty({ each: true })
+  @Transform(({ value }) =>
+    typeof value === 'string' ? JSON.parse(value) : value,
+  )
   monitors: string[];
 
   @IsOptional()
@@ -42,6 +48,9 @@ export class CreateAssignmentInput {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @Transform(({ value }) =>
+    typeof value === 'string' ? JSON.parse(value) : value,
+  )
   templateIds?: string[];
 
   @IsOptional()
