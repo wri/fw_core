@@ -28,6 +28,9 @@ import { AssignmentStatus } from '../assignments/assignment-status.enum';
 import { AssignmentsService } from '../assignments/assignments.service';
 import { ITemplateQuestion } from '../templates/models/template.schema';
 import { QuestionType } from '../templates/question-type.enum';
+import { CreateAnswerInput } from './inputs/create-answer.input';
+import { AuthUser } from '../common/decorators';
+import { IUser } from '../common/user.model';
 
 @Controller('templates/:templateId/answers')
 export class AnswersController {
@@ -42,15 +45,14 @@ export class AnswersController {
   @Post()
   @UseInterceptors(AnyFilesInterceptor({ dest: './tmp' }))
   async create(
-    @Body() fields: CreateAnswerDto,
+    @Body() fields: CreateAnswerInput,
     @Req() request: Request,
+    @AuthUser() user: IUser,
     @UploadedFiles() fileArray?: Array<Express.Multer.File>,
   ) {
-    const { user, template } = request;
+    const { template } = request;
 
-    const userPosition = fields.userPosition
-      ? fields.userPosition.split(',')
-      : [];
+    const userPosition = fields.userPosition ?? [];
 
     // This groups the file uploads by fieldname
     const fileGroups = fileArray?.reduce((acc, file) => {
@@ -69,9 +71,9 @@ export class AnswersController {
       areaOfInterestName: fields.areaOfInterestName,
       language: fields.language,
       userPosition,
-      clickedPosition: JSON.parse(fields.clickedPosition ?? '{}'),
+      clickedPosition: fields.clickedPosition,
       user: new mongoose.Types.ObjectId(user.id),
-      createdAt: fields.date ?? Date.now().toString(),
+      createdAt: fields.date?.toString() ?? Date.now().toString(),
       responses: [],
       teamId: fields.teamId,
     };
