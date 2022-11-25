@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AssignmentsService } from './assignments.service';
 import { AssignmentsController } from './assignments.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -11,9 +11,7 @@ import { UserService } from '../common/user.service';
 import { ConfigService } from '@nestjs/config';
 import { AreasModule } from '../areas/modules/areas.module';
 import { S3Service } from '../answers/services/s3Service';
-import { TemplatesService } from '../templates/templates.service';
 import { TemplatesModule } from '../templates/templates.module';
-import { TemplateSchema } from '../templates/models/template.schema';
 
 @Module({
   imports: [
@@ -29,12 +27,8 @@ import { TemplateSchema } from '../templates/models/template.schema';
       [{ name: 'teamuserrelations', schema: TeamMemberSchema }],
       'teamsDb',
     ),
-    MongooseModule.forFeature(
-      [{ name: 'reports', schema: TemplateSchema }],
-      'formsDb',
-    ),
     AreasModule,
-    TemplatesModule,
+    forwardRef(() => TemplatesModule),
   ],
   controllers: [AssignmentsController],
   providers: [
@@ -44,7 +38,6 @@ import { TemplateSchema } from '../templates/models/template.schema';
     UserService,
     ConfigService,
     S3Service,
-    TemplatesService,
   ],
   exports: [AssignmentsService],
 })

@@ -1,20 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TemplatesService } from './templates.service';
 import { TemplatesController } from './templates.controller';
-import { AnswersService } from '../answers/services/answers.service';
-import { TeamsService } from '../teams/services/teams.service';
 import { UserService } from '../common/user.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TemplateSchema } from './models/template.schema';
-import { Answer, AnswerSchema } from '../answers/models/answer.model';
-import { TeamMembersService } from '../teams/services/teamMembers.service';
-import { TeamSchema } from '../teams/models/team.schema';
-import { TeamMemberSchema } from '../teams/models/teamMember.schema';
-import { TemplateAreaRelationService } from '../areas/services/templateAreaRelation.service';
-import { TemplateAreaRelationSchema } from '../areas/models/templateAreaRelation.schema';
-import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
-import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema';
 import { AreasModule } from '../areas/modules/areas.module';
+import { AnswersModule } from '../answers/answers.module';
+import { TeamsModule } from '../teams/modules/teams.module';
+import { TeamMembersModule } from '../teams/modules/teamMembers.module';
 
 @Module({
   imports: [
@@ -22,38 +15,13 @@ import { AreasModule } from '../areas/modules/areas.module';
       [{ name: 'reports', schema: TemplateSchema }],
       'formsDb',
     ),
-    MongooseModule.forFeature(
-      [{ name: Answer.name, schema: AnswerSchema }],
-      'formsDb',
-    ),
-    MongooseModule.forFeature(
-      [{ name: 'gfwteams', schema: TeamSchema }],
-      'teamsDb',
-    ),
-    MongooseModule.forFeature(
-      [{ name: 'teamuserrelations', schema: TeamMemberSchema }],
-      'teamsDb',
-    ),
-    MongooseModule.forFeature(
-      [{ name: 'areatemplaterelations', schema: TemplateAreaRelationSchema }],
-      'apiDb',
-    ),
-    MongooseModule.forFeature(
-      [{ name: 'areateamrelations', schema: TeamAreaRelationSchema }],
-      'apiDb',
-    ),
+    AnswersModule,
     AreasModule,
+    TeamsModule,
+    TeamMembersModule,
   ],
   controllers: [TemplatesController],
-  providers: [
-    TemplatesService,
-    TemplateAreaRelationService,
-    TeamAreaRelationService,
-    AnswersService,
-    TeamsService,
-    TeamMembersService,
-    UserService,
-  ],
+  providers: [TemplatesService, UserService],
   exports: [TemplatesService],
 })
 export class TemplatesModule {}

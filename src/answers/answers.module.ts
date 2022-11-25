@@ -59,6 +59,7 @@ import { AreasModule } from '../areas/modules/areas.module';
     S3Service,
     UserService,
   ],
+  exports: [AnswersService],
 })
 export class AnswersModule {
   configure(consumer: MiddlewareConsumer) {

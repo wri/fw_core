@@ -33,6 +33,7 @@ import { TeamAreaRelationSchema } from '../../areas/models/teamAreaRelation.sche
     UserService,
     TeamAreaRelationService,
   ],
+  exports: [TeamsService],
 })
 export class TeamsModule {
   configure(consumer: MiddlewareConsumer) {

@@ -23,6 +23,7 @@ import { UserService } from '../../common/user.service';
   ],
   controllers: [TeamMembersController],
   providers: [TeamsService, TeamMembersService, UserService],
+  exports: [TeamMembersService],
 })
 export class TeamMembersModule {
   configure(consumer: MiddlewareConsumer) {
