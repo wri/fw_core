@@ -1,5 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import request from 'supertest';
+import assignments from '../../assignments/tests/assignments.constants';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { UserService } from '../../common/user.service';
@@ -189,7 +190,7 @@ describe('Answers', () => {
     it('should return an array all user answers', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.defaultTemplate);
+        .insertOne({ ...constants.defaultTemplate });
       await formsDbConnection.collection('answers').insertOne({
         report: template.insertedId,
         reportName: 'answer 1',
@@ -270,7 +271,7 @@ describe('Answers', () => {
       });
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.defaultTemplate);
+        .insertOne({ ...constants.defaultTemplate });
       const managerAnswer = await formsDbConnection
         .collection('answers')
         .insertOne({
@@ -330,7 +331,7 @@ describe('Answers', () => {
     it('should return all answers for template creator', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.userTemplate);
+        .insertOne({ ...constants.userTemplate });
       const managerAnswer = await formsDbConnection
         .collection('answers')
         .insertOne({
@@ -390,7 +391,7 @@ describe('Answers', () => {
     it('should return answer objects that contain full name of creator', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.userTemplate);
+        .insertOne({ ...constants.userTemplate });
       await formsDbConnection.collection('answers').insertOne({
         report: template.insertedId,
         reportName: 'answer 1',
@@ -441,6 +442,7 @@ describe('Answers', () => {
       await teamsDbConnection.collection('teamuserrelations').deleteMany({});
       await formsDbConnection.collection('reports').deleteMany({});
       await formsDbConnection.collection('answers').deleteMany({});
+      await formsDbConnection.collection('assignments').deleteMany({});
     });
 
     it('should return a 401 without authorisation', async () => {
@@ -452,7 +454,7 @@ describe('Answers', () => {
     it('should return a users answer', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.userTemplate);
+        .insertOne({ ...constants.userTemplate });
       const userAnswer1 = await formsDbConnection
         .collection('answers')
         .insertOne({
@@ -488,7 +490,7 @@ describe('Answers', () => {
     it('should return an answer containing the creators full name', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.userTemplate);
+        .insertOne({ ...constants.userTemplate });
       const userAnswer1 = await formsDbConnection
         .collection('answers')
         .insertOne({
@@ -516,7 +518,7 @@ describe('Answers', () => {
     it('should return another users answer if the current user owns the template', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.userTemplate);
+        .insertOne({ ...constants.userTemplate });
       const userAnswer1 = await formsDbConnection
         .collection('answers')
         .insertOne({
@@ -552,7 +554,7 @@ describe('Answers', () => {
     it('should fail to return another users answer if the current user doesnt own the template', async () => {
       const template = await formsDbConnection
         .collection('reports')
-        .insertOne(constants.defaultTemplate);
+        .insertOne({ ...constants.defaultTemplate });
       const userAnswer1 = await formsDbConnection
         .collection('answers')
         .insertOne({
@@ -625,6 +627,43 @@ describe('Answers', () => {
       expect(response.body.data.attributes).toHaveProperty(
         'reportName',
         'answer 1',
+      );
+    });
+
+    it('should return assignmentId on answer response', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate });
+
+      const assignment = await formsDbConnection
+        .collection('assignments')
+        .insertOne({
+          ...assignments.defaultAssignment,
+          geostore: assignments.geostore.id,
+          name: 'name',
+          monitors: [ROLES.USER.id],
+          createdBy: ROLES.ADMIN.id,
+        });
+      const userAnswer1 = await formsDbConnection
+        .collection('answers')
+        .insertOne({
+          report: template.insertedId,
+          reportName: 'answer 1',
+          language: 'en',
+          user: new mongoose.Types.ObjectId(ROLES.USER.id),
+          responses: [{ name: 'question-1', value: 'test' }],
+          assignmentId: assignment.insertedId,
+        });
+
+      const response = await request(app.getHttpServer())
+        .get(
+          `/templates/${template.insertedId.toString()}/answers/${userAnswer1.insertedId.toString()}`,
+        )
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body.data.attributes.assignmentId).toBe(
+        assignment.insertedId.toString(),
       );
     });
   });

@@ -17,6 +17,7 @@ const whitelist = [
   'createdAt',
   'responses',
   'templateName',
+  'assignmentId',
 ];
 
 const serializeResource = (data) => {
