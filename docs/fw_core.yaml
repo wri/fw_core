@@ -2582,6 +2582,10 @@ components:
                 type: string
               status:
                 type: string
+                enum:
+                  - open
+                  - completed
+                  - on hold
               templateIds:
                 type: array
                 items:
