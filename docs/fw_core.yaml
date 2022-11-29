@@ -2396,6 +2396,8 @@ components:
                   - en
                 status: unpublished
                 defaultLanguage: en
+                areaIds:
+                  - 6386325f35774e2956ba1304
       description: Template Request Body
     UpdateTemplateBody:
       content:
