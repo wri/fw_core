@@ -1,4 +1,4 @@
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -31,7 +31,7 @@ export class CreateAnswerInput {
   @IsArray()
   @ArrayMaxSize(2)
   @ArrayMinSize(2)
-  @IsNumberString({ each: true })
+  @IsNumberString({}, { each: true })
   @Transform(({ value }) => (isString(value) ? value.split(',') : value))
   userPosition?: string[];
 
