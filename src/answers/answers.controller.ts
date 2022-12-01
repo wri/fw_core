@@ -96,8 +96,8 @@ export class AnswersController {
 
       if (question.type === QuestionType.IMAGE) {
         const uploadCount = fileGroups?.[question.name]?.length ?? 0;
-        const maxCount = question.maxImageCount;
-        if (maxCount && uploadCount > maxCount)
+        const maxCount = question.maxImageCount ?? 5;
+        if (uploadCount > maxCount)
           throw new BadRequestException(
             `Maximum file count (${maxCount}) exceeded for question '${question.name}'`,
           );
