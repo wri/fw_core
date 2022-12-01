@@ -696,6 +696,11 @@ paths:
                 required:
                   - email
                   - role
+            examples:
+              example-1:
+                value:
+                  - email: email@email.com
+                    role: manager
       tags:
         - Teams
   '/v3/gfw/teams/{teamId}/users/reassignAdmin/{userId}':
@@ -2097,6 +2102,19 @@ components:
                 areaName: My Area
                 image: FILE UPLOAD
                 name: My assignment
+            example-with-geostore:
+              value:
+                geostore: '{"type":"Feature","geometry":{"type":"Point","coordinates":[125.6,10.1]},"properties":{"name":"Dinagat Islands"}}'
+                priority: 0
+                monitors:
+                  - 637dd26df8c280b71f23e56a
+                notes: My Notes
+                areaId: 637dd2739dd154ba5840980f
+                templateIds:
+                  - 637dd27aaa83b6b70f535cda
+                areaName: My Area
+                image: FILE UPLOAD
+                name: My assignment
         application/json:
           schema:
             type: object
@@ -2178,6 +2196,26 @@ components:
                 templateIds:
                   - 637dcf05ff1b63630afae7dd
                 createdBy: 637dcf0c980808252df4973f
+            example-with-geostore:
+              value:
+                priority: 0
+                monitors:
+                  - 637dce839215e5d73042d398
+                areaId: 637dce919485c59d60824c11
+                geostore:
+                  type: Feature
+                  geometry:
+                    type: Point
+                    coordinates:
+                      - 125.6
+                      - 10.1
+                  properties:
+                    name: Dinagat Islands
+                name: First Assignment
+                notes: Some notes regarding the assignment
+                templateIds:
+                  - 637dcf05ff1b63630afae7dd
+                createdBy: 637dcf0c980808252df4973f
       description: ''
     RouteBody:
       content:
@@ -2245,6 +2283,20 @@ components:
                   type: string
                 startDate:
                   type: integer
+                teamId:
+                  type: string
+                active:
+                  type: string
+              required:
+                - areaId
+                - destination
+                - difficulty
+                - endDate
+                - geostoreId
+                - id
+                - locations
+                - name
+                - startDate
           examples:
             example-1:
               value:
@@ -2515,30 +2567,42 @@ components:
                 type: string
                 description: Must be image file
                 format: binary
+          examples:
+            example-1:
+              value:
+                name: name
+                image: FILE UPLOAD
       description: Body for creating area
     AreaTeamRelationBody:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              areaId:
-                type: string
-              teamId:
-                type: string
-            required:
-              - areaId
-              - teamId
+            type: array
+            items:
+              type: object
+              properties:
+                areaId:
+                  type: string
+                teamId:
+                  type: string
+              required:
+                - areaId
+                - teamId
     AreaTemplateRelationBody:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              templateId:
-                type: string
-              areaId:
-                type: string
+            type: array
+            items:
+              type: object
+              properties:
+                areaId:
+                  type: string
+                templateId:
+                  type: string
+              required:
+                - areaId
+                - templateId
     TeamBody:
       content:
         application/json:
@@ -2553,6 +2617,12 @@ components:
                   type: string
             required:
               - name
+          examples:
+            example-1:
+              value:
+                name: My Team name
+                layers:
+                  - <layer-id>
     UpdateAssignmentBody:
       content:
         multipart/form-data:
