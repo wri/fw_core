@@ -7,6 +7,7 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  ParseArrayPipe,
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { CreateRouteDto } from './dto/create-route.dto';
@@ -16,6 +17,9 @@ import { RouteDocument } from './models/route.schema';
 import mongoose from 'mongoose';
 import { AuthUser } from '../common/decorators';
 import { IUser } from '../common/user.model';
+import { SyncRouteInput } from './input/sync-route.input';
+import { MongooseObjectId } from '../common/objectId';
+import { isMongoId } from 'class-validator';
 
 @Controller('routes')
 export class RoutesController {
@@ -27,21 +31,29 @@ export class RoutesController {
   @Post('/sync')
   async create(
     @AuthUser() user: IUser,
-    @Body() routesToSync: CreateRouteDto[],
+    @Body(new ParseArrayPipe({ items: SyncRouteInput }))
+    body: SyncRouteInput[],
   ) {
     const syncedRoutes: RouteDocument[] = [];
 
-    for await (const route of routesToSync) {
-      const existingRoute = await this.routesService.findOne({
-        routeId: route.id,
-      });
+    for await (const route of body) {
+      const existingRoute = await this.routesService.findOne(
+        isMongoId(route.id)
+          ? { _id: new MongooseObjectId(route.id) }
+          : { routeId: route.id },
+      );
       if (existingRoute || !route.id) continue;
 
-      route.createdBy = user.id;
-      route.routeId = route.id;
-      route.active = true;
-      delete route.id;
-      const savedRoute = await this.routesService.create(route);
+      const createRouteDto: CreateRouteDto = {
+        ...route,
+        createdBy: user.id,
+        routeId: route.id,
+        active: true,
+      };
+
+      delete createRouteDto.id;
+
+      const savedRoute = await this.routesService.create(createRouteDto);
       syncedRoutes.push(savedRoute);
     }
 

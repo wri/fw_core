@@ -7,7 +7,7 @@ export default {
     },
     difficulty: 'easy',
     endDate: 1665574170542,
-    geostoreId: 'd0a7ccc250cb8ead3ea0a7d3730bc085',
+    geostoreId: '624eb2e03a38cf001b822d95',
     locations: [
       {
         accuracy: 5,

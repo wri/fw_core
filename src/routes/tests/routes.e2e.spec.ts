@@ -28,6 +28,7 @@ import { CoverageService } from '../../areas/services/coverage.service';
 import { DatasetService } from '../../areas/services/dataset.service';
 import { RoutesService } from '../routes.service';
 import { Route } from '../models/route.schema';
+import { MongooseObjectId } from '../../common/objectId';
 
 describe('Routes', () => {
   let app: INestApplication;
@@ -251,6 +252,38 @@ describe('Routes', () => {
       expect(response.body.data[0].attributes).toHaveProperty(
         'routeId',
         'cea34015-bfaf-46c2-a660-db1e9819b516',
+      );
+    });
+
+    it('should not create route if route id is mongo id existing in db', async () => {
+      const route = await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'e21bbd78-44c9-4d1f-9db2-324ab3def41b',
+        teamId: new mongoose.Types.ObjectId(),
+        createdBy: ROLES.USER.id,
+        active: true,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post(`/routes/sync`)
+        .send([
+          {
+            ...routeConstants.defaultRoute,
+            id: 'cea34015-bfaf-46c2-a660-db1e9819b515',
+            teamId: new mongoose.Types.ObjectId(),
+          },
+          {
+            ...routeConstants.defaultRoute,
+            teamId: new mongoose.Types.ObjectId(),
+            id: route.insertedId.toString(),
+          },
+        ])
+        .set('Authorization', 'USER')
+        .expect(201);
+
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].attributes.routeId).toBe(
+        'cea34015-bfaf-46c2-a660-db1e9819b515',
       );
     });
   });
