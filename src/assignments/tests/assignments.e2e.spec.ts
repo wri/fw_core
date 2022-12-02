@@ -28,6 +28,7 @@ import templatesConstants from './templates.constants';
 import { EMemberRole } from '../../teams/models/teamMember.schema';
 import { CreateAssignmentInput } from '../inputs/create-assignments.input';
 import { MongooseObjectId } from '../../common/objectId';
+import { AssignmentStatus } from '../assignment-status.enum';
 
 describe('Assignments', () => {
   let app: INestApplication;
@@ -1109,6 +1110,183 @@ describe('Assignments', () => {
         .delete(`/assignments/${assignment.insertedId.toString()}`)
         .set('Authorization', 'USER')
         .expect(403);
+    });
+  });
+
+  describe('PATCH /assignments/:id/status', () => {
+    afterEach(async () => {
+      await teamsDbConnection.collection('gfwteams').deleteMany({});
+      await teamsDbConnection.collection('teamuserrelations').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
+      await formsDbConnection.collection('answers').deleteMany({});
+      await formsDbConnection.collection('assignments').deleteMany({});
+    });
+
+    it('should fail if no status is given', async () => {
+      const assignmentRes = await request(app.getHttpServer())
+        .post('/assignments')
+        .send({ ...assignments.defaultAssignment, monitors: [ROLES.USER.id] })
+        .set('Authorization', 'USER')
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .patch(`/assignments/${assignmentRes.body.data.id}/status`)
+        .send({})
+        .set('Authorization', 'USER')
+        .expect(400);
+    });
+
+    it('should fail if monitor changing from open to completed', async () => {
+      const assignmentRes = await request(app.getHttpServer())
+        .post('/assignments')
+        .send({ ...assignments.defaultAssignment, monitors: [ROLES.USER.id] })
+        .set('Authorization', 'MANAGER')
+        .expect(201);
+
+      expect(assignmentRes.body.data.attributes.status).toBe(
+        AssignmentStatus.OPEN,
+      );
+
+      await request(app.getHttpServer())
+        .patch(`/assignments/${assignmentRes.body.data.id}/status`)
+        .send({ status: AssignmentStatus.COMPLETED })
+        .set('Authorization', 'USER')
+        .expect(403);
+    });
+
+    it('should fail if monitor changing from on hold to completed', async () => {
+      const res1 = await request(app.getHttpServer())
+        .post('/assignments')
+        .send({
+          ...assignments.defaultAssignment,
+          monitors: [ROLES.USER.id],
+        })
+        .set('Authorization', 'MANAGER')
+        .expect(201);
+
+      const res2 = await request(app.getHttpServer())
+        .patch(`/assignments/${res1.body.data.id}`)
+        .send({ status: AssignmentStatus.ON_HOLD })
+        .set('Authorization', 'MANAGER')
+        .expect(200);
+
+      expect(res2.body.data.attributes.status).toBe(AssignmentStatus.ON_HOLD);
+
+      await request(app.getHttpServer())
+        .patch(`/assignments/${res1.body.data.id}/status`)
+        .send({ status: AssignmentStatus.COMPLETED })
+        .set('Authorization', 'USER')
+        .expect(403);
+    });
+
+    it('should fail if monitor changing from completed to on hold', async () => {
+      const res1 = await request(app.getHttpServer())
+        .post('/assignments')
+        .send({
+          ...assignments.defaultAssignment,
+          monitors: [ROLES.USER.id],
+        })
+        .set('Authorization', 'MANAGER')
+        .expect(201);
+
+      const res2 = await request(app.getHttpServer())
+        .patch(`/assignments/${res1.body.data.id}`)
+        .send({ status: AssignmentStatus.COMPLETED })
+        .set('Authorization', 'MANAGER')
+        .expect(200);
+
+      expect(res2.body.data.attributes.status).toBe(AssignmentStatus.COMPLETED);
+
+      await request(app.getHttpServer())
+        .patch(`/assignments/${res1.body.data.id}/status`)
+        .send({ status: AssignmentStatus.ON_HOLD })
+        .set('Authorization', 'USER')
+        .expect(403);
+    });
+
+    it('should fail if monitor changing from completed to open', async () => {
+      const res1 = await request(app.getHttpServer())
+        .post('/assignments')
+        .send({
+          ...assignments.defaultAssignment,
+          monitors: [ROLES.USER.id],
+        })
+        .set('Authorization', 'MANAGER')
+        .expect(201);
+
+      const res2 = await request(app.getHttpServer())
+        .patch(`/assignments/${res1.body.data.id}`)
+        .send({ status: AssignmentStatus.COMPLETED })
+        .set('Authorization', 'MANAGER')
+        .expect(200);
+
+      expect(res2.body.data.attributes.status).toBe(AssignmentStatus.COMPLETED);
+
+      await request(app.getHttpServer())
+        .patch(`/assignments/${res1.body.data.id}/status`)
+        .send({ status: AssignmentStatus.OPEN })
+        .set('Authorization', 'USER')
+        .expect(403);
+    });
+
+    it('should allow monitor to change from open to on hold', async () => {
+      const res1 = await request(app.getHttpServer())
+        .post('/assignments')
+        .send({
+          ...assignments.defaultAssignment,
+          monitors: [ROLES.USER.id],
+        })
+        .set('Authorization', 'MANAGER')
+        .expect(201);
+
+      expect(res1.body.data.attributes.status).toBe(AssignmentStatus.OPEN);
+
+      await request(app.getHttpServer())
+        .patch(`/assignments/${res1.body.data.id}/status`)
+        .send({ status: AssignmentStatus.ON_HOLD })
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      const response = await request(app.getHttpServer())
+        .get(`/assignments/${res1.body.data.id}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body.data.attributes.status).toBe(
+        AssignmentStatus.ON_HOLD,
+      );
+    });
+
+    it('should allow monitor to change from on hold to open', async () => {
+      const res1 = await request(app.getHttpServer())
+        .post('/assignments')
+        .send({
+          ...assignments.defaultAssignment,
+          monitors: [ROLES.USER.id],
+        })
+        .set('Authorization', 'MANAGER')
+        .expect(201);
+
+      const res2 = await request(app.getHttpServer())
+        .patch(`/assignments/${res1.body.data.id}`)
+        .send({ status: AssignmentStatus.ON_HOLD })
+        .set('Authorization', 'MANAGER')
+        .expect(200);
+
+      expect(res2.body.data.attributes.status).toBe(AssignmentStatus.ON_HOLD);
+
+      await request(app.getHttpServer())
+        .patch(`/assignments/${res1.body.data.id}/status`)
+        .send({ status: AssignmentStatus.OPEN })
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      const response = await request(app.getHttpServer())
+        .get(`/assignments/${res1.body.data.id}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body.data.attributes.status).toBe(AssignmentStatus.OPEN);
     });
   });
 

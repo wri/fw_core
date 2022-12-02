@@ -11,6 +11,9 @@ import {
   BadRequestException,
   UseInterceptors,
   UploadedFile,
+  ParseEnumPipe,
+  NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { AssignmentsService } from './assignments.service';
 import { UpdateAssignmentDto } from './dto/update-assignment.dto';
@@ -211,6 +214,41 @@ export class AssignmentsController {
     );
 
     return { data: serializeAssignments(assignmentResponse) };
+  }
+
+  @Patch('/:id/status')
+  async updateStatus(
+    @AuthUser() user: IUser,
+    @Param('id') id: string,
+    @Body('status', new ParseEnumPipe(AssignmentStatus))
+    status: AssignmentStatus,
+  ) {
+    const assignment = await this.assignmentsService.findById(id);
+
+    if (!assignment) throw new NotFoundException('Assignment not found');
+
+    const isCreator = assignment.createdBy === user.id;
+
+    if (isCreator) {
+      assignment.status = status;
+      await assignment.save();
+      return { data: serializeAssignments(assignment) };
+    }
+
+    if (status === AssignmentStatus.COMPLETED)
+      throw new ForbiddenException(
+        'Only creator can change status to completed',
+      );
+
+    if (assignment.status === AssignmentStatus.COMPLETED)
+      throw new ForbiddenException(
+        'Only creator can change status from completed',
+      );
+
+    assignment.status = status;
+    await assignment.save();
+
+    return { data: serializeAssignments(assignment) };
   }
 
   @Delete('/deleteAllForUser')

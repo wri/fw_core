@@ -19,6 +19,7 @@ import mongoose from 'mongoose';
 import { GeostoreService } from '../areas/services/geostore.service';
 import { IUser } from '../common/user.model';
 import { S3Service } from '../answers/services/s3Service';
+import { MongooseObjectId } from '../common/objectId';
 
 const allowedKeys = [
   'name',
@@ -38,6 +39,12 @@ export class AssignmentsService {
     private readonly geostoreService: GeostoreService,
     private readonly s3Service: S3Service,
   ) {}
+
+  async findById(
+    id: string | MongooseObjectId,
+  ): Promise<AssignmentDocument | null> {
+    return this.assignmentModel.findById(id);
+  }
 
   async create(
     assignmentDto: CreateAssignmentDto,
