@@ -1061,6 +1061,36 @@ paths:
           $ref: '#/components/responses/Error'
       operationId: get-v3-gfw-arearelations-templates-templateAreas-templateId
       description: Returns an array of area ids related to a template
+  '/v3/gfw/assignments/{assignmentId}/status':
+    parameters:
+      - schema:
+          type: string
+        name: assignmentId
+        in: path
+        required: true
+    patch:
+      summary: Update status of assignment
+      tags:
+        - Assignments
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignment-Response'
+      operationId: patch-v3-gfw-assignments-assignmentId-status
+      description: Allow the user to update the status of the asssignment even if they are monitors but not creators of the assignment. Monitors can perform on hold to open and open to on hold status change. Creators can perform all status changes.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - open
+                    - completed
+                    - on hold
+              required:
+                - status
 components:
   schemas:
     AssignmentModel:
