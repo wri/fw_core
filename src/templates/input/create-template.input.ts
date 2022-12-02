@@ -52,7 +52,6 @@ export class CreateTemplateInput {
 
   @IsOptional()
   @IsArray()
-  @ArrayMinSize(1)
   @IsMongoId({ each: true })
   areaIds?: string[];
 }
