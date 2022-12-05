@@ -2602,6 +2602,7 @@ components:
               value:
                 name: name
                 image: FILE UPLOAD
+                geojson: '{"geojson":{"crs":{},"type":"FeatureCollection","features":[{"geometry":{"coordinates":[[[-39.84110795,-8.783184098],[-39.839191247,-8.82983348],[-39.798746579,-8.832448397],[-39.813720923,-8.78147167],[-39.84110795,-8.783184098]]],"type":"Polygon"},"type":"Feature"}]},"hash":"535036b0e0611996280b3fb69854ca7b","provider":{},"areaHa":2022.69268648047,"bbox":[-39.84110795,-8.832448397,-39.798746579,-8.78147167],"lock":true,"info":{"use":{}},"id":"535036b0e0611996280b3fb69854ca7b"}'
       description: Body for creating area
     AreaTeamRelationBody:
       content:
