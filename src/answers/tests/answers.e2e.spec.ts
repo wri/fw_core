@@ -112,7 +112,7 @@ describe('Answers', () => {
       await request(app.getHttpServer())
         .get(`/templates/${id.toString()}/answers`)
         .set('Authorization', 'USER')
-        .expect(404);
+        .expect(403);
     });
 
     it('should succeed if the user owns the template', async () => {
@@ -132,7 +132,7 @@ describe('Answers', () => {
       await request(app.getHttpServer())
         .get(`/templates/${template.insertedId.toString()}/answers`)
         .set('Authorization', 'USER')
-        .expect(404);
+        .expect(403);
     });
 
     it('should succeed if the template is public', async () => {

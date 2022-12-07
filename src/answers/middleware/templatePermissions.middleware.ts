@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -10,6 +11,8 @@ import { EMemberRole } from '../../teams/models/teamMember.schema';
 import { TemplatesService } from '../../templates/templates.service';
 import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import { TeamsService } from '../../teams/services/teams.service';
+import { MongooseObjectId } from '../../common/objectId';
+import { TemplateDocument } from '../../templates/models/template.schema';
 
 @Injectable()
 export class TemplatePermissionsMiddleware implements NestMiddleware {
@@ -26,54 +29,34 @@ export class TemplatePermissionsMiddleware implements NestMiddleware {
     // get the users teams
     const teams = await this.teamsService.findAllByUserId(user.id);
 
-    // get managers of those teams
-    const managers: { user?: mongoose.Types.ObjectId }[] = [];
+    const teamMemberIds: (MongooseObjectId | undefined)[] = [];
     for (const team of teams) {
-      let teamUsers = await this.teamMembersService.findAllTeamMembers(
-        team.id,
-        EMemberRole.Manager,
-      );
-      if (!teamUsers) teamUsers = [];
-      const teamManagers = teamUsers.filter(
-        (teamUser) =>
-          teamUser.role === EMemberRole.Manager ||
-          teamUser.role === EMemberRole.Administrator,
-      );
-      teamManagers.forEach((manager) =>
-        managers.push({ user: manager.userId }),
-      );
-    }
-    let filters = {};
-    if (teams.length > 0) {
-      filters = {
-        $and: [
-          { _id: new mongoose.Types.ObjectId(params.templateId) },
-          {
-            $or: [
-              { public: true },
-              { user: new mongoose.Types.ObjectId(user.id) },
-              ...managers,
-            ],
-          },
-        ],
-      };
-    } else {
-      filters = {
-        $and: [
-          { _id: new mongoose.Types.ObjectId(params.templateId) },
-          {
-            $or: [
-              { public: true },
-              { user: new mongoose.Types.ObjectId(user.id) },
-            ],
-          },
-        ],
-      };
+      const members =
+        (await this.teamMembersService.findAllTeamMembers(
+          team.id,
+          EMemberRole.Manager,
+        )) ?? [];
+      teamMemberIds.push(...members.map((m) => m.userId));
     }
 
-    const template = await this.templatesService.findOne(filters);
+    const filter: mongoose.FilterQuery<TemplateDocument> = {
+      $and: [
+        { _id: new MongooseObjectId(params.templateId) },
+        {
+          $or: [
+            { public: true },
+            { user: new MongooseObjectId(user.id) },
+            ...teamMemberIds.map((id) => ({ user: id })),
+          ],
+        },
+      ],
+    };
+
+    const template = await this.templatesService.findOne(filter);
     if (!template) {
-      throw new HttpException('Template not found', HttpStatus.NOT_FOUND);
+      throw new ForbiddenException(
+        "User doesn't have permissions to view this answer",
+      );
     }
     req.template = template;
     req.userTeams = teams;
