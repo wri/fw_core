@@ -51,7 +51,7 @@ export class SyncRouteInput {
   @IsInt()
   endDate: number;
 
-  @IsMongoId()
+  @IsNotEmpty()
   geostoreId: string;
 
   @IsArray()
