@@ -136,7 +136,7 @@ paths:
         $ref: '#/components/requestBodies/RouteBody'
   /v3/gfw/routes/user:
     get:
-      summary: Get User's Routes
+      summary: Get User's Active Routes
       tags:
         - Routes
       responses:
@@ -145,10 +145,10 @@ paths:
         '401':
           $ref: '#/components/responses/Error'
       operationId: get-v3-gfw-routes-user
-      description: Get all routes made by the user
+      description: Get all active routes made by the user
   /v3/gfw/routes/teams:
     get:
-      summary: Get User's Teams Routes
+      summary: Get User's Teams Active Routes
       tags:
         - Routes
       responses:
@@ -157,7 +157,7 @@ paths:
         '401':
           $ref: '#/components/responses/Error'
       operationId: get-v3-gfw-routes-teams
-      description: Returns an array of all routes linked to the user's teams
+      description: Returns an array of all active routes linked to the user's teams
   '/v3/gfw/routes/{routeId}':
     get:
       summary: Get A Single Route

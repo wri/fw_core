@@ -302,53 +302,63 @@ describe('Routes', () => {
       return await request(app.getHttpServer()).get(`/routes/user`).expect(401);
     });
 
-    it('should return an array of all the users routes', async () => {
-      const routes = await formsDbConnection.collection('routes').insertMany([
-        {
-          ...routeConstants.defaultRoute,
-          routeId: 'cea34015-bfaf-46c2-a660-db1e9819b515',
-          teamId: new mongoose.Types.ObjectId(),
-          createdBy: ROLES.USER.id,
-          active: true,
-        },
-        {
-          ...routeConstants.defaultRoute,
-          routeId: 'cea34015-bfaf-46c2-a660-db1e9819b516',
-          teamId: new mongoose.Types.ObjectId(),
-          createdBy: ROLES.MANAGER.id,
-          active: true,
-        },
-        {
-          ...routeConstants.defaultRoute,
-          routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
-          teamId: new mongoose.Types.ObjectId(),
-          createdBy: ROLES.USER.id,
-          active: true,
-        },
-        {
-          ...routeConstants.defaultRoute,
-          routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
-          teamId: new mongoose.Types.ObjectId(),
-          createdBy: ROLES.USER.id,
-          active: false,
-        },
-      ]);
+    it('should return an array of users active routes', async () => {
+      const route1 = await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b515',
+        teamId: new mongoose.Types.ObjectId(),
+        createdBy: ROLES.USER.id,
+        active: true,
+      });
+
+      await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b516',
+        teamId: new mongoose.Types.ObjectId(),
+        createdBy: ROLES.MANAGER.id,
+        active: true,
+      });
+
+      const route3 = await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
+        teamId: new mongoose.Types.ObjectId(),
+        createdBy: ROLES.USER.id,
+        active: true,
+      });
+
+      await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
+        teamId: new mongoose.Types.ObjectId(),
+        createdBy: ROLES.USER.id,
+        active: false,
+      });
 
       const response = await request(app.getHttpServer())
         .get(`/routes/user`)
         .set('Authorization', 'USER')
         .expect(200);
 
-      expect(response.body.data).toHaveLength(3);
-
-      const routeIds = [
-        routes.insertedIds[0],
-        routes.insertedIds[2],
-        routes.insertedIds[3],
-      ].map((id) => id.toString());
-
-      expect(response.body.data.map((d) => d.id).sort()).toEqual(
-        routeIds.sort(),
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data.length).toBe(2);
+      expect(response.body.data[0]).toHaveProperty(
+        'id',
+        route1.insertedId.toString(),
+      );
+      expect(response.body.data[0]).toHaveProperty('attributes');
+      expect(response.body.data[0].attributes).toHaveProperty(
+        'routeId',
+        'cea34015-bfaf-46c2-a660-db1e9819b515',
+      );
+      expect(response.body.data[1]).toHaveProperty(
+        'id',
+        route3.insertedId.toString(),
+      );
+      expect(response.body.data[1]).toHaveProperty('attributes');
+      expect(response.body.data[1].attributes).toHaveProperty(
+        'routeId',
+        'cea34015-bfaf-46c2-a660-db1e9819b517',
       );
     });
   });
@@ -369,7 +379,7 @@ describe('Routes', () => {
         .expect(401);
     });
 
-    it('should return an array of all routes for teams the user is a member of', async () => {
+    it('should return an array of active routes for teams the user is a member of', async () => {
       const team = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
@@ -381,52 +391,62 @@ describe('Routes', () => {
         role: EMemberRole.Monitor,
       });
 
-      const routes = await formsDbConnection.collection('routes').insertMany([
-        {
-          ...routeConstants.defaultRoute,
-          routeId: 'cea34015-bfaf-46c2-a660-db1e9819b515',
-          teamId: team.insertedId.toString(),
-          createdBy: ROLES.USER.id,
-          active: true,
-        },
-        {
-          ...routeConstants.defaultRoute,
-          routeId: 'cea34015-bfaf-46c2-a660-db1e9819b516',
-          teamId: new mongoose.Types.ObjectId(),
-          createdBy: ROLES.ADMIN.id,
-          active: true,
-        },
-        {
-          ...routeConstants.defaultRoute,
-          routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
-          teamId: team.insertedId.toString(),
-          createdBy: ROLES.USER.id,
-          active: true,
-        },
-        {
-          ...routeConstants.defaultRoute,
-          routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
-          teamId: team.insertedId.toString(),
-          createdBy: ROLES.USER.id,
-          active: false,
-        },
-      ]);
+      const route1 = await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b515',
+        teamId: team.insertedId.toString(),
+        createdBy: ROLES.USER.id,
+        active: true,
+      });
+
+      await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b516',
+        teamId: new mongoose.Types.ObjectId(),
+        createdBy: ROLES.ADMIN.id,
+        active: true,
+      });
+
+      const route3 = await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
+        teamId: team.insertedId.toString(),
+        createdBy: ROLES.USER.id,
+        active: true,
+      });
+
+      await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b517',
+        teamId: team.insertedId.toString(),
+        createdBy: ROLES.USER.id,
+        active: false,
+      });
 
       const response = await request(app.getHttpServer())
         .get(`/routes/teams`)
         .set('Authorization', 'MANAGER')
         .expect(200);
 
-      expect(response.body.data).toHaveLength(3);
-
-      const routeIds = [
-        routes.insertedIds[0],
-        routes.insertedIds[2],
-        routes.insertedIds[3],
-      ].map((id) => id.toString());
-
-      expect(response.body.data.map((d) => d.id).sort()).toEqual(
-        routeIds.sort(),
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data.length).toBe(2);
+      expect(response.body.data[0]).toHaveProperty(
+        'id',
+        route1.insertedId.toString(),
+      );
+      expect(response.body.data[0]).toHaveProperty('attributes');
+      expect(response.body.data[0].attributes).toHaveProperty(
+        'routeId',
+        'cea34015-bfaf-46c2-a660-db1e9819b515',
+      );
+      expect(response.body.data[1]).toHaveProperty(
+        'id',
+        route3.insertedId.toString(),
+      );
+      expect(response.body.data[1]).toHaveProperty('attributes');
+      expect(response.body.data[1].attributes).toHaveProperty(
+        'routeId',
+        'cea34015-bfaf-46c2-a660-db1e9819b517',
       );
     });
   });
@@ -487,7 +507,7 @@ describe('Routes', () => {
         .expect(401);
     });
 
-    it('should hard delete the route if deleted by creator', async () => {
+    it('should deactivate a route (change "active" field from true to false)', async () => {
       const route1 = await formsDbConnection.collection('routes').insertOne({
         ...routeConstants.defaultRoute,
         routeId: 'cea34015-bfaf-46c2-a660-db1e9819b515',
@@ -503,7 +523,8 @@ describe('Routes', () => {
       const deactivated = await formsDbConnection
         .collection('routes')
         .findOne({ routeId: 'cea34015-bfaf-46c2-a660-db1e9819b515' });
-      expect(deactivated).toBeNull();
+      expect(deactivated).toBeDefined();
+      expect(deactivated).toHaveProperty('active', false);
     });
 
     it('should allow a team manager to deactivate a team route', async () => {
