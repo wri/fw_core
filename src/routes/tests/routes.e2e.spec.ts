@@ -339,13 +339,11 @@ describe('Routes', () => {
         .set('Authorization', 'USER')
         .expect(200);
 
-      expect(response.body.data).toHaveLength(3);
+      expect(response.body.data).toHaveLength(2);
 
-      const routeIds = [
-        routes.insertedIds[0],
-        routes.insertedIds[2],
-        routes.insertedIds[3],
-      ].map((id) => id.toString());
+      const routeIds = [routes.insertedIds[0], routes.insertedIds[2]].map(
+        (id) => id.toString(),
+      );
 
       expect(response.body.data.map((d) => d.id).sort()).toEqual(
         routeIds.sort(),
@@ -417,14 +415,13 @@ describe('Routes', () => {
         .set('Authorization', 'MANAGER')
         .expect(200);
 
-      expect(response.body.data).toHaveLength(3);
+      expect(response.body.data).toHaveLength(2);
 
-      const routeIds = [
-        routes.insertedIds[0],
-        routes.insertedIds[2],
-        routes.insertedIds[3],
-      ].map((id) => id.toString());
+      const routeIds = [routes.insertedIds[0], routes.insertedIds[2]].map(
+        (id) => id.toString(),
+      );
 
+      expect(response.body.data).toHaveLength(2);
       expect(response.body.data.map((d) => d.id).sort()).toEqual(
         routeIds.sort(),
       );

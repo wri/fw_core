@@ -9,6 +9,7 @@ import {
   HttpStatus,
   ParseArrayPipe,
   ForbiddenException,
+  Query,
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { CreateRouteDto } from './dto/create-route.dto';
@@ -66,6 +67,7 @@ export class RoutesController {
     @AuthUser() user: IUser,
     @Param('teamId') teamId: string,
     @Param('areaId') areaId: string,
+    @Query('includeInactive') _includeInactive: string,
   ) {
     // active routes created by the user or with the team and area ids
     const filter: mongoose.FilterQuery<any> = {
@@ -76,27 +78,50 @@ export class RoutesController {
         { areaId: areaId },
       ],
     };
+
+    const includeInactive = _includeInactive === 'true';
+    if (!includeInactive) {
+      filter.$and?.push({ active: true });
+    }
+
     return { data: serializeRoutes(await this.routesService.findAll(filter)) };
   }
 
   @Get('/user')
-  async findAllUser(@AuthUser() user: IUser) {
+  async findAllUser(
+    @AuthUser() user: IUser,
+    @Query('includeInactive') _includeInactive: string,
+  ) {
     // get all active routes
-    const filter = {
+    const filter: any = {
       createdBy: user.id,
     };
+
+    const includeInactive = _includeInactive === 'true';
+    if (!includeInactive) {
+      filter.active = true;
+    }
+
     const routes = await this.routesService.findAll(filter);
     return { data: serializeRoutes(routes) };
   }
 
   @Get('/teams')
-  async findAllTeams(@AuthUser() user: IUser) {
+  async findAllTeams(
+    @AuthUser() user: IUser,
+    @Query('includeInactive') _includeInactive: string,
+  ) {
     // find all user teams
     const teams = await this.teamsService.findAllByUserId(user.id);
 
-    const filter = {
+    const filter: any = {
       teamId: { $in: teams.map((team) => team.id) },
     };
+
+    const includeInactive = _includeInactive === 'true';
+    if (!includeInactive) {
+      filter.active = true;
+    }
 
     const routes = await this.routesService.findAll(filter);
     return { data: serializeRoutes(routes) };
