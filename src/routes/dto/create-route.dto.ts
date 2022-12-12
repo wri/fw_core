@@ -14,4 +14,5 @@ export class CreateRouteDto {
   id?: string;
   teamId?: string;
   active?: boolean;
+  username?: string;
 }

@@ -27,6 +27,7 @@ export interface IRoute {
   createdBy: string;
   teamId?: string;
   active: boolean;
+  username?: string;
 }
 
 @Schema()
@@ -66,6 +67,9 @@ export class Route {
 
   @Prop({ required: true })
   active: boolean;
+
+  @Prop({ required: false })
+  username: string;
 }
 
 export interface RouteDocument extends IRoute, mongoose.Document {}

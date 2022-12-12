@@ -1091,6 +1091,28 @@ paths:
                     - on hold
               required:
                 - status
+  '/v3/gfw/routes/team/{teamId}/area/{areaId}':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: areaId
+        in: path
+        required: true
+    get:
+      summary: Get Team Area Routes
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Routes-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-routes-team-teamId-area-areaId
+      description: Returns all routes for team area either made for that team or made by the user
 components:
   schemas:
     AssignmentModel:
@@ -1238,6 +1260,8 @@ components:
           type: string
         active:
           type: boolean
+        username:
+          type: string
     PointModel:
       title: PointModel
       x-stoplight:

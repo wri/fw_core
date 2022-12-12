@@ -5,12 +5,14 @@ import { UpdateRouteDto } from './dto/update-route.dto';
 import { Route, RouteDocument } from './models/route.schema';
 import { Model } from 'mongoose';
 import mongoose from 'mongoose';
+import { UserService } from '../common/user.service';
 
 @Injectable()
 export class RoutesService {
   constructor(
     @InjectModel(Route.name, 'formsDb')
     private routeModel: Model<RouteDocument>,
+    private readonly userService: UserService,
   ) {}
 
   async create(createRouteDto: CreateRouteDto): Promise<RouteDocument> {
@@ -21,15 +23,21 @@ export class RoutesService {
   }
 
   async findAll(filter): Promise<RouteDocument[]> {
-    return await this.routeModel.find(filter);
+    return await this.addUsernameToRoutes(await this.routeModel.find(filter));
   }
 
   async findOneById(id: string): Promise<RouteDocument | null> {
-    return await this.routeModel.findById(new mongoose.Types.ObjectId(id));
+    const [route] = await this.addUsernameToRoutes([
+      await this.routeModel.findById(new mongoose.Types.ObjectId(id)),
+    ]);
+    return route;
   }
 
   async findOne(filter): Promise<RouteDocument | null> {
-    return await this.routeModel.findOne(filter);
+    const [route] = await this.addUsernameToRoutes([
+      await this.routeModel.findOne(filter),
+    ]);
+    return route;
   }
 
   update(id: string, _updateRouteDto: UpdateRouteDto) {
@@ -43,5 +51,15 @@ export class RoutesService {
 
     route.active = false;
     await route.save();
+  }
+
+  async addUsernameToRoutes(routes): Promise<RouteDocument[]> {
+    for await (const route of routes) {
+      if (route)
+        route.username = await this.userService.getNameByIdMICROSERVICE(
+          route.createdBy,
+        );
+    }
+    return routes;
   }
 }

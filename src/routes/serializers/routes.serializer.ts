@@ -11,6 +11,7 @@ const whitelist = [
   'createdBy',
   'active',
   'teamId',
+  'username',
 ];
 
 const serializeResource = (data) => {

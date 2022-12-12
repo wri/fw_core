@@ -28,7 +28,6 @@ import { CoverageService } from '../../areas/services/coverage.service';
 import { DatasetService } from '../../areas/services/dataset.service';
 import { RoutesService } from '../routes.service';
 import { Route } from '../models/route.schema';
-import { MongooseObjectId } from '../../common/objectId';
 
 describe('Routes', () => {
   let app: INestApplication;
@@ -487,6 +486,31 @@ describe('Routes', () => {
       expect(response.body.data.attributes).toHaveProperty(
         'createdBy',
         ROLES.USER.id,
+      );
+    });
+
+    it('should add username to route', async () => {
+      const route1 = await formsDbConnection.collection('routes').insertOne({
+        ...routeConstants.defaultRoute,
+        routeId: 'cea34015-bfaf-46c2-a660-db1e9819b515',
+        teamId: new mongoose.Types.ObjectId(),
+        createdBy: ROLES.USER.id,
+        active: true,
+      });
+      const response = await request(app.getHttpServer())
+        .get(`/routes/${route1.insertedId.toString()}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty(
+        'id',
+        route1.insertedId.toString(),
+      );
+      expect(response.body.data).toHaveProperty('attributes');
+      expect(response.body.data.attributes).toHaveProperty(
+        'username',
+        'Full Name',
       );
     });
   });
