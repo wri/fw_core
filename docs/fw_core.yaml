@@ -146,15 +146,9 @@ paths:
           $ref: '#/components/responses/Error'
       operationId: get-v3-gfw-routes-user
       description: Get all active routes made by the user
-      parameters:
-        - schema:
-            type: boolean
-          in: query
-          name: includeInactive
-          description: Includes inactive routes in response
   /v3/gfw/routes/teams:
     get:
-      summary: Get User's Team's Active Routes
+      summary: Get User's Teams Active Routes
       tags:
         - Routes
       responses:
@@ -164,12 +158,6 @@ paths:
           $ref: '#/components/responses/Error'
       operationId: get-v3-gfw-routes-teams
       description: Returns an array of all active routes linked to the user's teams
-      parameters:
-        - schema:
-            type: boolean
-          in: query
-          name: includeInactive
-          description: Include inactive routes in response
   '/v3/gfw/routes/{routeId}':
     get:
       summary: Get A Single Route
@@ -194,7 +182,7 @@ paths:
           $ref: '#/components/responses/Error'
         '404':
           $ref: '#/components/responses/Error'
-      description: Sets a route's status to inactive if request made by manager but not creator of the route. Deletes a route if the request made by the creator of the route.
+      description: Sets a route's status to inactive
       tags:
         - Routes
     parameters:
@@ -1117,7 +1105,8 @@ paths:
         required: true
     get:
       summary: Get Team Area Routes
-      tags: []
+      tags:
+        - Routes
       responses:
         '200':
           $ref: '#/components/responses/Routes-Response'
