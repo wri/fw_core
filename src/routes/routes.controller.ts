@@ -8,6 +8,8 @@ import {
   HttpException,
   HttpStatus,
   ParseArrayPipe,
+  ForbiddenException,
+  Query,
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { CreateRouteDto } from './dto/create-route.dto';
@@ -65,6 +67,7 @@ export class RoutesController {
     @AuthUser() user: IUser,
     @Param('teamId') teamId: string,
     @Param('areaId') areaId: string,
+    @Query('includeInactive') _includeInactive: string,
   ) {
     // active routes created by the user or with the team and area ids
     const filter: mongoose.FilterQuery<any> = {
@@ -73,32 +76,52 @@ export class RoutesController {
           $or: [{ teamId: teamId }, { createdBy: user.id }],
         },
         { areaId: areaId },
-        { active: true },
       ],
     };
+
+    const includeInactive = _includeInactive === 'true';
+    if (!includeInactive) {
+      filter.$and?.push({ active: true });
+    }
+
     return { data: serializeRoutes(await this.routesService.findAll(filter)) };
   }
 
   @Get('/user')
-  async findAllUser(@AuthUser() user: IUser) {
+  async findAllUser(
+    @AuthUser() user: IUser,
+    @Query('includeInactive') _includeInactive: string,
+  ) {
     // get all active routes
-    const filter = {
+    const filter: any = {
       createdBy: user.id,
-      active: true,
     };
+
+    const includeInactive = _includeInactive === 'true';
+    if (!includeInactive) {
+      filter.active = true;
+    }
+
     const routes = await this.routesService.findAll(filter);
     return { data: serializeRoutes(routes) };
   }
 
   @Get('/teams')
-  async findAllTeams(@AuthUser() user: IUser) {
+  async findAllTeams(
+    @AuthUser() user: IUser,
+    @Query('includeInactive') _includeInactive: string,
+  ) {
     // find all user teams
     const teams = await this.teamsService.findAllByUserId(user.id);
 
-    const filter = {
+    const filter: any = {
       teamId: { $in: teams.map((team) => team.id) },
-      active: true,
     };
+
+    const includeInactive = _includeInactive === 'true';
+    if (!includeInactive) {
+      filter.active = true;
+    }
 
     const routes = await this.routesService.findAll(filter);
     return { data: serializeRoutes(routes) };
@@ -118,17 +141,24 @@ export class RoutesController {
     const route = await this.routesService.findOneById(id);
     if (!route)
       throw new HttpException("This route doesn't exist", HttpStatus.NOT_FOUND);
+
+    // if user is creator then hard delete
+    if (route.createdBy === user.id) {
+      await route.deleteOne();
+      return;
+    }
+
+    // if user is not creator but a manager then soft delete
+    if (!route.teamId)
+      throw new ForbiddenException(
+        "User doesn't have permission to delete this route",
+      );
+
     // check user is manager of route team
     const managedTeams = await this.teamsService.findAllManagedTeams(user.id);
-    if (
-      route.teamId &&
-      !managedTeams.includes(route.teamId) &&
-      route.createdBy !== user.id
-    )
-      throw new HttpException(
-        'You cannot delete this route',
-        HttpStatus.FORBIDDEN,
-      );
+    if (!managedTeams.includes(route.teamId))
+      throw new ForbiddenException('User cannot delete this route');
+
     await this.routesService.deactivate(id);
   }
 }
