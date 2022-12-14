@@ -10,6 +10,7 @@ import {
   IsOptional,
   isString,
   ValidateNested,
+  ValidationArguments,
 } from 'class-validator';
 
 export class CreateAnswerInput {
@@ -31,8 +32,13 @@ export class CreateAnswerInput {
   @IsArray()
   @ArrayMaxSize(2)
   @ArrayMinSize(2)
+  @Transform(({ value }) => {
+    console.log(value, typeof value, value.split(','));
+    return isString(value)
+      ? value.split(',').map((item) => item.trim())
+      : value;
+  })
   @IsNumberString({}, { each: true })
-  @Transform(({ value }) => (isString(value) ? value.split(',') : value))
   userPosition?: string[];
 
   @IsOptional()
