@@ -5,7 +5,6 @@ import {
   IsDefined,
   IsMongoId,
   IsNotEmpty,
-  IsNumberString,
   IsObject,
   IsOptional,
   IsString,

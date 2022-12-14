@@ -10,7 +10,6 @@ import {
   IsOptional,
   isString,
   ValidateNested,
-  ValidationArguments,
 } from 'class-validator';
 
 export class CreateAnswerInput {
