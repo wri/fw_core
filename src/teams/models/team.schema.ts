@@ -1,10 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { EMemberRole, TeamMemberDocument } from './teamMember.schema';
+import {
+  EMemberRole,
+  EMemberStatus,
+  TeamMemberDocument,
+} from './teamMember.schema';
 
 export interface ITeam {
   name: string;
   userRole?: EMemberRole;
+  status?: EMemberStatus;
   createdAt: string;
   members?: TeamMemberDocument[];
   areas?: string[];
@@ -21,6 +26,9 @@ export class Team {
 
   @Prop({ required: false })
   userRole: string;
+
+  @Prop()
+  status: string;
 
   @Prop({ required: false })
   members: mongoose.Schema.Types.Mixed;

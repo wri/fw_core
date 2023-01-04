@@ -14,7 +14,7 @@ import { TeamDocument } from '../models/team.schema';
 import { TeamsService } from '../services/teams.service';
 import { Request } from 'express';
 import { TeamMembersService } from '../services/teamMembers.service';
-import { EMemberRole, TeamMemberDocument } from '../models/teamMember.schema';
+import { EMemberRole, EMemberStatus, TeamMemberDocument } from '../models/teamMember.schema';
 import serializeTeam from '../serializers/team.serializer';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
 import { AuthUser } from '../../common/decorators';
@@ -73,7 +73,9 @@ export class TeamsController {
 
     const teams = await this.teamsService.findAllByUserId(id);
     const filteredTeams = teams.filter(
-      (team) => team.userRole !== EMemberRole.Left,
+      (team) =>
+        team.userRole !== EMemberRole.Left &&
+        team.status === EMemberStatus.Confirmed,
     );
 
     // get members of teams and areas of team
