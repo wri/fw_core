@@ -14,7 +14,11 @@ import { TeamDocument } from '../models/team.schema';
 import { TeamsService } from '../services/teams.service';
 import { Request } from 'express';
 import { TeamMembersService } from '../services/teamMembers.service';
-import { EMemberRole, EMemberStatus, TeamMemberDocument } from '../models/teamMember.schema';
+import {
+  EMemberRole,
+  EMemberStatus,
+  TeamMemberDocument,
+} from '../models/teamMember.schema';
 import serializeTeam from '../serializers/team.serializer';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
 import { AuthUser } from '../../common/decorators';
