@@ -69,7 +69,7 @@ export class TeamsService {
       const team = await this.findById(member.teamId.toString());
       if (team) {
         team.userRole = member.role;
-        teams.push(team);
+        if (member.status === EMemberStatus.Confirmed) teams.push(team);
       }
     }
 

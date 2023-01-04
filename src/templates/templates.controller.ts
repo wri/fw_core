@@ -388,7 +388,7 @@ export class TemplatesController {
   async deleteAllAnswers(@AuthUser() user: IUser): Promise<string[]> {
     const allAnswers = await this.answersService.find({ user: user.id });
     await this.answersService.deleteMany({ user: user.id });
-    return allAnswers.map((answer) => answer._id);
+    return allAnswers.map((answer) => answer._id.toString());
   }
 
   @Delete('/:id')
