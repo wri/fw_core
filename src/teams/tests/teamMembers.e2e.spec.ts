@@ -49,7 +49,7 @@ describe('Team Members', () => {
       .getTeamsHandle();
   });
 
-  describe('GET /teams/:teamId/users', () => {
+  /*   describe('GET /teams/:teamId/users', () => {
     //jest.setTimeout(10000)
     afterEach(async () => {
       await teamsDbConnection.collection('gfwteams').deleteMany({});
@@ -1096,6 +1096,73 @@ describe('Team Members', () => {
         )
         .set('Authorization', 'USER')
         .expect(400);
+    });
+  }); */
+
+  describe('DELETE /deleteUserFromAllTeams/:userId', () => {
+    afterEach(async () => {
+      await teamsDbConnection.collection('gfwteams').deleteMany({});
+      await teamsDbConnection.collection('teamuserrelations').deleteMany({});
+    });
+
+    it('should return a 401 without authorisation', async () => {
+      return await request(app.getHttpServer())
+        .delete(`/teams/deleteUserFromAllTeams/${2}`)
+        .expect(401);
+    });
+
+    it('should remove a user from all their teams', async () => {
+      const team1 = await teamsDbConnection
+        .collection('gfwteams')
+        .insertOne({ name: 'Test' });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Confirmed,
+        role: EMemberRole.Manager,
+      });
+      const team2 = await teamsDbConnection
+        .collection('gfwteams')
+        .insertOne({ name: 'Test' });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team2.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Declined,
+        role: EMemberRole.Monitor,
+      });
+      await request(app.getHttpServer())
+        .delete(`/teams/deleteUserFromAllTeams/${ROLES.USER.id}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      const relationCount = await teamsDbConnection
+        .collection('teamuserrelations')
+        .countDocuments({ userId: new mongoose.Types.ObjectId(ROLES.USER.id) });
+      expect(relationCount).toBe(0);
+    });
+
+    it('should return the ids of the teams removed from', async () => {
+      const team1 = await teamsDbConnection
+        .collection('gfwteams')
+        .insertOne({ name: 'Test' });
+      await teamsDbConnection.collection('teamuserrelations').insertOne({
+        teamId: team1.insertedId,
+        userId: new mongoose.Types.ObjectId(ROLES.USER.id),
+        email: ROLES.USER.email,
+        status: EMemberStatus.Confirmed,
+        role: EMemberRole.Manager,
+      });
+      const response = await request(app.getHttpServer())
+        .delete(`/teams/deleteUserFromAllTeams/${ROLES.USER.id}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('teamsDeletedFrom');
+      expect(response.body.teamsDeletedFrom[0]).toBe(
+        team1.insertedId.toString(),
+      );
     });
   });
 

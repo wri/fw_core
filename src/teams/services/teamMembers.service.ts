@@ -159,4 +159,34 @@ export class TeamMembersService {
     }
     return users;
   }
+
+  async deleteAllForUser(userId: string): Promise<any> {
+    const teamsDeletedFrom: string[] = [];
+    const teamsNotDeletedFrom: string[] = [];
+    const errors: { id: any; error: string | unknown }[] = [];
+    const teamMemberRelations = await this.teamMemberModel.find({ userId });
+    for await (const relation of teamMemberRelations) {
+      if (relation.role === EMemberRole.Administrator) {
+        teamsNotDeletedFrom.push(relation.teamId.toString());
+        errors.push({ id: relation.id, error: 'admin' });
+      } else {
+        try {
+          const deletedRelation = await this.teamMemberModel.findByIdAndDelete(
+            relation._id,
+          );
+          if (deletedRelation)
+            teamsDeletedFrom.push(relation.teamId.toString());
+        } catch (error) {
+          teamsNotDeletedFrom.push(relation.teamId.toString());
+          errors.push({ id: relation.teamId.toString(), error });
+        }
+      }
+    }
+
+    return {
+      teamsDeletedFrom,
+      teamsNotDeletedFrom,
+      errors,
+    };
+  }
 }

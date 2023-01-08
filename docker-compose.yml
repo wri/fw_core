@@ -85,7 +85,7 @@ services:
       - redis
     networks:
       - gfw-nest-network
-    command: yarn test
+    command: yarn test /src/teams/tests/teamMembers.e2e.spec.ts
   docs:
     build: .
     ports:

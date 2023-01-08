@@ -10,6 +10,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { TemplatesService } from './templates.service';
 import { CreateTemplateDto } from './dto/create-template.dto';
@@ -30,6 +31,7 @@ import { ValidateMongoId } from '../common/pipes/objectIdValidator.pipe';
 import { UpdateTemplateInput } from './input/update-template.input';
 import { ValidateBodyIsNotEmptyPipe } from '../common/pipes/validate-body-is-not-empty.pipe';
 import { AreasService } from '../areas/services/areas.service';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('templates')
 export class TemplatesController {
@@ -39,6 +41,7 @@ export class TemplatesController {
     private readonly teamsService: TeamsService,
     private readonly templateAreaRelationService: TemplateAreaRelationService,
     private readonly areasService: AreasService,
+    private readonly configService: ConfigService,
   ) {}
   private readonly logger = new Logger(TemplatesController.name);
 
@@ -91,6 +94,33 @@ export class TemplatesController {
   @Get('/public')
   async findAllPublicTemplates() {
     const templates = await this.templatesService.findAllPublicTemplates();
+
+    return { data: serializeTemplate(templates) };
+  }
+
+  @Get('/latestByUserId/:userId')
+  async findAllLatestVersionsByUserId(
+    @AuthUser() user: IUser,
+    @Param('id') userId: string,
+  ): Promise<ITemplateResponse> {
+    this.logger.log(
+      `Obtaining the latest version of all reports owned by user ${userId}`,
+    );
+
+    const templates = await this.templatesService.findAllByUserId(userId, {
+      latest: true,
+    });
+
+    for (const template of templates) {
+      const answersCount = template.editGroupId
+        ? await this.answersService.countByEditGroupId(template.editGroupId)
+        : await this.answersService.countByTemplateId(template.id);
+      template.answersCount = answersCount;
+      template.areas =
+        await this.templateAreaRelationService.findAreasForTemplate(
+          template.id,
+        );
+    }
 
     return { data: serializeTemplate(templates) };
   }
@@ -221,6 +251,24 @@ export class TemplatesController {
     }
 
     return { data: serializeTemplate(templates) };
+  }
+
+  @Get('/allUserAnswers/:userId')
+  async getAllUserAnswers(
+    @AuthUser() user: IUser,
+    @Param('id') userId: string,
+  ): Promise<IAnswerReturn> {
+    this.logger.log(`Obtaining all user answers`);
+    user.id = userId;
+    const answers = await this.answersService.getAllAnswers({
+      loggedUser: user,
+      teams: [],
+    });
+
+    if (!answers)
+      throw new NotFoundException('Answers not found for this user');
+
+    return { data: serializeAnswers(answers) };
   }
 
   @Get('/allAnswers')
@@ -384,11 +432,76 @@ export class TemplatesController {
     return { data: serializeTemplate(template) };
   }
 
-  @Delete('/allAnswers')
-  async deleteAllAnswers(@AuthUser() user: IUser): Promise<string[]> {
-    const allAnswers = await this.answersService.find({ user: user.id });
-    await this.answersService.deleteMany({ user: user.id });
-    return allAnswers.map((answer) => answer._id.toString());
+  /**
+   * Route to delete all user answers and templates for a user with supplied id
+   * @param userId Id of user
+   * @returns an object containing deleted answers and templates,
+   * undeleted answers and templates, and any errors.
+   * A user can delete their own records, or the microservice token can be used for any user
+   */
+  @Delete('/allUser/:userId')
+  async deleteAllUserReports(
+    @AuthUser() user: IUser,
+    @Param('userId') userId: string,
+  ): Promise<any> {
+    const deletedTemplates: string[] = [],
+      undeletedTemplates: string[] = [],
+      errors: { id: any; error: string }[] = [];
+    // check permissions
+    if (
+      user.id !== userId &&
+      user.token !== this.configService.get('service.token')
+    )
+      throw new UnauthorizedException(
+        'You are not authorised to delete this resource',
+      );
+    // delete all the users answers
+    const allAnswers = await this.answersService.find({ user: userId });
+    await this.answersService.deleteMany({ user: userId });
+    const deletedAnswers = allAnswers.map((answer) => answer._id.toString());
+
+    // get all templates
+    const templates = await this.templatesService.findAllByUserId(userId, {
+      latest: true,
+    });
+    // loop over each non-public template and delete if no answers. Don't delete if still answers
+    for await (const template of templates.filter(
+      (template) => template.public === false,
+    )) {
+      // get answer count
+      const count = await this.answersService.count({
+        report: { $in: [template._id, template.editGroupId] },
+      });
+      if (count === 0) {
+        // delete all versions
+        try {
+          await this.templatesService.deleteAllVersions(
+            template._id,
+            template.editGroupId,
+          );
+          deletedTemplates.push(template.id);
+        } catch (error) {
+          undeletedTemplates.push(template.id);
+          errors.push({
+            id: template.id,
+            error: 'systemError',
+          });
+        }
+      } else {
+        undeletedTemplates.push(template.id);
+        errors.push({
+          id: template.id,
+          error: 'answersExist',
+        });
+      }
+    }
+
+    return {
+      deletedAnswers,
+      deletedTemplates,
+      undeletedTemplates,
+      errors,
+    };
   }
 
   @Delete('/:id')

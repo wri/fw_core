@@ -88,4 +88,9 @@ export class TemplatesService extends BaseService<
     }
     return this.model.find({ public: true });
   }
+
+  async deleteAllVersions(id, editGroupId): Promise<void> {
+    await this.model.deleteMany({ editGroupId });
+    await this.model.findByIdAndDelete(id);
+  }
 }

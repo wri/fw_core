@@ -1108,7 +1108,7 @@ describe('Templates', () => {
     });
   });
 
-  describe('DELETE /templates/allAnswers', () => {
+  describe('DELETE /templates/allUser/:userId', () => {
     afterEach(async () => {
       await teamsDbConnection.collection('gfwteams').deleteMany({});
       await teamsDbConnection.collection('teamuserrelations').deleteMany({});
@@ -1118,7 +1118,7 @@ describe('Templates', () => {
 
     it('should return a 401 without authorisation', async () => {
       return await request(app.getHttpServer())
-        .delete(`/templates/allAnswers`)
+        .delete(`/templates/allUser/1`)
         .expect(401);
     });
 
@@ -1163,7 +1163,7 @@ describe('Templates', () => {
         .findOne({ _id: answer3.insertedId });
       expect(createdAnswer3).toBeDefined();
       await request(app.getHttpServer())
-        .delete(`/templates/allAnswers`)
+        .delete(`/templates/allUser/${ROLES.USER.id}`)
         .set('Authorization', 'USER')
         .expect(200);
 
@@ -1178,7 +1178,95 @@ describe('Templates', () => {
       const deletedAnswer3 = await formsDbConnection
         .collection('answers')
         .findOne({ _id: answer3.insertedId });
-      expect(deletedAnswer3).toBeDefined();
+      expect(deletedAnswer3).not.toBeNull();
+    });
+
+    it('should delete all a users templates', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne(constants.userTemplate);
+      const template2 = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.defaultTemplate });
+
+      await request(app.getHttpServer())
+        .delete(`/templates/allUser/${ROLES.USER.id}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+      const deletedTemplate = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+      expect(deletedTemplate).toBeNull();
+      const nonDeletedTemplate = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template2.insertedId });
+      expect(nonDeletedTemplate).not.toBeNull();
+    });
+
+    it('shouldnt delete a template with answers', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne(constants.userTemplate);
+      const template2 = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.defaultTemplate });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.ADMIN.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
+
+      await request(app.getHttpServer())
+        .delete(`/templates/allUser/${ROLES.USER.id}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+      const deletedTemplate = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template.insertedId });
+      expect(deletedTemplate).not.toBeNull();
+      const nonDeletedTemplate = await formsDbConnection
+        .collection('reports')
+        .findOne({ _id: template2.insertedId });
+      expect(nonDeletedTemplate).not.toBeNull();
+    });
+
+    it('should return arrays of details', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne(constants.userTemplate);
+      const template2 = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.defaultTemplate });
+      const answer = await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.ADMIN.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
+
+      const response = await request(app.getHttpServer())
+        .delete(`/templates/allUser/${ROLES.USER.id}`)
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('deletedAnswers');
+      expect(response.body.deletedAnswers[0]).toBe(
+        answer.insertedId.toString(),
+      );
+      expect(response.body).toHaveProperty('undeletedTemplates');
+      expect(response.body.undeletedTemplates[0]).toBe(
+        template.insertedId.toString(),
+      );
     });
   });
 

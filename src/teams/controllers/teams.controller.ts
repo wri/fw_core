@@ -151,6 +151,13 @@ export class TeamsController {
     return { data: serializeTeam(updatedTeam) };
   }
 
+  // DELETE /v3/teams/deleteUserFromAllTeams/:userId
+  @Delete('/deleteUserFromAllTeams/:userId')
+  async deleteUserFromAllTeams(@Param('userId') userId: string): Promise<any> {
+    // delete all team member relations that has user id
+    return this.teamMembersService.deleteAllForUser(userId);
+  }
+
   // DELETE /v3/teams/:teamId
   // Need to be admin
   @Delete('/:teamId')
