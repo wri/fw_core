@@ -280,7 +280,7 @@ export class AreasController {
   async deleteOneArea(
     @Param('id') id: string,
     @AuthUser() user: IUser,
-  ): Promise<string> {
+  ): Promise<any> {
     const area = await this.areasService.getArea(id, user);
 
     if (!area) throw new ForbiddenException();
@@ -291,12 +291,12 @@ export class AreasController {
         HttpStatus.FORBIDDEN,
       );
 
-    const deletedArea: IArea = await this.areasService.delete(id, user);
+    await this.areasService.delete(id, user);
 
     // delete area relations
     await this.teamAreaRelationService.delete({ areaId: id });
     await this.templateAreaRelationService.deleteMany({ areaId: id });
 
-    return deletedArea.id;
+    return { data: id };
   }
 }
