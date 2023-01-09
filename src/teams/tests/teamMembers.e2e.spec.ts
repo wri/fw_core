@@ -49,7 +49,7 @@ describe('Team Members', () => {
       .getTeamsHandle();
   });
 
-  /*   describe('GET /teams/:teamId/users', () => {
+  describe('GET /teams/:teamId/users', () => {
     //jest.setTimeout(10000)
     afterEach(async () => {
       await teamsDbConnection.collection('gfwteams').deleteMany({});
@@ -1097,7 +1097,7 @@ describe('Team Members', () => {
         .set('Authorization', 'USER')
         .expect(400);
     });
-  }); */
+  });
 
   describe('DELETE /deleteUserFromAllTeams/:userId', () => {
     afterEach(async () => {
