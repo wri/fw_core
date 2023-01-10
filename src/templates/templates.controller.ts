@@ -216,43 +216,6 @@ export class TemplatesController {
     return { data: serializeTemplate(template) };
   }
 
-  @Get()
-  async findAll(@AuthUser() user: IUser): Promise<ITemplateResponse> {
-    const filter = {
-      $and: [
-        {
-          $or: [
-            { $and: [{ public: true }, { status: 'published' }] },
-            { user: user.id },
-          ],
-        },
-      ],
-    };
-
-    this.logger.log('Obtaining all user templates');
-    const templates = await this.templatesService.find(filter);
-
-    // get answer count for each report
-    const numReports = templates.length;
-    for (let i = 1; i < numReports; i++) {
-      let answersFilter = {};
-      if (user.role === 'ADMIN' || user.id === templates[i].user.toString()) {
-        answersFilter = {
-          report: templates[i].id,
-        };
-      } else {
-        answersFilter = {
-          user: user.id,
-          report: templates[i].id,
-        };
-      }
-      const answers = await this.answersService.find(answersFilter);
-      templates[i].answersCount = answers.length || 0;
-    }
-
-    return { data: serializeTemplate(templates) };
-  }
-
   @Get('/allUserAnswers/:userId')
   async getAllUserAnswers(
     @AuthUser() user: IUser,
@@ -326,6 +289,43 @@ export class TemplatesController {
       await this.templateAreaRelationService.findAreasForTemplate(template.id);
 
     return { data: serializeTemplate(template) };
+  }
+
+  @Get()
+  async findAll(@AuthUser() user: IUser): Promise<ITemplateResponse> {
+    const filter = {
+      $and: [
+        {
+          $or: [
+            { $and: [{ public: true }, { status: 'published' }] },
+            { user: user.id },
+          ],
+        },
+      ],
+    };
+
+    this.logger.log('Obtaining all user templates');
+    const templates = await this.templatesService.find(filter);
+
+    // get answer count for each report
+    const numReports = templates.length;
+    for (let i = 1; i < numReports; i++) {
+      let answersFilter = {};
+      if (user.role === 'ADMIN' || user.id === templates[i].user.toString()) {
+        answersFilter = {
+          report: templates[i].id,
+        };
+      } else {
+        answersFilter = {
+          user: user.id,
+          report: templates[i].id,
+        };
+      }
+      const answers = await this.answersService.find(answersFilter);
+      templates[i].answersCount = answers.length || 0;
+    }
+
+    return { data: serializeTemplate(templates) };
   }
 
   @Patch('/:id')
