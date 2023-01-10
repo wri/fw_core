@@ -101,7 +101,7 @@ export class TemplatesController {
   @Get('/latestByUserId/:userId')
   async findAllLatestVersionsByUserId(
     @AuthUser() user: IUser,
-    @Param('id') userId: string,
+    @Param('userId') userId: string,
   ): Promise<ITemplateResponse> {
     this.logger.log(
       `Obtaining the latest version of all reports owned by user ${userId}`,
