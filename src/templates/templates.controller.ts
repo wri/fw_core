@@ -219,7 +219,7 @@ export class TemplatesController {
   @Get('/allUserAnswers/:userId')
   async getAllUserAnswers(
     @AuthUser() user: IUser,
-    @Param('id') userId: string,
+    @Param('userId') userId: string,
   ): Promise<IAnswerReturn> {
     this.logger.log(`Obtaining all user answers`);
     user.id = userId;
