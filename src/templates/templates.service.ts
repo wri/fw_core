@@ -85,13 +85,13 @@ export class TemplatesService extends BaseService<
   }): Promise<TemplateDocument[]> {
     if (opts?.projection) {
       return this.model.find(
-        { public: true, status: ETemplateStatus.UNPUBLISHED },
+        { public: true, status: ETemplateStatus.PUBLISHED },
         { projection: opts.projection },
       );
     }
     return this.model.find({
       public: true,
-      status: ETemplateStatus.UNPUBLISHED,
+      status: ETemplateStatus.PUBLISHED,
     });
   }
 
