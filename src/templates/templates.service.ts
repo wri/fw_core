@@ -84,9 +84,15 @@ export class TemplatesService extends BaseService<
     projection: (keyof TemplateDocument)[];
   }): Promise<TemplateDocument[]> {
     if (opts?.projection) {
-      return this.model.find({ public: true }, { projection: opts.projection });
+      return this.model.find(
+        { public: true, status: ETemplateStatus.UNPUBLISHED },
+        { projection: opts.projection },
+      );
     }
-    return this.model.find({ public: true });
+    return this.model.find({
+      public: true,
+      status: ETemplateStatus.UNPUBLISHED,
+    });
   }
 
   async deleteAllVersions(id, editGroupId): Promise<void> {
