@@ -1,138 +1,161 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAreaDto } from '../dto/create-area.dto';
-import { UpdateAreaDto } from '../dto/update-area.dto';
 import { GeostoreService } from './geostore.service';
 import { Logger } from '@nestjs/common';
-import config = require('config');
-import fs from "fs";
-import FormData from "form-data";
+import fs from 'fs';
+import FormData from 'form-data';
 import axios from 'axios';
 import { CoverageService } from './coverage.service';
-import { DatasetService } from './dataset.service';
-import { IArea, IGeojson, IGeostore } from '../models/area.entity';
+import { IArea, IGeojson } from '../models/area.entity';
 import { IUser } from '../../common/user.model';
-
-const ALERTS_SUPPORTED = config.get("alertsSupported");
+import { ConfigService } from '@nestjs/config';
+import { IGeostore } from '../models/geostore.entity';
 
 @Injectable()
 export class AreasService {
-
   constructor(
     private readonly geostoreService: GeostoreService,
     private readonly coverageService: CoverageService,
-    private readonly datasetService: DatasetService
-    ) { }
+    private readonly configService: ConfigService,
+  ) {}
   private readonly logger = new Logger(AreasService.name);
 
-  async getArea(areaId: string, user: IUser): Promise<IArea> {
+  async getArea(areaId: string, user: IUser): Promise<IArea | null> {
     try {
-      const baseURL = config.get("areasAPI.url");
-      const url = `${baseURL}/v2/area/${areaId}`
+      const baseURL = this.configService.get('areasApi.url');
+      const url = `${baseURL}/v2/area/${areaId}`;
       const getAreasRequestConfig = {
         headers: {
-          authorization: user.token
-        }
-      }
+          authorization: user.token ?? '',
+        },
+      };
       const { data } = await axios.get(url, getAreasRequestConfig);
       this.logger.log(`Got area with id ${data.data.id}`);
       return data && data.data;
-    } catch (e) {
-      this.logger.error("Error while fetching area", e);
+    } catch (e: any) {
+      if (e.response.status === 404) return null;
+      this.logger.error('Error while fetching area', e);
       throw e;
     }
   }
 
-  async getAreaMICROSERVICE(areaId: string): Promise<IArea> {
+  async getAreaMICROSERVICE(areaId: string): Promise<IArea | null> {
     try {
-      const baseURL = config.get("areasAPI.url");
-      const url = `${baseURL}/v1/area/${areaId}`
+      const baseURL = this.configService.get('areasApi.url');
+      const url = `${baseURL}/v1/area/${areaId}`;
       const getAreasRequestConfig = {
         headers: {
-          authorization: `Bearer ${config.get("service.token")}`
-        }
-      }
+          authorization: `Bearer ${this.configService.get('service.token')}`,
+        },
+      };
       const { data } = await axios.get(url, getAreasRequestConfig);
       this.logger.log(`Got area with id ${data.data.id}`);
       return data && data.data;
-    } catch (e) {
-      this.logger.error("Error while fetching area", e);
+    } catch (e: any) {
+      if (e.response.status === 404) return null;
+      this.logger.error('Error while fetching area', e);
       throw e;
     }
   }
 
   async getUserAreas(user: IUser): Promise<IArea[]> {
     try {
-      const baseURL = config.get("areasAPI.url");
-      const url = `${baseURL}/v2/area`
+      const baseURL = this.configService.get('areasApi.url');
+      const url = `${baseURL}/v2/area`;
       const getUserAreasRequestConfig = {
         headers: {
-          authorization: user.token
-        }
+          authorization: user.token ?? '',
+        },
       };
       const response = await axios.get(url, getUserAreasRequestConfig);
       const areas = response.data;
-      this.logger.log(`Got ${areas.data.length} user areas for user ${user.id}`);
-      return areas && areas.data;
-    } catch (e) {
-      this.logger.error("Error while fetching areas", e);
+      this.logger.log(
+        `Got ${areas.data.length} user areas for user ${user.id}`,
+      );
+      if (areas && areas.data) {
+        const filteredAreas = areas.data.filter(
+          (area) => area.attributes.application === 'fw',
+        );
+        return filteredAreas;
+      } else return [];
+    } catch (e: any) {
+      if (e.response.status === 404) return [];
+      this.logger.error('Error while fetching areas', e);
       throw e;
     }
   }
 
-  async createAreaWithGeostore({ name, image }, geojson, user): Promise<any> {
-    let geostore: IGeostore;
+  async createAreaWithGeostore(
+    { name, image },
+    geojson,
+    user: IUser,
+  ): Promise<any> {
+    let geostore: IGeostore | undefined;
     let coverage;
+    const ALERTS_SUPPORTED = this.configService.get('alertsSupported');
 
     try {
-      geostore = await this.geostoreService.createGeostore(geojson, user)
+      geostore = await this.geostoreService.createGeostore(
+        geojson,
+        user.token ?? '',
+      );
     } catch (error) {
-      this.logger.error("Error while creating geostore", error)
+      this.logger.error('Error while creating geostore', error);
+      throw error;
     }
     try {
-      const params = {
-        geostoreId: geostore.id,
-        slugs: ALERTS_SUPPORTED
-      };
-      coverage = await this.coverageService.getCoverage(params, user);
+      coverage = await this.coverageService.getCoverage(
+        {
+          geostoreId: geostore?.id,
+          slugs: ALERTS_SUPPORTED,
+        },
+        user.token ?? '',
+      );
     } catch (error) {
-      this.logger.error("Error while getting area coverage", error);
+      this.logger.error('Error while getting area coverage', error);
       throw error;
     }
     try {
       const form = new FormData();
-      form.append("name", name);
-      form.append("geostore", geostore.id);
-      form.append("image",fs.createReadStream(image.path));
+      form.append('name', name);
+      form.append('geostore', geostore?.id);
+      form.append('image', fs.createReadStream(image.path));
 
-      const baseURL = config.get('areasAPI.url');
+      const baseURL = this.configService.get('areasApi.url');
       const url = `${baseURL}/v1/area/fw/${user.id}`;
 
       const createAreaRequestConfig = {
         headers: {
           ...form.getHeaders(),
-          authorization: user.token
-        }
-      }
+          authorization: user.token ?? '',
+        },
+      };
       const { data } = await axios.post(url, form, createAreaRequestConfig);
-      return { geostore, area: data.data, coverage }
-
+      return { geostore, area: data.data, coverage };
     } catch (error) {
-      this.logger.error("Error while creating area with geostore", error);
-      throw error
+      this.logger.error('Error while creating area with geostore', error);
+      throw error;
     }
   }
 
-  async updateAreaWithGeostore({ name, image }, geojson: IGeojson, existingArea: IArea, user: IUser) {
-
+  async updateAreaWithGeostore(
+    { name, image },
+    geojson: IGeojson,
+    existingArea: IArea,
+    user: IUser,
+  ) {
     let geostoreId;
     let coverage;
+    const ALERTS_SUPPORTED = this.configService.get('alertsSupported');
 
     if (geojson) {
       try {
-        const geostoreResponse = await this.geostoreService.createGeostore(geojson, user.token);
-        geostoreId = geostoreResponse.id;
+        const geostoreResponse = await this.geostoreService.createGeostore(
+          geojson,
+          user.token ?? '',
+        );
+        geostoreId = geostoreResponse?.id;
       } catch (e) {
-        this.logger.error("Error while creating geostore", e);
+        this.logger.error('Error while creating geostore', e);
         throw e;
       }
     } else geostoreId = existingArea.attributes.geostore;
@@ -140,54 +163,56 @@ export class AreasService {
     try {
       const params = {
         geostoreId,
-        slugs: ALERTS_SUPPORTED
+        slugs: ALERTS_SUPPORTED,
       };
-      coverage = await this.coverageService.getCoverage(params, user.token);
+      coverage = await this.coverageService.getCoverage(
+        params,
+        user.token ?? '',
+      );
     } catch (e) {
-      this.logger.error("Error while getting area coverage", e);
+      this.logger.error('Error while getting area coverage', e);
       throw e;
     }
     try {
       const form = new FormData();
-      if(name) form.append("name", name);
-      form.append("geostore", geostoreId);
-      if(image) form.append("image",fs.createReadStream(image.path));
+      if (name) form.append('name', name);
+      form.append('geostore', geostoreId);
+      if (image) form.append('image', fs.createReadStream(image.path));
 
-      const baseURL = config.get('areasAPI.url');
+      const baseURL = this.configService.get('areasApi.url');
       const url = `${baseURL}/v2/area/${existingArea.id}`;
 
       const createAreaRequestConfig = {
         headers: {
           ...form.getHeaders(),
-          authorization: user.token
-        }
-      }
+          authorization: user.token ?? '',
+        },
+      };
       const { data } = await axios.patch(url, form, createAreaRequestConfig);
-      this.logger.log(`Updated area with id ${data.data.id}`)
+      this.logger.log(`Updated area with id ${data.data.id}`);
       return { geostoreId, area: data.data, coverage };
     } catch (e) {
-      this.logger.error("Error while updating area with geostore", e);
+      this.logger.error('Error while updating area with geostore', e);
       throw e;
     }
   }
 
   async delete(areaId: string, user: IUser): Promise<IArea> {
     try {
-      const baseURL = config.get('areasAPI.url');
+      const baseURL = this.configService.get('areasApi.url');
       const url = `${baseURL}/v2/area/${areaId}`;
       const deleteAreaRequestConfig = {
         headers: {
-          authorization: user.token
-        }
+          authorization: user.token ?? '',
+        },
       };
       const { data } = await axios.delete(url, deleteAreaRequestConfig);
       const area = data.data;
-      this.logger.log(`Area with id ${area.id} deleted`)
+      this.logger.log(`Area with id ${areaId} deleted`);
       return area;
     } catch (error) {
-      this.logger.error("Error while deleting area", error);
+      this.logger.error('Error while deleting area', error);
       throw error;
     }
-  
   }
 }

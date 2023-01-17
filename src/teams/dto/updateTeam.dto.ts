@@ -1,3 +1,3 @@
-import { CreateTeamDto } from "./createTeam.dto";
+import { CreateTeamDto } from './createTeam.dto';
 
-export type UpdateTeamDto = CreateTeamDto
+export type UpdateTeamDto = CreateTeamDto;

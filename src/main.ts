@@ -1,10 +1,10 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as Sentry from '@sentry/node'
-import ErrorSerializer from './common/error.serializer'
+import * as Sentry from '@sentry/node';
+import ErrorSerializer from './common/error.serializer';
 import { IUser } from './common/user.model';
-import { ITemplate, TemplateDocument } from './templates/models/template.schema';
+import { TemplateDocument } from './templates/models/template.schema';
 import { TeamDocument } from './teams/models/team.schema';
 
 declare global {
@@ -19,8 +19,15 @@ declare global {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe());
-  app.setGlobalPrefix('v3/gfw')
+  app.enableCors();
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.setGlobalPrefix('v3/gfw');
+
+  Sentry.init({
+    dsn: 'https://a6b18ef7ce1d43298127081511289af7@o163691.ingest.sentry.io/4504083459211264',
+    environment: process.env.NODE_ENV,
+    sampleRate: 1,
+  });
 
   app.use(async (req, res, next) => {
     try {
@@ -30,7 +37,7 @@ async function bootstrap() {
       try {
         error = JSON.parse(inErr);
       } catch (e) {
-        Logger.error("Could not parse error message - is it JSON?: ", inErr)
+        Logger.error('Could not parse error message - is it JSON?: ', inErr);
         error = inErr;
       }
       res.status = error.status || res.status || 500;
@@ -40,16 +47,16 @@ async function bootstrap() {
       } else {
         Logger.log(error);
       }
-  
+
       res.body = ErrorSerializer.serializeError(res.status, error.message);
-      if (process.env.NODE_ENV === "production" && res.status === 500) {
-        res.body = "Unexpected error";
+      if (process.env.NODE_ENV === 'production' && res.status === 500) {
+        res.body = 'Unexpected error';
       }
-      res.type = "application/vnd.api+json";
+      res.type = 'application/vnd.api+json';
     }
   });
 
-  await app.listen(process.env.PORT);
-  console.log(`App running on: ${await app.getUrl()}`)
+  await app.listen(process.env.PORT ?? 4042);
+  console.log(`App running on: ${await app.getUrl()}`);
 }
 bootstrap();

@@ -1,0 +1,2779 @@
+openapi: 3.1.0
+info:
+  title: fw_core
+  version: '1.0'
+  summary: Core Services of GFW
+  description: 'Combination of Areas, Teams, Reports, Assignments and Routes'
+servers:
+  - url: 'http://localhost:3000'
+    description: Local
+  - url: 'https://dev-fw-api.globalforestwatch.org'
+    description: Dev
+  - url: 'https://staging-fw-api.globalforestwatch.org'
+    description: Staging
+  - url: 'https://api.globalforestwatch.org'
+    description: Production
+paths:
+  /v3/gfw/assignments:
+    post:
+      operationId: post-v3-gfw-assignments
+      summary: Create Assignment
+      description: Creates an assignment
+      tags:
+        - Assignments
+      responses:
+        '201':
+          $ref: '#/components/responses/Assignment-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      requestBody:
+        $ref: '#/components/requestBodies/CreateAssignmentBody'
+  /v3/gfw/assignments/user:
+    get:
+      operationId: get-v3-gfw-user
+      summary: Get User Assignments
+      description: Returns a user's assignments
+      tags:
+        - Assignments
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignments-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+  /v3/gfw/assignments/open:
+    get:
+      operationId: get-v3-gfw-assignments-open
+      summary: Get Open User Assignments
+      description: Returns all non-complete user assignments
+      tags:
+        - Assignments
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignments-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+  '/v3/gfw/assignments/areas/{areaId}':
+    get:
+      operationId: 'get-v3-gfw-assignments-area-:areaId'
+      summary: Get Area Assignments
+      description: Returns all user assignments within an area
+      parameters:
+        - schema:
+            type: string
+          name: areaId
+          in: path
+          required: true
+      tags:
+        - Assignments
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignments-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+  '/v3/gfw/assignments/{assignmentId}':
+    get:
+      summary: Get Assignment
+      tags:
+        - Assignments
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignment-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: 'get-v3-gfw-assignments-:assignmentId'
+      description: Gets a single assignment
+    patch:
+      summary: Update Assignment
+      operationId: 'patch-v3-gfw-assignments-:assignmentId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignment-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      description: Updates an assignment
+      tags:
+        - Assignments
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateAssignmentBody'
+    delete:
+      summary: Delete Assignment
+      operationId: 'delete-v3-gfw-assignments-:assignmentId'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      tags:
+        - Assignments
+      description: Deletes an assignment
+    parameters:
+      - schema:
+          type: string
+        name: assignmentId
+        in: path
+        required: true
+  /v3/gfw/routes/sync:
+    post:
+      summary: Sync Routes to Web
+      operationId: post-v3-gfw-routes-sync
+      responses:
+        '201':
+          $ref: '#/components/responses/Routes-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      description: Syncs an array of routes to the database
+      tags:
+        - Routes
+      requestBody:
+        $ref: '#/components/requestBodies/RouteBody'
+  /v3/gfw/routes/user:
+    get:
+      summary: Get User's Active Routes
+      tags:
+        - Routes
+      responses:
+        '200':
+          $ref: '#/components/responses/Routes-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-routes-user
+      description: Get all active routes made by the user
+  /v3/gfw/routes/teams:
+    get:
+      summary: Get User's Teams Active Routes
+      tags:
+        - Routes
+      responses:
+        '200':
+          $ref: '#/components/responses/Routes-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-routes-teams
+      description: Returns an array of all active routes linked to the user's teams
+  '/v3/gfw/routes/{routeId}':
+    get:
+      summary: Get A Single Route
+      tags:
+        - Routes
+      responses:
+        '200':
+          $ref: '#/components/responses/Route-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: 'get-v3-gfw-routes-:routeId'
+      description: Returns the route with the given id
+    delete:
+      summary: Delete Route
+      operationId: 'delete-v3-gfw-routes-:routeId'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Sets a route's status to inactive
+      tags:
+        - Routes
+    parameters:
+      - schema:
+          type: string
+        name: routeId
+        in: path
+        required: true
+  /v3/gfw/templates:
+    post:
+      summary: Create a Template
+      operationId: post-v3-gfw-templates
+      responses:
+        '201':
+          $ref: '#/components/responses/Template-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      description: Creates a new template
+      requestBody:
+        $ref: '#/components/requestBodies/CreateTemplateBody'
+      tags:
+        - Templates
+    get:
+      summary: Get All Templates
+      operationId: get-v3-gfw-templates
+      responses:
+        '200':
+          $ref: '#/components/responses/Templates-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      tags:
+        - Templates
+      description: Returns all user and public templates
+  '/v3/gfw/templates/{templateId}':
+    get:
+      summary: Get a Template
+      tags:
+        - Templates
+      responses:
+        '200':
+          $ref: '#/components/responses/Template-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: 'get-v3-gfw-templates-:templateId'
+      description: Gets a single template given the template id
+    parameters:
+      - schema:
+          type: string
+        name: templateId
+        in: path
+        required: true
+    patch:
+      summary: Update a Template
+      operationId: patch-v3-gfw-templates-templateId
+      responses:
+        '200':
+          $ref: '#/components/responses/Template-Response'
+        '401':
+          description: Unauthorized
+      description: Creates a new version of the template that shares the same `editGroupId` with the template.
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateTemplateBody'
+      tags:
+        - Templates
+    delete:
+      summary: Delete a Template
+      operationId: delete-v3-gfw-templates-templateId
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      description: Deletes a template with the given id
+      tags:
+        - Templates
+  '/v3/gfw/templates/{templateId}/answers':
+    parameters:
+      - schema:
+          type: string
+        name: templateId
+        in: path
+        required: true
+    get:
+      summary: Get All Template Answers
+      tags:
+        - Answers
+      responses:
+        '200':
+          $ref: '#/components/responses/Answers-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-templates-templateId-answers
+      description: Gets all answers user has permission to see for template with given id
+    post:
+      summary: Create an Answer
+      operationId: post-v3-gfw-templates-templateId-answers
+      responses:
+        '201':
+          $ref: '#/components/responses/Answer-Response'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+      description: Creates a new answer
+      requestBody:
+        $ref: '#/components/requestBodies/CreateAnswerBody'
+      tags:
+        - Answers
+  '/v3/gfw/templates/{templateId}/answers/area/{areaId}':
+    parameters:
+      - schema:
+          type: string
+        name: templateId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: areaId
+        in: path
+        required: true
+    get:
+      summary: Get All Area Answers
+      tags:
+        - Answers
+      responses:
+        '200':
+          $ref: '#/components/responses/Answers-Response'
+        '401':
+          description: Unauthorized
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-templates-templateId-answers-area-areaId
+      description: Returns all answers associated with template and area with id provided
+  '/v3/gfw/templates/{templateId}/answers/{answerId}':
+    parameters:
+      - schema:
+          type: string
+        name: templateId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: answerId
+        in: path
+        required: true
+    get:
+      summary: Get an Answer
+      tags:
+        - Answers
+      responses:
+        '200':
+          $ref: '#/components/responses/Answer-Response'
+      operationId: get-v3-gfw-templates-templateId-answers-answerId
+      description: Gets an answer with the given id
+    delete:
+      summary: Delete an Answer
+      operationId: delete-v3-gfw-templates-templateId-answers-answerId
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      description: Deletes the answer with the given id
+      tags:
+        - Answers
+  /v3/gfw/templates/allAnswers:
+    get:
+      summary: Get Every Answer
+      tags:
+        - Answers
+      responses:
+        '200':
+          $ref: '#/components/responses/Answers-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-templates-allAnswers
+      description: Gets all answers a user can view across all templates
+    delete:
+      summary: Delete All User Answers
+      operationId: delete-v3-gfw-templates-allAnswers
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+      description: Deletes all answers a user has created
+      tags:
+        - Answers
+  /v3/gfw/areas/user:
+    get:
+      summary: Get User Areas
+      tags:
+        - Areas
+      responses:
+        '200':
+          $ref: '#/components/responses/Areas-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-areas-user
+      description: Gets all areas created by the user
+  /v3/gfw/areas/userAndTeam:
+    get:
+      summary: Get User and Team Areas
+      tags:
+        - Areas
+      responses:
+        '200':
+          $ref: '#/components/responses/Areas-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-areas-userandteam
+      description: Gets all areas created by the user as well as areas linked to their teams
+    parameters: []
+  /v3/gfw/areas/:
+    post:
+      summary: Create a New Area
+      operationId: post-v3-gfw-areas
+      responses:
+        '201':
+          $ref: '#/components/responses/Area-Response'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+      description: Creates a new area
+      tags:
+        - Areas
+      requestBody:
+        $ref: '#/components/requestBodies/AreaBody'
+  '/v3/gfw/areas/{areaId}':
+    parameters:
+      - schema:
+          type: string
+        name: areaId
+        in: path
+        required: true
+    get:
+      summary: Get a Single Area
+      tags:
+        - Areas
+      responses:
+        '200':
+          $ref: '#/components/responses/Area-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-areas-areaId
+      description: Gets an area with the id provided
+    patch:
+      summary: Update an Area
+      operationId: patch-v3-gfw-areas-areaId
+      responses:
+        '200':
+          $ref: '#/components/responses/Area-Response'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Updates an area with the given id
+      requestBody:
+        $ref: '#/components/requestBodies/AreaBody'
+      tags:
+        - Areas
+    delete:
+      summary: Delete an Area
+      operationId: delete-v3-gfw-areas-areaId
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      description: Deletes an area with the given id
+      tags:
+        - Areas
+  /v3/gfw/arearelations/teams/:
+    post:
+      summary: Create Area-Team Relation
+      operationId: post-v3-gfw-arearelations-teams
+      responses:
+        '201':
+          $ref: '#/components/responses/TeamAreaRelation-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Creates an area-team relation
+      tags:
+        - Area-Team Relations
+      requestBody:
+        $ref: '#/components/requestBodies/AreaTeamRelationBody'
+    delete:
+      summary: Remove Area-Team Relation
+      operationId: delete-v3-gfw-arearelations-teams
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+      requestBody:
+        $ref: '#/components/requestBodies/AreaTeamRelationBody'
+      description: Deletes an area-team relation
+      tags:
+        - Area-Team Relations
+  /v3/gfw/arearelations/templates:
+    post:
+      summary: Create Area-Template Relation
+      operationId: post-v3-gfw-arearelations-templates
+      responses:
+        '201':
+          $ref: '#/components/responses/AreaTemplateRelation-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Creates an area-template relation
+      requestBody:
+        $ref: '#/components/requestBodies/AreaTemplateRelationBody'
+      tags:
+        - Area-Template Relations
+    delete:
+      summary: Remove Area-Template Relation
+      operationId: delete-v3-gfw-arearelations-templates
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+      requestBody:
+        $ref: '#/components/requestBodies/AreaTemplateRelationBody'
+      description: Deletes an area-template relation
+      tags:
+        - Area-Template Relations
+    parameters: []
+  /v3/gfw/teams/myinvites:
+    get:
+      summary: Get My Team Invites
+      tags:
+        - Teams
+      responses:
+        '200':
+          $ref: '#/components/responses/Teams-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-teams-myinvites
+      description: Returns all team invites for the user
+  '/v3/gfw/teams/user/{userId}':
+    parameters:
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    get:
+      summary: Get All User Teams
+      tags:
+        - Teams
+      responses:
+        '200':
+          $ref: '#/components/responses/Teams-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-teams-user-userId
+      description: Returns an array of all teams the user is member of
+  '/v3/gfw/teams/{teamId}':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+    get:
+      summary: Get Team Details
+      tags:
+        - Teams
+      responses:
+        '200':
+          $ref: '#/components/responses/Team-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-teams-teamId
+      description: Gets a teams details
+    patch:
+      summary: Update a Team Name
+      operationId: patch-v3-gfw-teams-teamId
+      responses:
+        '200':
+          $ref: '#/components/responses/Team-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Updates the name of the team
+      requestBody:
+        $ref: '#/components/requestBodies/TeamBody'
+      tags:
+        - Teams
+    delete:
+      summary: Delete a Team
+      operationId: delete-v3-gfw-teams-teamId
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Deletes a team and all team members
+      tags:
+        - Teams
+  /v3/gfw/teams:
+    post:
+      summary: Create a New Team
+      operationId: post-v3-gfw-teams
+      responses:
+        '201':
+          $ref: '#/components/responses/Team-Response'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Creates a new team and makes the current user the team admin
+      requestBody:
+        $ref: '#/components/requestBodies/TeamBody'
+      tags:
+        - Teams
+  '/v3/gfw/teams/{teamId}/users':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+    get:
+      summary: Get All Team Members
+      tags:
+        - Teams
+      responses:
+        '200':
+          $ref: '#/components/responses/TeamMembers-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-teams-teamId-users
+      description: Returns the members of the team of the given id
+    post:
+      summary: Add Team Members
+      operationId: post-v3-gfw-teams-teamId-users
+      responses:
+        '201':
+          $ref: '#/components/responses/TeamMembers-Response'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Adds one or more team members
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  email:
+                    type: string
+                  role:
+                    type: string
+                    enum:
+                      - manager
+                      - monitor
+                required:
+                  - email
+                  - role
+            examples:
+              example-1:
+                value:
+                  - email: email@email.com
+                    role: manager
+      tags:
+        - Teams
+  '/v3/gfw/teams/{teamId}/users/reassignAdmin/{userId}':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    patch:
+      summary: Reassign Team Administrator
+      operationId: patch-v3-gfw-teams-teamId-users-reassignAdmin-userId
+      responses:
+        '200':
+          $ref: '#/components/responses/TeamMember-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: Reassigns the team admin to the user with the supplied id
+      tags:
+        - Teams
+  '/v3/gfw/teams/{teamId}/users/{teamMemberRelationId}':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: teamMemberRelationId
+        in: path
+        required: true
+    patch:
+      summary: Update a Team Member's Role
+      operationId: patch-v3-gfw-teams-teamId-users-teamMemberRelationId
+      responses:
+        '200':
+          $ref: '#/components/responses/TeamMember-Response'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: 'Updates the team member''s role. The teamMemberRelationId is the id supplied in a team members record, not the id of the user.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  enum:
+                    - manager
+                    - monitor
+      tags:
+        - Teams
+    delete:
+      summary: ''
+      operationId: delete-v3-gfw-teams-teamId-users-teamMemberRelationId
+      responses:
+        '200':
+          description: OK
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      description: 'Removed the team member from the team. The teamMemberRelationId is the id supplied in a team members record, not the id of the user.'
+      tags:
+        - Teams
+  '/v3/gfw/teams/{teamId}/users/{userId}/accept':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    patch:
+      summary: Accept Team Invitation
+      operationId: patch-v3-gfw-teams-teamId-users-userId-accept
+      responses:
+        '200':
+          $ref: '#/components/responses/TeamMember-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      description: 'Accepts an invitation to join team with id, for user with id'
+      tags:
+        - Teams
+  '/v3/gfw/teams/{teamId}/users/{userId}/decline':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    patch:
+      summary: Decline Team Invitation
+      operationId: patch-v3-gfw-teams-teamId-users-userId-decline
+      responses:
+        '200':
+          $ref: '#/components/responses/TeamMember-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      description: 'Declines an invitation to join team with id, for user with id'
+      tags:
+        - Teams
+  '/v3/gfw/teams/{teamId}/users/{userId}/leave':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    patch:
+      summary: Leave a Team
+      operationId: patch-v3-gfw-teams-teamId-users-userId-leave
+      responses:
+        '200':
+          $ref: '#/components/responses/TeamMember-Response'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+      description: 'Leaves the team with id, for user with id'
+      tags:
+        - Teams
+  '/v3/gfw/assignments/allOpenUserForArea/{areaId}':
+    parameters:
+      - schema:
+          type: string
+        name: areaId
+        in: path
+        required: true
+    get:
+      summary: Get All Open User Assignments in Area
+      tags:
+        - Assignments
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignments-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-assignments-allOpenUserForArea-areaId
+      description: Returns all assignments the user has created or is assigned to for a given area
+  '/v3/gfw/templates/versions/{editGroupId}/latest':
+    get:
+      summary: Get latest version
+      tags:
+        - Templates
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignment-Response'
+      operationId: 'get-v3-gfw-templates-versions-:id-latest'
+      description: Fetches the latest version in a given template group
+    parameters:
+      - schema:
+          type: string
+        name: editGroupId
+        in: path
+        required: true
+        description: Edit group id for which the latest version is to be fetched
+  /v3/gfw/templates/latest:
+    get:
+      summary: Get latest versions of all user templates
+      tags:
+        - Templates
+      responses:
+        '200':
+          $ref: '#/components/responses/Templates-Response'
+      operationId: get-v3-gfw-templates-latest
+      description: Returns a list of all user templates with the latest version of each template. The answer count refers to the sum of the answers for the edit group the template is in.
+  '/v3/gfw/templates/versions/{editGroupId}':
+    parameters:
+      - schema:
+          type: string
+        name: editGroupId
+        in: path
+        required: true
+        description: The edit group id for the template group
+    get:
+      summary: Get all versions of a group
+      tags:
+        - Templates
+      responses:
+        '200':
+          $ref: '#/components/responses/Templates-Response'
+      operationId: get-v3-gfw-templates-version-editGroupId
+      description: Get a list of templates which are all the versions for the given edit group id. The answer counts on each templates refer to the answer count per individual version.
+      x-internal: false
+  '/v3/gfw/templates/{templateId}/status':
+    parameters:
+      - schema:
+          type: string
+        name: templateId
+        in: path
+        required: true
+        description: Id for the template to be updated
+    patch:
+      summary: Update template status
+      tags:
+        - Templates
+      responses:
+        '200':
+          $ref: '#/components/responses/Template-Response'
+      operationId: patch-v3-templates-templateId-status
+      description: Update the status of a given template
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - published
+                    - unpublished
+              required:
+                - status
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - published
+                    - unpublished
+              required:
+                - status
+        description: ''
+  /v3/gfw/templates/public:
+    get:
+      summary: Get all public templates
+      tags:
+        - Templates
+      responses:
+        '200':
+          $ref: '#/components/responses/Templates-Response'
+      operationId: get-v3-gfw-templates-public
+      description: Returns a list of all public templates
+  '/v3/gfw/arearelations/teams/areaTeams/{areaId}':
+    parameters:
+      - schema:
+          type: string
+        name: areaId
+        in: path
+        required: true
+    get:
+      summary: Get All Area Team Ids
+      tags:
+        - Area-Team Relations
+      responses:
+        '200':
+          $ref: '#/components/responses/String-Array-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-areaTeams-areaId
+      description: Returns an array of team ids associated with the area
+  '/v3/gfw/arearelations/teams/teamAreas/{teamId}':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+    get:
+      summary: Get All Team Area Ids
+      tags:
+        - Area-Team Relations
+      responses:
+        '200':
+          $ref: '#/components/responses/String-Array-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-arearelations-teams-teamAreas-teamId
+      description: Returns an array of area ids relating to a team
+  '/v3/gfw/arearelations/templates/areaTemplates/{areaId}':
+    parameters:
+      - schema:
+          type: string
+        name: areaId
+        in: path
+        required: true
+    get:
+      summary: Get All Area Template Ids
+      tags:
+        - Area-Template Relations
+      responses:
+        '200':
+          $ref: '#/components/responses/String-Array-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/String-Array-Response'
+      operationId: get-v3-gfw-arearelations-templates-areaTemplates-areaId
+      description: Returns an array of template ids related to an area
+  '/v3/gfw/arearelations/templates/templateAreas/{templateId}':
+    parameters:
+      - schema:
+          type: string
+        name: templateId
+        in: path
+        required: true
+    get:
+      summary: Get All Template Area Ids
+      tags:
+        - Area-Template Relations
+      responses:
+        '200':
+          $ref: '#/components/responses/String-Array-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-arearelations-templates-templateAreas-templateId
+      description: Returns an array of area ids related to a template
+  '/v3/gfw/assignments/{assignmentId}/status':
+    parameters:
+      - schema:
+          type: string
+        name: assignmentId
+        in: path
+        required: true
+    patch:
+      summary: Update status of assignment
+      tags:
+        - Assignments
+      responses:
+        '200':
+          $ref: '#/components/responses/Assignment-Response'
+      operationId: patch-v3-gfw-assignments-assignmentId-status
+      description: Allow the user to update the status of the asssignment even if they are monitors but not creators of the assignment. Monitors can perform on hold to open and open to on hold status change. Creators can perform all status changes.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - open
+                    - completed
+                    - on hold
+              required:
+                - status
+  '/v3/gfw/routes/team/{teamId}/area/{areaId}':
+    parameters:
+      - schema:
+          type: string
+        name: teamId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: areaId
+        in: path
+        required: true
+    get:
+      summary: Get Team Area Routes
+      tags:
+        - Routes
+      responses:
+        '200':
+          $ref: '#/components/responses/Routes-Response'
+        '401':
+          $ref: '#/components/responses/Error'
+      operationId: get-v3-gfw-routes-team-teamId-area-areaId
+      description: Returns all routes for team area either made for that team or made by the user
+components:
+  schemas:
+    AssignmentModel:
+      type: object
+      x-examples:
+        example-1:
+          name: string
+          location: IGeojson
+          priority: number;
+          monitors: 'string[];'
+          notes: string;
+          status: string;
+          alert: string;
+          areaId: string;
+          templateIds: 'string[];'
+          teamIds: 'string[];'
+          createdAt: Date;
+          createdBy: '''string;'''
+          areaName: string;
+      description: ''
+      examples:
+        - name: string
+          location: string
+          priority: 0
+          monitors:
+            - string
+          notes: string
+          status: string
+          alert: string
+          areaId: string
+          templateIds:
+            - string
+          teamIds:
+            - string
+          createdAt: 0
+          createdBy: string
+          areaName: string
+      properties:
+        name:
+          type: string
+        location:
+          type: array
+          items:
+            type: object
+            properties:
+              lat:
+                type: integer
+              lon:
+                type: integer
+              alertType:
+                type: string
+              alertId:
+                type: string
+        priority:
+          type: number
+        monitors:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+        status:
+          type: string
+          enum:
+            - open
+            - on hold
+            - completed
+        areaId:
+          type: string
+        templateIds:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: number
+        createdBy:
+          type: string
+        areaName:
+          type: string
+        geostore:
+          $ref: '#/components/schemas/GeostoreModel'
+        templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateModel'
+        monitorNames:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+        image:
+          type: string
+      required:
+        - name
+        - priority
+        - monitors
+        - notes
+        - status
+        - areaId
+        - templateIds
+    RouteModel:
+      type: object
+      x-examples:
+        example-1:
+          areaId: string
+          destination: IPoint
+          difficulty: string
+          startDate: 1
+          endDate: 1
+          geostoreId: string
+          routeId: string
+          locations: 'ILocation[]'
+          name: string
+          createdBy: string
+          teamId: string
+          active: true
+      properties:
+        areaId:
+          type: string
+        destination:
+          $ref: '#/components/schemas/PointModel'
+        difficulty:
+          type: string
+        startDate:
+          type: integer
+        endDate:
+          type: integer
+        geostoreId:
+          type: string
+        routeId:
+          type: string
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/RouteLocationModel'
+        name:
+          type: string
+        createdBy:
+          type: string
+        teamId:
+          type: string
+        active:
+          type: boolean
+        username:
+          type: string
+    PointModel:
+      title: PointModel
+      x-stoplight:
+        id: u128l07xqtgwl
+      type: object
+      properties:
+        latitude:
+          type: number
+        longitude:
+          type: number
+    RouteLocationModel:
+      type: object
+      x-examples:
+        example-1:
+          accuracy: 1
+          altitude: 1
+          latitude: 1
+          longitude: 1
+          timestamp: 1
+      properties:
+        accuracy:
+          type: number
+        altitude:
+          type: number
+        latitude:
+          type: number
+        longitude:
+          type: number
+        timestamp:
+          type: integer
+      required:
+        - accuracy
+        - altitude
+        - latitude
+        - longitude
+        - timestamp
+    TemplateModel:
+      type: object
+      x-examples:
+        example-1:
+          name: string
+          user: mongoose.Types.ObjectId;
+          languages:
+            - 'mongoose.Schema.Types.Mixed[];'
+          defaultLanguage: string;
+          public: true
+          status: ETemplateStatus;
+          createdAt: string;
+          questions: []
+          answersCount: 1
+      examples: []
+      properties:
+        name:
+          type: string
+        user:
+          type: string
+        languages:
+          type: array
+          items:
+            type: string
+        defaultLanguage:
+          type: string
+        public:
+          type: boolean
+        status:
+          type: string
+        createdAt:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionModel'
+        answersCount:
+          type: integer
+        isLatest:
+          type: boolean
+        editGroupId:
+          type: string
+        areas:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+    ChildQuestionModel:
+      type: object
+      x-examples:
+        example-1:
+          type: string
+          label:
+            en: string
+          name: string
+          defaultValue: mongoose.Schema.Types.Mixed;
+          values: mongoose.Schema.Types.Mixed;
+          required: true
+          order: 1
+          conditionalValue: 1
+      properties:
+        type:
+          type: string
+        label:
+          type: object
+          properties:
+            en:
+              type: string
+        name:
+          type: string
+        defaultValue:
+          type: string
+        values:
+          type: string
+        required:
+          type: boolean
+        order:
+          type: number
+        conditionalValue:
+          type: number
+        maxImageCount:
+          type: number
+      required:
+        - type
+        - label
+        - name
+        - values
+        - required
+      examples: []
+      title: ChildQuestionModel
+    QuestionModel:
+      type: object
+      x-examples:
+        example-1:
+          type: string
+          label:
+            en: string
+          name: string
+          defaultValue: mongoose.Schema.Types.Mixed;
+          values: mongoose.Schema.Types.Mixed;
+          required: true
+          order: 1
+          conditionalValue: 1
+      examples: []
+      properties:
+        type:
+          type: string
+        label:
+          type: object
+          properties:
+            en:
+              type: string
+        name:
+          type: string
+        defaultValue:
+          type: string
+        values:
+          type: string
+        required:
+          type: boolean
+        order:
+          type: number
+        childQuestions:
+          $ref: '#/components/schemas/ChildQuestionModel'
+        maxImageCount:
+          type: number
+      required:
+        - type
+        - label
+        - name
+        - values
+        - required
+      description: ''
+      title: Question Model
+    AnswerModel:
+      type: object
+      x-examples:
+        example-1:
+          report: mongoose.Types.ObjectId;
+          reportName: ''
+          templateName: string;
+          fullName: string;
+          username: string
+          organization: string
+          teamId: string
+          areaOfInterest: mongoose.Types.ObjectId;
+          areaOfInterestName: string;
+          language: string;
+          userPosition:
+            - 'any[];'
+          clickedPosition:
+            - 'any[];'
+          user: mongoose.Types.ObjectId;
+          responses: 'IAnswerResponse[];'
+          createdAt: string;
+      examples:
+        - report: string
+          reportName: string
+          templateName: string
+          fullName: string
+          username: string
+          organization: string
+          teamId: string
+          areaOfInterest: string
+          areaOfInterestName: string
+          language: string
+          userPosition: []
+          clickedPosition: []
+          user: string
+          responses: string
+          createdAt: string
+      properties:
+        report:
+          type: string
+        reportName:
+          type: string
+        templateName:
+          type: string
+        fullName:
+          type: string
+        username:
+          type: string
+        organization:
+          type: string
+        teamId:
+          type: string
+        areaOfInterest:
+          type: string
+        areaOfInterestName:
+          type: string
+        language:
+          type: string
+        userPosition:
+          type: array
+          items: {}
+        clickedPosition:
+          type: array
+          items: {}
+        user:
+          type: string
+        responses:
+          type: string
+        createdAt:
+          type: string
+        assignmentId:
+          type: string
+      required:
+        - report
+        - reportName
+        - language
+        - user
+        - responses
+        - createdAt
+    TeamModel:
+      title: TeamModel
+      x-stoplight:
+        id: p9wc4hlscmd8c
+      type: object
+      properties:
+        name:
+          type: string
+        userRole:
+          type: string
+          enum:
+            - administrator
+            - manager
+            - monitor
+            - left
+        createdAt:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMemberModel'
+        areas:
+          type: array
+          items:
+            type: string
+        layers:
+          type: array
+          items:
+            type: string
+      required:
+        - name
+        - createdAt
+    AreaModel:
+      type: object
+      x-examples:
+        example-1:
+          name: string
+          application: string
+          geostore: IGeostore | string
+          userId: string
+          createdAt: string
+          updatedAt: string
+          image: string
+          env: string
+          datasets:
+            - slug: string
+              name: string
+              active: false
+              startDate: string
+              endDate: string
+          use: any
+          iso: any
+          coverage: any
+          teamId: string
+          teams: []
+          reportTemplate: 'ITemplate[];'
+      properties:
+        name:
+          type: string
+        application:
+          type: string
+        geostore:
+          $ref: '#/components/schemas/GeostoreModel'
+        userId:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        image:
+          type: string
+        env:
+          type: string
+        datasets:
+          type: array
+          items:
+            type: object
+            properties:
+              slug:
+                type: string
+              name:
+                type: string
+              active:
+                type: boolean
+              startDate:
+                type: string
+              endDate:
+                type: string
+        use:
+          type: string
+        iso:
+          type: string
+        coverage:
+          type: string
+        teamId:
+          type: string
+        teams:
+          type: array
+          items:
+            type: string
+        reportTemplate:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateModel'
+    FeatureModel:
+      type: object
+      x-examples:
+        example-1:
+          geometry:
+            coordinates:
+              - - 1
+                - 1
+            type: string
+          type: string
+      examples:
+        - geometry:
+            coordinates:
+              - 0
+            type: string
+          type: string
+      properties:
+        geometry:
+          type: object
+          properties:
+            coordinates:
+              type: array
+              items:
+                type: number
+            type:
+              type: string
+        type:
+          type: string
+      description: Geojson Feature
+    GeojsonModel:
+      type: object
+      x-examples:
+        example-1:
+          crs: any
+          type: string
+          features: []
+      properties:
+        crs:
+          type: string
+        type:
+          type: string
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureModel'
+    GeostoreModel:
+      type: object
+      x-examples:
+        example-1:
+          id: string
+          geojson: IGeojson
+          hash: string
+          provider: any
+          areaHa: 1
+          bbox:
+            - 1
+          lock: false
+          info: any
+      examples: []
+      properties:
+        id:
+          type: string
+        geojson:
+          type: string
+        hash:
+          type: string
+        provider:
+          type: string
+        areaHa:
+          type: integer
+        bbox:
+          type: array
+          items:
+            type: integer
+        lock:
+          type: boolean
+        info:
+          type: string
+    AreaTeamRelationModel:
+      title: AreaTeamRelationModel
+      x-stoplight:
+        id: 4un83noxbl6u5
+      type: object
+      properties:
+        teamId:
+          type: string
+        areaId:
+          type: string
+      required:
+        - teamId
+        - areaId
+    AreaTemplateRelationModel:
+      title: AreaTemplateRelationModel
+      x-stoplight:
+        id: 4un83noxbl6u5
+      type: object
+      properties:
+        templateId:
+          type: string
+        areaId:
+          type: string
+      required:
+        - templateId
+        - areaId
+    TeamMemberModel:
+      title: TeamMemberModel
+      x-stoplight:
+        id: arp0j9c073kbe
+      type: object
+      properties:
+        teamId:
+          type: string
+        userId:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum:
+            - administrator
+            - manager
+            - monitor
+            - left
+        status:
+          type: string
+          enum:
+            - confirmed
+            - invited
+            - declined
+        name:
+          type: string
+      required:
+        - teamId
+        - email
+        - role
+        - status
+  securitySchemes:
+    Authorization:
+      type: http
+      scheme: bearer
+  responses:
+    Error:
+      description: Error Response
+      content:
+        application/json:
+          schema:
+            description: ''
+            type: object
+            properties:
+              errors:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  required:
+                    - status
+                    - detail
+                  properties:
+                    status:
+                      type: number
+                    detail:
+                      type: string
+                      minLength: 1
+            required:
+              - errors
+          examples: {}
+    Healthcheck:
+      description: Healthcheck response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              uptime:
+                type: number
+          examples: {}
+    Assignment-Response:
+      description: Single assignment
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  attributes:
+                    $ref: '#/components/schemas/AssignmentModel'
+          examples: {}
+    Assignments-Response:
+      description: Array of assignments
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                    attributes:
+                      $ref: '#/components/schemas/AssignmentModel'
+    Routes-Response:
+      description: Array of routes
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                    attributes:
+                      $ref: '#/components/schemas/RouteModel'
+    Route-Response:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  attributes:
+                    $ref: '#/components/schemas/RouteModel'
+    Template-Response:
+      description: Single Template
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  attributes:
+                    $ref: '#/components/schemas/TemplateModel'
+    Templates-Response:
+      description: Array of Templates
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                    attributes:
+                      $ref: '#/components/schemas/TemplateModel'
+    Answer-Response:
+      description: A single answer
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  attributes:
+                    $ref: '#/components/schemas/AnswerModel'
+    Answers-Response:
+      description: An array of answers
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                    attributes:
+                      $ref: '#/components/schemas/AnswerModel'
+    Area-Response:
+      description: Single area
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  attributes:
+                    $ref: '#/components/schemas/AreaModel'
+    Areas-Response:
+      description: Array of areas
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                    attributes:
+                      $ref: '#/components/schemas/AreaModel'
+    TeamAreaRelation-Response:
+      description: Area-Team Relation object
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              teamId:
+                type: string
+              areaId:
+                type: string
+              _id:
+                type: string
+    AreaTemplateRelation-Response:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              _id:
+                type: string
+              templateId:
+                type: string
+              areaId:
+                type: string
+    Team-Response:
+      description: Single Team
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  attributes:
+                    $ref: '#/components/schemas/TeamModel'
+    Teams-Response:
+      description: Array of teams
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                    attributes:
+                      $ref: '#/components/schemas/TeamModel'
+    TeamMember-Response:
+      description: Single team member
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  attributes:
+                    $ref: '#/components/schemas/TeamMemberModel'
+    TeamMembers-Response:
+      description: Array of team members
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                    attributes:
+                      $ref: '#/components/schemas/TeamMemberModel'
+    String-Array-Response:
+      description: Array of ids
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: string
+  requestBodies:
+    CreateAssignmentBody:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            x-examples:
+              example-1:
+                location: string
+                priority: 0
+                monitors:
+                  - string
+                notes: string
+                status: string
+                alert: string
+                areaId: string
+                templateId: string
+                teamIds:
+                  - string
+                createdAt: 0
+                createdBy: string
+                areaName: string
+            properties:
+              location:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    lat:
+                      type: integer
+                    lon:
+                      type: integer
+                    alertType:
+                      type: string
+                    alertId:
+                      type: string
+                  required:
+                    - lat
+                    - lon
+              priority:
+                type: number
+              monitors:
+                type: array
+                items:
+                  type: string
+              notes:
+                type: string
+              areaId:
+                type: string
+              templateIds:
+                type: array
+                items:
+                  type: string
+              geostore:
+                type: string
+                description: A JSON string that represents the geostore object
+              image:
+                description: Image file
+                type: string
+                format: binary
+              name:
+                type: string
+            required:
+              - priority
+              - monitors
+              - areaId
+              - templateIds
+          examples:
+            example-with-location:
+              value:
+                location:
+                  - lat: 22
+                    lon: -22
+                    alertType: RADD
+                    alertId: 637dd25e6dc81eaf766ffa37
+                priority: 0
+                monitors:
+                  - 637dd26df8c280b71f23e56a
+                notes: My Notes
+                areaId: 637dd2739dd154ba5840980f
+                templateIds:
+                  - 637dd27aaa83b6b70f535cda
+                areaName: My Area
+                image: FILE UPLOAD
+                name: My assignment
+            example-with-geostore:
+              value:
+                geostore: '{"type":"Feature","geometry":{"type":"Point","coordinates":[125.6,10.1]},"properties":{"name":"Dinagat Islands"}}'
+                priority: 0
+                monitors:
+                  - 637dd26df8c280b71f23e56a
+                notes: My Notes
+                areaId: 637dd2739dd154ba5840980f
+                templateIds:
+                  - 637dd27aaa83b6b70f535cda
+                areaName: My Area
+                image: FILE UPLOAD
+                name: My assignment
+        application/json:
+          schema:
+            type: object
+            x-examples:
+              example-1:
+                id: string
+                type: string
+                name: string
+                location: string
+                priority: 0
+                monitors:
+                  - string
+                notes: string
+                status: string
+                alert: string
+                areaId: string
+                templateIds:
+                  - string
+                teamIds:
+                  - string
+                createdAt: 0
+                createdBy: string
+                areaName: string
+            properties:
+              priority:
+                type: integer
+              monitors:
+                type: array
+                items:
+                  type: string
+              areaId:
+                type: string
+              location:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    lat:
+                      type: number
+                    lon:
+                      type: number
+                    alertType:
+                      type: string
+                    alertId:
+                      type: string
+                  required:
+                    - lat
+                    - lon
+              geostore:
+                $ref: '#/components/schemas/GeostoreModel'
+              name:
+                type: string
+              notes:
+                type: string
+              templateIds:
+                type: array
+                items:
+                  type: string
+              createdBy:
+                type: string
+            required:
+              - priority
+              - monitors
+              - areaId
+          examples:
+            example-with-location:
+              value:
+                priority: 0
+                monitors:
+                  - 637dce839215e5d73042d398
+                areaId: 637dce919485c59d60824c11
+                location:
+                  - lat: 22
+                    lon: -22
+                    alertType: RADD
+                    alertId: 637dce919485c59d60824c11
+                name: First Assignment
+                notes: Some notes regarding the assignment
+                templateIds:
+                  - 637dcf05ff1b63630afae7dd
+                createdBy: 637dcf0c980808252df4973f
+            example-with-geostore:
+              value:
+                priority: 0
+                monitors:
+                  - 637dce839215e5d73042d398
+                areaId: 637dce919485c59d60824c11
+                geostore:
+                  type: Feature
+                  geometry:
+                    type: Point
+                    coordinates:
+                      - 125.6
+                      - 10.1
+                  properties:
+                    name: Dinagat Islands
+                name: First Assignment
+                notes: Some notes regarding the assignment
+                templateIds:
+                  - 637dcf05ff1b63630afae7dd
+                createdBy: 637dcf0c980808252df4973f
+      description: ''
+    RouteBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            x-examples:
+              example-1:
+                - areaId: 624eb2e03a38cf001b822d95
+                  destination:
+                    latitude: -19.815424793397977
+                    longitude: 48.08241538050228
+                  difficulty: easy
+                  endDate: 1665574170542
+                  geostoreId: d0a7ccc250cb8ead3ea0a7d3730bc085
+                  id: cea34015-bfaf-46c2-a660-db1e9819b515
+                  locations:
+                    - accuracy: 5
+                      altitude: -0.03440846490469818
+                      latitude: 48.0558683
+                      longitude: 41.8379333
+                      timestamp: 1665574109360
+                    - accuracy: 5
+                      altitude: 0
+                      latitude: 48.523696666666666
+                      longitude: 38.32230833333333
+                      timestamp: 1665574119395
+                    - accuracy: 5
+                      altitude: 0
+                      latitude: 45.897461666666665
+                      longitude: 35.86137166666666
+                      timestamp: 1665574139542
+                    - accuracy: 5
+                      altitude: 0
+                      latitude: 41.910246666666666
+                      longitude: 40.607465
+                      timestamp: 1665574149485
+                    - accuracy: 5
+                      altitude: 0
+                      latitude: 44.09527666666666
+                      longitude: 45.44145
+                      timestamp: 1665574158509
+                  name: route
+                  startDate: 1665574109132
+            items:
+              type: object
+              properties:
+                areaId:
+                  type: string
+                destination:
+                  $ref: '#/components/schemas/PointModel'
+                difficulty:
+                  type: string
+                endDate:
+                  type: integer
+                geostoreId:
+                  type: string
+                id:
+                  type: string
+                locations:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RouteLocationModel'
+                name:
+                  type: string
+                startDate:
+                  type: integer
+                teamId:
+                  type: string
+                active:
+                  type: string
+              required:
+                - areaId
+                - destination
+                - difficulty
+                - endDate
+                - geostoreId
+                - id
+                - locations
+                - name
+                - startDate
+          examples:
+            example-1:
+              value:
+                - areaId: 637df6490ed1f908b1aa7306
+                  destination:
+                    latitude: 33
+                    longitude: -33
+                  difficulty: easy
+                  endDate: 16691995399
+                  geostoreId: 637df6ccd9c769bd2f6164ac
+                  id: 637df6f34015fb71981389b8
+                  locations:
+                    - accuracy: 5
+                      altitude: 100
+                      latitude: 22
+                      longitude: -22
+                      timestamp: 1669199535
+                  name: string
+                  startDate: 1669199532
+    CreateTemplateBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            x-examples:
+              example-1:
+                name: string
+                questions: []
+                languages: []
+                status: ETemplateStatus
+                public: true
+                defaultLanguage: string
+                user: tring
+            properties:
+              name:
+                type: object
+              questions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    label:
+                      type: object
+                    name:
+                      type: string
+                    defaultValue:
+                      type: string
+                    values:
+                      type: object
+                      additionalProperties:
+                        type: object
+                        properties:
+                          label: string
+                          value: number
+                    maxImageCount:
+                      type: integer
+                    order:
+                      type: integer
+                    required:
+                      type: boolean
+                    childQuestions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                          label:
+                            type: object
+                          name:
+                            type: string
+                          defaultValue:
+                            type: string
+                          values:
+                            type: object
+                          maxImageCount:
+                            type: string
+                          required:
+                            type: boolean
+                          order:
+                            type: integer
+                          conditions:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              value:
+                                type: number
+                    conditions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          value:
+                            type: string
+                  required:
+                    - type
+                    - label
+                    - name
+              languages:
+                type: array
+                items:
+                  type: string
+              status:
+                type: string
+                enum:
+                  - unpublished
+                  - published
+              defaultLanguage:
+                type: string
+              public:
+                type: boolean
+                default: false
+              createdAt:
+                type: string
+              areaIds:
+                type: array
+                items:
+                  type: string
+            required:
+              - name
+              - questions
+              - languages
+              - status
+              - defaultLanguage
+          examples:
+            example-mvp:
+              value:
+                name:
+                  en: My Template
+                questions:
+                  - type: text
+                    label:
+                      en: My text question
+                    name: question-1
+                  - type: audio
+                    label:
+                      en: My audio question
+                    name: question-2
+                  - type: blob
+                    label:
+                      en: My image question
+                    name: question-3
+                languages:
+                  - en
+                status: unpublished
+                defaultLanguage: en
+                areaIds:
+                  - 6386325f35774e2956ba1304
+      description: Template Request Body
+    UpdateTemplateBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            x-examples:
+              example-1:
+                name: string
+                questions:
+                  - type: string
+                    label:
+                      en: string
+                    name: string
+                    defaultValue: string
+                    values: string
+                    required: true
+                    order: 0
+                    childQuestions:
+                      type: string
+                      label:
+                        en: string
+                      name: string
+                      defaultValue: string
+                      values: string
+                      required: true
+                      order: 0
+                      conditionalValue: 0
+                languages:
+                  - string
+                status: string
+                public: true
+                defaultLanguage: string
+            properties:
+              name:
+                type: object
+              questions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    label:
+                      type: object
+                    name:
+                      type: string
+                    defaultValue:
+                      type: string
+                    values:
+                      type: object
+                    required:
+                      type: boolean
+                    order:
+                      type: integer
+                    childQuestions:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        label:
+                          type: object
+                          properties:
+                            en:
+                              type: string
+                        name:
+                          type: string
+                        defaultValue:
+                          type: string
+                        values:
+                          type: string
+                        required:
+                          type: boolean
+                        order:
+                          type: integer
+                        conditionalValue:
+                          type: integer
+                    conditions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          value:
+                            type: integer
+                    maxImageCount:
+                      type: string
+              languages:
+                type: array
+                items:
+                  type: string
+              defaultLanguage:
+                type: string
+              areaIds:
+                type: array
+                items:
+                  type: string
+          examples:
+            example-1:
+              value:
+                name:
+                  en: My template name
+    AreaBody:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              geojson:
+                $ref: '#/components/schemas/GeojsonModel'
+              image:
+                type: string
+                description: Must be image file
+                format: binary
+          examples:
+            example-1:
+              value:
+                name: name
+                image: FILE UPLOAD
+                geojson: '{"geojson":{"crs":{},"type":"FeatureCollection","features":[{"geometry":{"coordinates":[[[-39.84110795,-8.783184098],[-39.839191247,-8.82983348],[-39.798746579,-8.832448397],[-39.813720923,-8.78147167],[-39.84110795,-8.783184098]]],"type":"Polygon"},"type":"Feature"}]},"hash":"535036b0e0611996280b3fb69854ca7b","provider":{},"areaHa":2022.69268648047,"bbox":[-39.84110795,-8.832448397,-39.798746579,-8.78147167],"lock":true,"info":{"use":{}},"id":"535036b0e0611996280b3fb69854ca7b"}'
+      description: Body for creating area
+    AreaTeamRelationBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                areaId:
+                  type: string
+                teamId:
+                  type: string
+              required:
+                - areaId
+                - teamId
+    AreaTemplateRelationBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                areaId:
+                  type: string
+                templateId:
+                  type: string
+              required:
+                - areaId
+                - templateId
+    TeamBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              layers:
+                type: array
+                items:
+                  type: string
+            required:
+              - name
+          examples:
+            example-1:
+              value:
+                name: My Team name
+                layers:
+                  - <layer-id>
+    UpdateAssignmentBody:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            x-examples:
+              example-1:
+                name: string
+                priority: 0
+                monitors:
+                  - string
+                notes: string
+                status: string
+                templateId: string
+                teamIds:
+                  - string
+            properties:
+              name:
+                type: string
+              priority:
+                type: integer
+              monitors:
+                type: array
+                items:
+                  type: string
+              notes:
+                type: string
+              status:
+                type: string
+                enum:
+                  - open
+                  - completed
+                  - on hold
+              templateIds:
+                type: array
+                items:
+                  type: string
+              image:
+                type: string
+                description: Image file
+                format: binary
+          examples:
+            example-1:
+              value:
+                name: My Assignment
+                priority: 0
+                monitors:
+                  - 637dd27aaa83b6b70f535cda
+                notes: My Notes
+                status: open
+                templateIds:
+                  - 637df6490ed1f908b1aa7306
+                image: FILE UPLOAD
+    CreateAnswerBody:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              reportName:
+                type: string
+              areaOfInterest:
+                type: string
+              areaOfInterestName:
+                type: string
+              language:
+                type: string
+              userPosition:
+                type: string
+              clickedPosition:
+                type: string
+              date:
+                type: string
+              teamId:
+                type: string
+              assignmentId:
+                type: string
+            required:
+              - reportName
+              - areaOfInterest
+              - language
+              - teamId
+          examples:
+            example-1:
+              value:
+                reportName: My report name
+                areaOfInterest: 637f2b223e4648f5cecf715a
+                areaOfInterestName: My area name
+                language: en
+                userPosition: '22,-22'
+                clickedPosition: '{"lat": 22, "lon":-22}'
+                date: 1669199532
+                teamId: 637f2b223e4648f5cecf715d
+                assignmentId: 637f2b223e4648f5cecf715b
+                question-1: My response
+                question-2: My second response
+security:
+  - Authorization: []

@@ -1,3 +1,3 @@
 export class CreateTeamDto {
-    name: string;
+  name: string;
 }
