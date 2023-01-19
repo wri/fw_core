@@ -170,7 +170,7 @@ export class AnswersController {
             `${question.label[answer.language]} (${question.name}) required`,
           );
 
-        await addResponseOrFail(question);
+        await addResponseOrFail(childQuestion);
       }
     }
 
