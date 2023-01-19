@@ -1,8 +1,5 @@
 import {
-<<<<<<< HEAD
-=======
   BadRequestException,
->>>>>>> dev
   ForbiddenException,
   HttpException,
   HttpStatus,
