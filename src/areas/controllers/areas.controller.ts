@@ -73,7 +73,13 @@ export class AreasController {
         throw new HttpException('Error while retrieving areas', error.status);
       }
     }
-    return { data };
+    return {
+      data: data.filter((area) => {
+        if (typeof area.attributes.geostore !== 'string')
+          return area.attributes.geostore.areaHa < 2000000;
+        else return true;
+      }),
+    };
   }
 
   // GET /areas/userAndTeam
@@ -125,7 +131,13 @@ export class AreasController {
         );
       }
     }
-    return { data };
+    return {
+      data: data.filter((area) => {
+        if (typeof area.attributes.geostore !== 'string')
+          return area.attributes.geostore.areaHa < 2000000;
+        else return true;
+      }),
+    };
   }
 
   @Post()

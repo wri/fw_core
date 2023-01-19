@@ -72,10 +72,23 @@ export class AreasService {
         `Got ${areas.data.length} user areas for user ${user.id}`,
       );
       if (areas && areas.data) {
+<<<<<<< HEAD
         const filteredAreas = areas.data.filter(
           (area) => area.attributes.application === 'fw',
         );
         return filteredAreas;
+=======
+        // exclude areas that have wdpaid or admin object keys
+        const areasToReturn = areas.data.filter((area) => {
+          const wdpa = !!area.attributes.wdpaid;
+          const gadm =
+            !!area.attributes.admin &&
+            Object.keys(area.attributes.admin).length > 0 &&
+            !Object.values(area.attributes.admin).every((x) => x === null);
+          return !wdpa && !gadm;
+        });
+        return areasToReturn;
+>>>>>>> dev
       } else return [];
     } catch (e: any) {
       if (e.response.status === 404) return [];

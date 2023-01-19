@@ -1,4 +1,8 @@
 import {
+<<<<<<< HEAD
+=======
+  BadRequestException,
+>>>>>>> dev
   ForbiddenException,
   HttpException,
   HttpStatus,
@@ -27,6 +31,11 @@ export class TemplatePermissionsMiddleware implements NestMiddleware {
     // creates a filter to get the report if the user is allowed to see it
     // looks like a monitor can see reports made by their team manager(s)
     // get the users teams
+
+    if (!params.templateId) {
+      throw new BadRequestException('Missing templateId');
+    }
+
     const teams = await this.teamsService.findAllByUserId(user.id);
 
     const teamMemberIds: (MongooseObjectId | undefined)[] = [];
