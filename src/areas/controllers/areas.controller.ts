@@ -235,21 +235,7 @@ export class AreasController {
     const existingArea = await this.areasService.getArea(id, user);
     if (!existingArea)
       throw new HttpException('Area not found', HttpStatus.NOT_FOUND);
-    if (!updateAreaDto.name)
-      throw new HttpException(
-        'Request must contain a name',
-        HttpStatus.BAD_REQUEST,
-      );
-    if (!updateAreaDto.geojson)
-      throw new HttpException(
-        'Request must contain a geojson',
-        HttpStatus.BAD_REQUEST,
-      );
-    if (!image)
-      throw new HttpException(
-        'Request must contain an image',
-        HttpStatus.BAD_REQUEST,
-      );
+
     const { geojson, name } = updateAreaDto;
 
     let data: any;
