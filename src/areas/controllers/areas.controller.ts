@@ -76,7 +76,7 @@ export class AreasController {
     return {
       data: data.filter((area) => {
         if (typeof area.attributes.geostore !== 'string')
-          return area.attributes.geostore.areaHa < 200000000;
+          return area.attributes.geostore.areaHa < 2000000;
         else return true;
       }),
     };
@@ -134,7 +134,7 @@ export class AreasController {
     return {
       data: data.filter((area) => {
         if (typeof area.attributes.geostore !== 'string')
-          return area.attributes.geostore.areaHa < 200000000;
+          return area.attributes.geostore.areaHa < 2000000;
         else return true;
       }),
     };
