@@ -114,11 +114,34 @@ export class TeamsController {
 
   // GET /v3/teams/:teamId
   @Get('/:teamId')
-  async getTeam(@Param() params): Promise<any> {
+  async getTeam(@AuthUser() user: IUser, @Param() params): Promise<any> {
     const { teamId } = params;
 
     const team = await this.teamsService.findById(teamId);
     if (!team) throw new HttpException('Team not found', HttpStatus.NOT_FOUND);
+
+    // get members of team and areas of team
+    const teamUserRelation = await this.teamMembersService.findTeamMember(
+      teamId,
+      user.id,
+    );
+
+    if (teamUserRelation) {
+      const members: TeamMemberDocument[] =
+        await this.teamMembersService.findAllTeamMembers(
+          teamId,
+          teamUserRelation.role,
+        );
+
+      team.members = members;
+      team.userRole = teamUserRelation.role;
+    } else team.members = [];
+
+    // array of area ids
+    const areas = await this.teamAreaRelationService.find({ teamId });
+    if (areas) team.areas = areas.map((area) => area.areaId);
+    else team.areas = [];
+
     return { data: serializeTeam(team) };
   }
 
