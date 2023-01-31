@@ -1,4 +1,11 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateAreaDto } from './create-area.dto';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
-export class UpdateAreaDto extends PartialType(CreateAreaDto) {}
+export class UpdateAreaDto {
+  @IsOptional()
+  @IsNotEmpty()
+  name?: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  geojson?: string;
+}
