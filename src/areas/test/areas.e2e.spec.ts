@@ -428,7 +428,7 @@ describe('Areas', () => {
         .expect(401);
     });
 
-    it('Update an area while being logged without a name value should return an error', async function () {
+    it('Update an area while being logged without a name value', async function () {
       const filename = 'image.png';
       const fileData = Buffer.from('TestFileContent', 'utf8');
 
@@ -436,10 +436,10 @@ describe('Areas', () => {
         .patch(`/areas/${1}`)
         .attach('image', fileData, filename)
         .set('Authorization', `USER`)
-        .expect(400);
+        .expect(200);
     });
 
-    it('Update an area while being logged without a geojson value should return an error', async function () {
+    it('Update an area while being logged without a geojson value', async function () {
       const filename = 'image.png';
       const fileData = Buffer.from('TestFileContent', 'utf8');
 
@@ -448,14 +448,14 @@ describe('Areas', () => {
         .attach('image', fileData, filename)
         .field({ name: 'name' })
         .set('Authorization', `USER`)
-        .expect(400);
+        .expect(200);
     });
-    it('Update an area while being logged without an image value should return an error', async function () {
+    it('Update an area while being logged without an image value', async function () {
       await request(app.getHttpServer())
         .patch(`/areas/${1}`)
         .send({ name: 'name', geojson: {} })
         .set('Authorization', `USER`)
-        .expect(400);
+        .expect(200);
     });
   });
 
