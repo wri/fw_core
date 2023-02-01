@@ -42,21 +42,22 @@ export class AnswersService extends BaseService<
   async getAllTemplateAnswers({
     template,
     user,
+    userTeams,
   }: {
     template: TemplateDocument;
     user: IUser;
+    userTeams: TeamDocument[];
   }): Promise<IAnswer[]> {
     let filter = {};
     const confirmedUsers: (mongoose.Types.ObjectId | undefined)[] = [];
     // add current user to users array
     confirmedUsers.push(new mongoose.Types.ObjectId(user.id));
 
-    const teamsManaged = await this.teamsService.findAllManagedTeams(user.id);
-    // get all managed teams users
-    for await (const team of teamsManaged) {
+    // get all user teams users
+    for await (const team of userTeams) {
       // get users of each team
       const users = await this.teamMembersService.findAllTeamMembers(
-        team,
+        team.id,
         EMemberRole.Administrator,
       );
       confirmedUsers.push(...users.map((user) => user.userId));
@@ -70,18 +71,10 @@ export class AnswersService extends BaseService<
       filter = {
         $and: [{ report: template._id }],
       };
-    } else if (teamsManaged.length > 0) {
-      // managers can check all report answers from the default template (the only public template) from him and his team's members
+    } else {
+      // users can see their own answers and answers their team members have made
       filter = {
         $and: [{ report: template._id }, { user: { $in: confirmedUsers } }],
-      };
-    } else {
-      // monitors can see their own answers
-      filter = {
-        $and: [
-          { report: template._id },
-          { user: new mongoose.Types.ObjectId(user.id) },
-        ],
       };
     }
     return await this.addUsernameToAnswers(await this.answerModel.find(filter));

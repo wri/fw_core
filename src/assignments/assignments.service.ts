@@ -100,18 +100,22 @@ export class AssignmentsService {
 
   async findUser(userId: string): Promise<AssignmentDocument[]> {
     // get user's managed teams
-    const managedUsers = await this.teamMembersService.findAllUsersManaged(
+    const teamMembers = await this.teamMembersService.findEveryTeamMember(
       userId,
     );
-    managedUsers.push(userId);
+    teamMembers.push(userId);
     return await this.assignmentModel.find({
-      $or: [{ monitors: { $in: managedUsers } }, { createdBy: userId }],
+      $or: [{ monitors: { $in: teamMembers } }, { createdBy: userId }],
     });
   }
 
   async findOpen(userId: string): Promise<AssignmentDocument[]> {
+    const teamMembers = await this.teamMembersService.findEveryTeamMember(
+      userId,
+    );
+    teamMembers.push(userId);
     return await this.assignmentModel.find({
-      monitors: userId,
+      monitors: { $in: teamMembers },
       status: { $in: ['open', 'on hold'] },
     });
   }
@@ -120,9 +124,13 @@ export class AssignmentsService {
     userId: string,
     areaId: string,
   ): Promise<AssignmentDocument[]> {
+    const teamMembers = await this.teamMembersService.findEveryTeamMember(
+      userId,
+    );
+    teamMembers.push(userId);
     return await this.assignmentModel.find({
       $and: [
-        { $or: [{ monitors: userId }, { createdBy: userId }] },
+        { $or: [{ monitors: { $in: teamMembers } }, { createdBy: userId }] },
         { status: { $in: ['open', 'on hold'] } },
         { areaId: areaId },
       ],
