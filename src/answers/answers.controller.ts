@@ -14,7 +14,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AnswersService } from './services/answers.service';
-import { CreateAnswerDto } from './dto/create-answer.dto';
 import { Request } from 'express';
 import serializeAnswers from './serializers/answers.serializer';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
@@ -206,6 +205,12 @@ export class AnswersController {
     return { data: serializeAnswers(answerModel) };
   }
 
+  /**
+   * Fetches all answers for given template and area for user and area teams
+   * @param templateId Id of template to get answers for
+   * @param areaId Id of area to get answers for
+   * @returns Answers for the given template and area
+   */
   @Get('/areas/:areaId')
   async getAreaAnswers(
     @Req() request: Request,
@@ -231,12 +236,21 @@ export class AnswersController {
     return { data: serializeAnswers(answers) };
   }
 
+  /**
+   * Fetches all answers for given template by user and users team
+   * @param templateId Id of template to get answers for
+   * @returns Answers for the given template
+   */
   @Get()
   async findAll(@Req() request: Request) {
-    const { template, user } = request;
+    const { template, user, userTeams } = request;
     return {
       data: serializeAnswers(
-        await this.answersService.getAllTemplateAnswers({ user, template }),
+        await this.answersService.getAllTemplateAnswers({
+          user,
+          template,
+          userTeams,
+        }),
       ),
     };
   }

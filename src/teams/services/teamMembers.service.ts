@@ -160,6 +160,23 @@ export class TeamMembersService {
     return users;
   }
 
+  async findEveryTeamMember(userId: string): Promise<(string | null)[]> {
+    const teams = await this.teamMemberModel.find({ userId });
+    const users: (string | null)[] = [];
+    for await (const team of teams) {
+      const teamUsers = await this.teamMemberModel.find({
+        teamId: team.teamId,
+      });
+      users.push(
+        ...teamUsers.map((user) =>
+          user.userId ? user.userId.toString() : null,
+        ),
+      );
+    }
+
+    return users;
+  }
+
   async deleteAllForUser(userId: string): Promise<any> {
     const teamsDeletedFrom: string[] = [];
     const teamsNotDeletedFrom: string[] = [];
