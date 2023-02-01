@@ -1769,22 +1769,10 @@ components:
             description: ''
             type: object
             properties:
-              errors:
-                type: array
-                uniqueItems: true
-                minItems: 1
-                items:
-                  required:
-                    - status
-                    - detail
-                  properties:
-                    status:
-                      type: number
-                    detail:
-                      type: string
-                      minLength: 1
-            required:
-              - errors
+              statusCode:
+                type: number
+              message:
+                type: string
           examples: {}
     Healthcheck:
       description: Healthcheck response
