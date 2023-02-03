@@ -90,7 +90,7 @@ export class TeamsController {
         teamId,
         userId,
       );
-
+      console.log('userRelation', team._id, teamUserRelation);
       if (teamUserRelation) {
         const members: TeamMemberDocument[] =
           await this.teamMembersService.findAllTeamMembers(
