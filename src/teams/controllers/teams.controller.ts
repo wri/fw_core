@@ -108,7 +108,7 @@ export class TeamsController {
 
       teamsToSend.push(team);
     }
-
+    console.log(teamsToSend);
     return { data: serializeTeam(teamsToSend) };
   }
 
