@@ -6,6 +6,7 @@ import ErrorSerializer from './common/error.serializer';
 import { IUser } from './common/user.model';
 import { TemplateDocument } from './templates/models/template.schema';
 import { TeamDocument } from './teams/models/team.schema';
+import { CacheControlInterceptor } from './common/interceptors/cachecontrol.interceptor';
 
 declare global {
   namespace Express {
@@ -20,14 +21,9 @@ declare global {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
+  app.useGlobalInterceptors(new CacheControlInterceptor());
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.setGlobalPrefix('v3/gfw');
-
-  app.use((req, res, next) => {
-    return next().then(function () {
-      res.set('Cache-Control', 'private');
-    });
-  });
 
   Sentry.init({
     dsn: 'https://a6b18ef7ce1d43298127081511289af7@o163691.ingest.sentry.io/4504083459211264',
