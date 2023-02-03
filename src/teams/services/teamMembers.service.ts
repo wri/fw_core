@@ -39,8 +39,8 @@ export class TeamMembersService {
   }
 
   async findTeamMember(
-    teamId: string,
-    userId: string,
+    teamId: mongoose.Types.ObjectId,
+    userId: mongoose.Types.ObjectId,
   ): Promise<TeamMemberDocument | null> {
     const member = await this.teamMemberModel.findOne({
       teamId,

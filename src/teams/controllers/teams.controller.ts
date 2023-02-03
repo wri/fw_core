@@ -23,6 +23,7 @@ import serializeTeam from '../serializers/team.serializer';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
 import { AuthUser } from '../../common/decorators';
 import { IUser } from '../../common/user.model';
+import mongoose from 'mongoose';
 
 @Controller('teams')
 export class TeamsController {
@@ -85,12 +86,13 @@ export class TeamsController {
     // get members of teams and areas of team
     const teamsToSend: TeamDocument[] = [];
     for await (const team of filteredTeams) {
-      const teamId = team.id;
+      const teamId = team._id;
+      console.log('ids', team.id, userId);
       const teamUserRelation = await this.teamMembersService.findTeamMember(
         teamId,
-        userId,
+        new mongoose.Types.ObjectId(userId),
       );
-      console.log('userRelation', team._id, teamUserRelation);
+      console.log('userRelation', teamId, teamUserRelation);
       if (teamUserRelation) {
         const members: TeamMemberDocument[] =
           await this.teamMembersService.findAllTeamMembers(
@@ -123,7 +125,7 @@ export class TeamsController {
     // get members of team and areas of team
     const teamUserRelation = await this.teamMembersService.findTeamMember(
       teamId,
-      user.id,
+      new mongoose.Types.ObjectId(user.id),
     );
 
     if (teamUserRelation) {
