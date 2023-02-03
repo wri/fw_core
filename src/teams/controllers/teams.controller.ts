@@ -87,7 +87,7 @@ export class TeamsController {
     const teamsToSend: TeamDocument[] = [];
     for await (const team of filteredTeams) {
       const teamId = team._id;
-      console.log('ids', team.id, userId);
+      console.log('ids', teamId, userId);
       const teamUserRelation = await this.teamMembersService.findTeamMember(
         teamId,
         new mongoose.Types.ObjectId(userId),
@@ -110,7 +110,7 @@ export class TeamsController {
 
       teamsToSend.push(team);
     }
-    console.log(teamsToSend);
+    //console.log(teamsToSend);
     return { data: serializeTeam(teamsToSend) };
   }
 

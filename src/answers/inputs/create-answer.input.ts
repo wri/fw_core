@@ -32,7 +32,6 @@ export class CreateAnswerInput {
   @ArrayMaxSize(2)
   @ArrayMinSize(2)
   @Transform(({ value }) => {
-    console.log(value, typeof value, value.split(','));
     return isString(value)
       ? value.split(',').map((item) => item.trim())
       : value;
