@@ -164,6 +164,12 @@ export class TeamMembersService {
     const teams = await this.teamMemberModel.find({ userId });
     const users: (string | null)[] = [];
     for await (const team of teams) {
+      if (team.role === EMemberRole.Left) continue;
+      if (
+        team.status === EMemberStatus.Declined ||
+        team.status === EMemberStatus.Invited
+      )
+        continue;
       const teamUsers = await this.teamMemberModel.find({
         teamId: team.teamId,
       });
