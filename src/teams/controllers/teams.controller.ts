@@ -85,7 +85,7 @@ export class TeamsController {
     // get members of teams and areas of team
     const teamsToSend: TeamDocument[] = [];
     for await (const team of filteredTeams) {
-      const teamId = team._id;
+      const teamId = team.id;
       const teamUserRelation = await this.teamMembersService.findTeamMember(
         teamId,
         userId,
