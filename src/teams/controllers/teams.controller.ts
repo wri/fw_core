@@ -76,7 +76,7 @@ export class TeamsController {
 
     this.logger.log(`Getting all teams for user ${userId}`);
 
-    const teams = await this.teamsService.findAllByUserId(id);
+    const teams: TeamDocument[] = await this.teamsService.findAllByUserId(id);
     const filteredTeams = teams.filter(
       (team) =>
         team.userRole !== EMemberRole.Left &&
@@ -87,12 +87,10 @@ export class TeamsController {
     const teamsToSend: TeamDocument[] = [];
     for await (const team of filteredTeams) {
       const teamId = team._id;
-      console.log('ids', teamId, userId);
       const teamUserRelation = await this.teamMembersService.findTeamMember(
         teamId,
         new mongoose.Types.ObjectId(userId),
       );
-      console.log('userRelation', teamId, teamUserRelation);
       if (teamUserRelation) {
         const members: TeamMemberDocument[] =
           await this.teamMembersService.findAllTeamMembers(
@@ -110,7 +108,6 @@ export class TeamsController {
 
       teamsToSend.push(team);
     }
-    //console.log(teamsToSend);
     return { data: serializeTeam(teamsToSend) };
   }
 
