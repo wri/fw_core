@@ -28,6 +28,7 @@ import { CreateTeamMemberDto } from '../dto/createTeamMember.dto';
 import { AuthUser } from '../../common/decorators';
 import { IUser } from '../../common/user.model';
 import { MongooseObjectId } from '../../common/objectId';
+import mongoose from 'mongoose';
 
 @Controller('teams/:teamId/users')
 export class TeamMembersController {
@@ -49,8 +50,8 @@ export class TeamMembersController {
     const { id: userId } = user;
     const { teamId } = params;
     const teamMember = await this.teamMembersService.findTeamMember(
-      teamId,
-      userId,
+      new mongoose.Types.ObjectId(teamId),
+      new mongoose.Types.ObjectId(userId),
     );
 
     if (!teamMember) throw new NotFoundException();
@@ -120,16 +121,16 @@ export class TeamMembersController {
   // Only admin can access this router
   @Patch('/reassignAdmin/:userId')
   async reassignAdmin(@Param() params, @AuthUser() user: IUser): Promise<any> {
-    const { userId, teamId } = params;
+    const { userId, teamId }: { userId: string; teamId: string } = params;
     const { id: loggedUserId } = user;
 
     const teamUser = await this.teamMembersService.findTeamMember(
-      teamId,
-      userId,
+      new mongoose.Types.ObjectId(teamId),
+      new mongoose.Types.ObjectId(userId),
     );
     const adminUser = await this.teamMembersService.findTeamMember(
-      teamId,
-      loggedUserId,
+      new mongoose.Types.ObjectId(teamId),
+      new mongoose.Types.ObjectId(loggedUserId),
     );
 
     if (!teamUser)
@@ -201,13 +202,13 @@ export class TeamMembersController {
   // Can't remove the Admin
   @Delete('/:memberId')
   async deleteMember(@Param() params, @AuthUser() user: IUser): Promise<void> {
-    const { memberId, teamId } = params;
+    const { memberId, teamId }: { memberId: string; teamId: string } = params;
     const { id: loggedUserId } = user;
 
     const teamMemberToDelete = await this.teamMembersService.findById(memberId);
     const currentUser = await this.teamMembersService.findTeamMember(
-      teamId,
-      loggedUserId,
+      new mongoose.Types.ObjectId(teamId),
+      new mongoose.Types.ObjectId(loggedUserId),
     );
 
     if (!teamMemberToDelete)

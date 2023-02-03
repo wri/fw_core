@@ -10,6 +10,7 @@ import { Request, Response, NextFunction } from 'express';
 import { TeamMembersService } from '../services/teamMembers.service';
 import { EMemberRole, TeamMemberDocument } from '../models/teamMember.schema';
 import { TeamDocument } from '../models/team.schema';
+import mongoose from 'mongoose';
 
 type TRequest = {
   body: {
@@ -45,8 +46,8 @@ export class IsAdminOrManagerMiddleware implements NestMiddleware {
       );
 
     const teamMember = await this.teamMembersService.findTeamMember(
-      teamId,
-      userId,
+      new mongoose.Types.ObjectId(teamId),
+      new mongoose.Types.ObjectId(userId),
     );
 
     if (
