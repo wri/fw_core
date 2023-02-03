@@ -23,6 +23,12 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.setGlobalPrefix('v3/gfw');
 
+  app.use((req, res, next) => {
+    return next().then(function () {
+      res.set('Cache-Control', 'private');
+    });
+  });
+
   Sentry.init({
     dsn: 'https://a6b18ef7ce1d43298127081511289af7@o163691.ingest.sentry.io/4504083459211264',
     environment: process.env.NODE_ENV,
