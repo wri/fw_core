@@ -116,13 +116,19 @@ export class AssignmentsService {
         await this.teamAreaRelationService.getAllAreasForTeam(team.id);
       areas.push(...relations);
     }
+    // either assignments linked to you or team members associated with areas linked to you through teams
     return await this.assignmentModel.find({
       $or: [
         { $or: [{ monitors: { $in: [userId] } }, { createdBy: userId }] },
         {
           $and: [
             { areaId: { $in: areas } },
-            { monitors: { $in: teamMembers } },
+            {
+              $or: [
+                { monitors: { $in: teamMembers } },
+                { createdBy: { $in: teamMembers } },
+              ],
+            },
           ],
         },
       ],
