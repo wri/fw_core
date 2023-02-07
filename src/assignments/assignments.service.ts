@@ -117,9 +117,14 @@ export class AssignmentsService {
       areas.push(...relations);
     }
     return await this.assignmentModel.find({
-      $and: [
-        { areaId: { $in: areas } },
-        { $or: [{ monitors: { $in: teamMembers } }, { createdBy: userId }] },
+      $or: [
+        { $or: [{ monitors: { $in: [userId] } }, { createdBy: userId }] },
+        {
+          $and: [
+            { areaId: { $in: areas } },
+            { monitors: { $in: teamMembers } },
+          ],
+        },
       ],
     });
   }

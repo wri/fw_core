@@ -50,7 +50,6 @@ export class TeamsService {
   async findAllByUserId(userId: string): Promise<TeamDocument[]> {
     const teamMembers: TeamMemberDocument[] =
       await this.teamMembersService.findAllByUserId(userId);
-    console.log('teamMembers', teamMembers);
     return await this.findAllByTeamUserRelations(teamMembers);
   }
 

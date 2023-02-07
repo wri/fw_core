@@ -27,13 +27,13 @@ import { DatasetService } from '../../areas/services/dataset.service';
 import templatesConstants from './templates.constants';
 import { EMemberRole } from '../../teams/models/teamMember.schema';
 import { CreateAssignmentInput } from '../inputs/create-assignments.input';
-import { MongooseObjectId } from '../../common/objectId';
 import { AssignmentStatus } from '../assignment-status.enum';
 
 describe('Assignments', () => {
   let app: INestApplication;
   let teamsDbConnection: Connection;
   let formsDbConnection: Connection;
+  let apiDbConnection: Connection;
   const userService = {
     authorise: (token) => ROLES[token],
     getNameByIdMICROSERVICE: (_id) => 'Full Name',
@@ -114,6 +114,9 @@ describe('Assignments', () => {
     formsDbConnection = moduleRef
       .get<DatabaseService>(DatabaseService)
       .getFormsHandle();
+    apiDbConnection = moduleRef
+      .get<DatabaseService>(DatabaseService)
+      .getApiHandle();
   });
 
   describe('POST /assignments', () => {
@@ -449,7 +452,10 @@ describe('Assignments', () => {
         email: 'email',
         role: EMemberRole.Monitor,
       });
-
+      await apiDbConnection.collection('areateamrelations').insertOne({
+        areaId: areaConstants.testArea.id.toString(),
+        teamId: team.insertedId.toString(),
+      });
       const assignment = await formsDbConnection
         .collection('assignments')
         .insertOne({
