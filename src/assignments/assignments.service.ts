@@ -20,6 +20,8 @@ import { GeostoreService } from '../areas/services/geostore.service';
 import { IUser } from '../common/user.model';
 import { S3Service } from '../answers/services/s3Service';
 import { MongooseObjectId } from '../common/objectId';
+import { TeamsService } from 'src/teams/services/teams.service';
+import { TeamAreaRelationService } from 'src/areas/services/teamAreaRelation.service';
 
 const allowedKeys = [
   'name',
@@ -36,6 +38,8 @@ export class AssignmentsService {
     @InjectModel(Assignment.name, 'formsDb')
     private assignmentModel: Model<AssignmentDocument>,
     private readonly teamMembersService: TeamMembersService,
+    private readonly teamsService: TeamsService,
+    private readonly teamAreaRelationService: TeamAreaRelationService,
     private readonly geostoreService: GeostoreService,
     private readonly s3Service: S3Service,
   ) {}
@@ -99,13 +103,24 @@ export class AssignmentsService {
   }
 
   async findUser(userId: string): Promise<AssignmentDocument[]> {
-    // get user's managed teams
+    // get user's team members
     const teamMembers = await this.teamMembersService.findEveryTeamMember(
       userId,
     );
     teamMembers.push(userId);
+    // get user teams areas
+    const teams = await this.teamsService.findAllByUserId(userId);
+    const areas: string[] = [];
+    for await (const team of teams) {
+      const relations: string[] =
+        await this.teamAreaRelationService.getAllAreasForTeam(team.id);
+      areas.push(...relations);
+    }
     return await this.assignmentModel.find({
-      $or: [{ monitors: { $in: teamMembers } }, { createdBy: userId }],
+      $and: [
+        { areaId: { $in: areas } },
+        { $or: [{ monitors: { $in: teamMembers } }, { createdBy: userId }] },
+      ],
     });
   }
 
