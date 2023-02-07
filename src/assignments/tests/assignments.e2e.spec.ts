@@ -471,7 +471,7 @@ describe('Assignments', () => {
         geostore: assignments.geostore.id,
         name: 'not visible',
         monitors: [],
-        createdBy: ROLES.USER.id,
+        createdBy: new mongoose.Types.ObjectId(),
       });
 
       const response = await request(app.getHttpServer())
