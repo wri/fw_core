@@ -20,8 +20,8 @@ import { GeostoreService } from '../areas/services/geostore.service';
 import { IUser } from '../common/user.model';
 import { S3Service } from '../answers/services/s3Service';
 import { MongooseObjectId } from '../common/objectId';
-import { TeamsService } from 'src/teams/services/teams.service';
-import { TeamAreaRelationService } from 'src/areas/services/teamAreaRelation.service';
+import { TeamsService } from '../teams/services/teams.service';
+import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
 
 const allowedKeys = [
   'name',
