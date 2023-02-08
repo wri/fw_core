@@ -24,7 +24,7 @@ import { MongooseObjectId } from '../../common/objectId';
 import { AreasModule } from '../../areas/modules/areas.module';
 import { AreasService } from '../../areas/services/areas.service';
 import { CreateTemplateInput } from '../input/create-template.input';
-import { IArea } from '../../areas/models/area.entity';
+//import { IArea } from '../../areas/models/area.entity';
 
 describe('Templates', () => {
   let app: INestApplication;
