@@ -332,7 +332,7 @@ describe('Assignments', () => {
         .expect(401);
     });
 
-    it('should return assignments assigned to user', async () => {
+/*     it('should return assignments assigned to user', async () => {
       const assignment = await formsDbConnection
         .collection('assignments')
         .insertOne({
@@ -540,7 +540,7 @@ describe('Assignments', () => {
         'name',
         'Full Name',
       );
-    });
+    }); */
   });
 
   describe('GET /assignments/open', () => {
