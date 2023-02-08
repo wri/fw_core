@@ -88,34 +88,12 @@ export class AnswersService extends BaseService<
     teams: TeamDocument[];
   }): Promise<IAnswer[]> {
     let filter = {};
-    let teamsManaged: TeamDocument[] = [];
-    const confirmedUsers: (mongoose.Types.ObjectId | undefined)[] = [];
-    if (teams.length > 0) {
-      // check if user is manager of any teams
-      teamsManaged = teams.filter(
-        (team) =>
-          team.userRole === EMemberRole.Manager ||
-          team.userRole === EMemberRole.Administrator,
-      );
-      // get all managed teams users
-      if (teamsManaged.length > 0) {
-        for await (const team of teamsManaged) {
-          // get users of each team and add to users array
-          const teamUsers = await this.teamMembersService.findAllTeamMembers(
-            team.id,
-            EMemberRole.Administrator,
-          );
-          if (teamUsers)
-            confirmedUsers.push(
-              ...teamUsers.map((teamUser) => teamUser.userId),
-            );
-        }
-      }
-    }
-    // add current user to users array
-    confirmedUsers.push(new mongoose.Types.ObjectId(loggedUser.id));
+    const teamMembers = await this.teamMembersService.findEveryTeamMember(
+      loggedUser.id,
+    );
+    teamMembers.push(loggedUser.id);
 
-    filter = { user: { $in: confirmedUsers } };
+    filter = { user: { $in: teamMembers } };
 
     const answers = await this.answerModel.find(filter);
 
