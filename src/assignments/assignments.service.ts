@@ -22,6 +22,7 @@ import { S3Service } from '../answers/services/s3Service';
 import { MongooseObjectId } from '../common/objectId';
 import { TeamsService } from '../teams/services/teams.service';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
+import { AreasService } from '../areas/services/areas.service';
 
 const allowedKeys = [
   'name',
@@ -42,6 +43,7 @@ export class AssignmentsService {
     private readonly teamAreaRelationService: TeamAreaRelationService,
     private readonly geostoreService: GeostoreService,
     private readonly s3Service: S3Service,
+    private readonly areaService: AreasService,
   ) {}
 
   async findById(
@@ -102,20 +104,22 @@ export class AssignmentsService {
     return await this.assignmentModel.findOne(filter);
   }
 
-  async findUser(userId: string): Promise<AssignmentDocument[]> {
+  async findUser(user: IUser): Promise<AssignmentDocument[]> {
     // get user's team members
     const teamMembers = await this.teamMembersService.findEveryTeamMember(
-      userId,
+      user.id,
     );
-    teamMembers.push(userId);
+    teamMembers.push(user.id);
     // get user teams areas
-    const teams = await this.teamsService.findAllByUserId(userId);
+    const teams = await this.teamsService.findAllByUserId(user.id);
     const areas: string[] = [];
     for await (const team of teams) {
       const relations: string[] =
         await this.teamAreaRelationService.getAllAreasForTeam(team.id);
       areas.push(...relations);
     }
+    const userAreas = await this.areaService.getUserAreas(user);
+    areas.push(...userAreas.map((area) => area.id));
     // either assignments linked to you or team members associated with areas linked to you through teams
     return await this.assignmentModel.find({
       $and: [

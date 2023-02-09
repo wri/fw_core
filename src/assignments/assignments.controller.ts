@@ -91,7 +91,7 @@ export class AssignmentsController {
   async findUserAssignments(
     @AuthUser() user: IUser,
   ): Promise<IAssignmentResponse> {
-    const assignments = await this.assignmentsService.findUser(user.id);
+    const assignments = await this.assignmentsService.findUser(user);
 
     const assignmentResponse = await this.buildAssignmentResponse(
       assignments,
