@@ -117,7 +117,7 @@ export class TemplatesService extends BaseService<
         _id: new mongoose.Types.ObjectId('59b6a26b138f260012e9fdeb'),
       });
       const savedDoc = await newDoc.save();
-      await this.model.findByIdAndDelete(oldId);
+      //await this.model.findByIdAndDelete(oldId);
       return savedDoc;
     } else return;
   }
