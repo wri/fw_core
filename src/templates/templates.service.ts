@@ -99,4 +99,26 @@ export class TemplatesService extends BaseService<
     await this.model.deleteMany({ editGroupId });
     await this.model.findByIdAndDelete(id);
   }
+
+  async updateId(oldId) {
+    const doc = await this.model.findById(oldId);
+    if (doc) {
+      const newDoc = new this.model({
+        name: doc.name,
+        user: doc.user,
+        languages: doc.languages,
+        defaultLanguage: doc.defaultLanguage,
+        public: doc.public,
+        status: doc.status,
+        createdAt: doc.createdAt,
+        questions: doc.questions,
+        editGroupId: doc.editGroupId,
+        isLatest: doc.isLatest,
+        _id: new mongoose.Types.ObjectId('59b6a26b138f260012e9fdeb'),
+      });
+      const savedDoc = await newDoc.save();
+      await this.model.findByIdAndDelete(oldId);
+      return savedDoc;
+    } else return;
+  }
 }

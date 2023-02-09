@@ -411,6 +411,11 @@ export class TemplatesController {
     return { data: serializeTemplate(updatedTemplate) };
   }
 
+  @Patch('/changeId/:id')
+  async changeId(@Param('id') templateId: string) {
+    return await this.templatesService.updateId(templateId);
+  }
+
   @Patch('/:id/status')
   async updateStatus(
     @Param('id') templateId: string,
