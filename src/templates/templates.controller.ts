@@ -437,6 +437,11 @@ export class TemplatesController {
     return { data: serializeTemplate(template) };
   }
 
+  @Delete('/forceDelete/:id')
+  async forceDelete(@Param('id') id: string): Promise<void> {
+    await this.templatesService.forceDelete(id);
+  }
+
   /**
    * Route to delete all user answers and templates for a user with supplied id
    * @param userId Id of user

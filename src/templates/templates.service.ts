@@ -99,7 +99,7 @@ export class TemplatesService extends BaseService<
     await this.model.deleteMany({ editGroupId });
     await this.model.findByIdAndDelete(id);
   }
-//
+
   async updateId(oldId) {
     const doc = await this.model.findById(oldId);
     if (doc) {
@@ -120,5 +120,9 @@ export class TemplatesService extends BaseService<
       //await this.model.findByIdAndDelete(oldId);
       return savedDoc;
     } else return;
+  }
+
+  async forceDelete(id) {
+    await this.model.findByIdAndDelete(id);
   }
 }
