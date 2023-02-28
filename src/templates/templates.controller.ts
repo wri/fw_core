@@ -32,6 +32,7 @@ import { UpdateTemplateInput } from './input/update-template.input';
 import { ValidateBodyIsNotEmptyPipe } from '../common/pipes/validate-body-is-not-empty.pipe';
 import { AreasService } from '../areas/services/areas.service';
 import { ConfigService } from '@nestjs/config';
+import mongoose from 'mongoose';
 
 @Controller('templates')
 export class TemplatesController {
@@ -528,17 +529,24 @@ export class TemplatesController {
         'You cannot delete a published template. Please unpublish first.',
       );
 
-    const answers = await this.answersService.find({ report: id });
+    const idArray = [new MongooseObjectId(id)];
+    if (template.editGroupId) idArray.push(template.editGroupId);
+
+    const answers = await this.answersService.find({
+      report: { $in: idArray },
+    });
     if (answers.length > 0 && user.role !== 'ADMIN')
       throw new ForbiddenException(
         'This report has answers, you cannot delete. Please unpublish instead.',
       );
 
     if (answers.length > 0)
-      await this.answersService.deleteMany({ report: id });
+      await this.answersService.deleteMany({ report: { $in: idArray } });
 
-    await this.templatesService.delete(id);
-    await this.templateAreaRelationService.deleteMany({ report: id });
+    await this.templatesService.deleteAllVersions(id, template.editGroupId);
+    await this.templateAreaRelationService.deleteMany({
+      report: { $in: idArray },
+    });
   }
 
   private validateCreateTemplateLanguagesOrFail(
