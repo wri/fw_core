@@ -135,10 +135,7 @@ export class AssignmentsService {
   }
 
   async findOpen(userId: string): Promise<AssignmentDocument[]> {
-    const teamMembers = await this.teamMembersService.findEveryTeamMember(
-      userId,
-    );
-    teamMembers.push(userId);
+    const teamMembers = [userId];
     return await this.assignmentModel.find({
       monitors: { $in: teamMembers },
       status: { $in: ['open', 'on hold'] },
