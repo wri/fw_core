@@ -48,6 +48,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@chelsea-apps/node-config": "^0.0.7",
     "@nestjs/cli": "^8.0.0",
     "@nestjs/schematics": "^8.0.0",
     "@nestjs/testing": "^8.0.0",
@@ -72,7 +73,8 @@
     "ts-loader": "^9.2.3",
     "ts-node": "^10.0.0",
     "tsconfig-paths": "^3.10.1",
-    "typescript": "^4.3.5"
+    "typescript": "^4.3.5",
+    "xo": "^0.53.1"
   },
   "jest": {
     "moduleFileExtensions": [
