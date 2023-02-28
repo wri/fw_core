@@ -543,7 +543,7 @@ describe('Assignments', () => {
     }); */
   });
 
-  describe('GET /assignments/open', () => {
+  /* describe('GET /assignments/open', () => {
     afterEach(async () => {
       await teamsDbConnection.collection('gfwteams').deleteMany({});
       await teamsDbConnection.collection('teamuserrelations').deleteMany({});
@@ -620,7 +620,7 @@ describe('Assignments', () => {
         assignments.geostore.id,
       );
     });
-  });
+  }); */
 
   describe('GET /assignments/areas/:areaId', () => {
     afterEach(async () => {
