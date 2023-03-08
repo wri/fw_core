@@ -32,7 +32,6 @@ import { UpdateTemplateInput } from './input/update-template.input';
 import { ValidateBodyIsNotEmptyPipe } from '../common/pipes/validate-body-is-not-empty.pipe';
 import { AreasService } from '../areas/services/areas.service';
 import { ConfigService } from '@nestjs/config';
-import mongoose from 'mongoose';
 
 @Controller('templates')
 export class TemplatesController {
@@ -513,6 +512,14 @@ export class TemplatesController {
       undeletedTemplates,
       errors,
     };
+  }
+
+  @Delete('/tidyUp')
+  async tidyUp(): Promise<void> {
+    /*     if (user.token !== this.configService.get('service.token'))
+      throw new UnauthorizedException(); */
+    await this.answersService.tidyUp();
+    return;
   }
 
   @Delete('/:id')

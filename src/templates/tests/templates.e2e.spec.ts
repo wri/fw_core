@@ -1955,6 +1955,102 @@ describe('Templates', () => {
     });
   });
 
+  describe('DELETE /templates/tidyUp', () => {
+    afterEach(async () => {
+      await formsDbConnection.collection('reports').deleteMany({});
+      await formsDbConnection.collection('answers').deleteMany({});
+    });
+
+    afterEach(async () => {
+      await formsDbConnection.collection('reports').deleteMany({});
+      await formsDbConnection.collection('answers').deleteMany({});
+    });
+
+    it('should delete reports with no templates', async () => {
+      const defaultTemplate = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.defaultTemplate });
+      const managerTemplate = await formsDbConnection
+        .collection('reports')
+        .insertOne(constants.managerTemplate);
+      const defaultAnswer = await formsDbConnection
+        .collection('answers')
+        .insertOne({
+          report: defaultTemplate.insertedId,
+          reportName: 'answer 1',
+          language: 'en',
+          user: new mongoose.Types.ObjectId(ROLES.USER.id),
+          responses: [{ name: 'question-1', value: 'test' }],
+        });
+      const managerAnswer = await formsDbConnection
+        .collection('answers')
+        .insertOne({
+          report: managerTemplate.insertedId,
+          reportName: 'answer 1',
+          language: 'en',
+          user: new mongoose.Types.ObjectId(ROLES.USER.id),
+          responses: [{ name: 'question-1', value: 'test' }],
+        });
+      const otherAnswer = await formsDbConnection
+        .collection('answers')
+        .insertOne({
+          report: constants.managerTemplate.editGroupId,
+          reportName: 'answer 1',
+          language: 'en',
+          user: new mongoose.Types.ObjectId(ROLES.USER.id),
+          responses: [{ name: 'question-1', value: 'test' }],
+        });
+      const floatingAnswer = await formsDbConnection
+        .collection('answers')
+        .insertOne({
+          report: new mongoose.Types.ObjectId(),
+          reportName: 'answer 1',
+          language: 'en',
+          user: new mongoose.Types.ObjectId(ROLES.USER.id),
+          responses: [{ name: 'question-1', value: 'test' }],
+        });
+
+      const answer = await formsDbConnection
+        .collection('answers')
+        .findOne({ _id: floatingAnswer.insertedId });
+      const answer2 = await formsDbConnection
+        .collection('answers')
+        .findOne({ _id: defaultAnswer.insertedId });
+      const answer3 = await formsDbConnection
+        .collection('answers')
+        .findOne({ _id: managerAnswer.insertedId });
+      const answer4 = await formsDbConnection
+        .collection('answers')
+        .findOne({ _id: otherAnswer.insertedId });
+      expect(answer?._id.toString()).toBe(floatingAnswer.insertedId.toString());
+      expect(answer2?._id.toString()).toBe(defaultAnswer.insertedId.toString());
+      expect(answer3?._id.toString()).toBe(managerAnswer.insertedId.toString());
+      expect(answer4?._id.toString()).toBe(otherAnswer.insertedId.toString());
+
+      await request(app.getHttpServer())
+        .delete('/templates/tidyUp')
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      const answer5 = await formsDbConnection
+        .collection('answers')
+        .findOne({ _id: floatingAnswer.insertedId });
+      const answer6 = await formsDbConnection
+        .collection('answers')
+        .findOne({ _id: defaultAnswer.insertedId });
+      const answer7 = await formsDbConnection
+        .collection('answers')
+        .findOne({ _id: managerAnswer.insertedId });
+      const answer8 = await formsDbConnection
+        .collection('answers')
+        .findOne({ _id: otherAnswer.insertedId });
+      expect(answer5?._id).toBeUndefined();
+      expect(answer6?._id.toString()).toBe(defaultAnswer.insertedId.toString());
+      expect(answer7?._id.toString()).toBe(managerAnswer.insertedId.toString());
+      expect(answer8?._id.toString()).toBe(otherAnswer.insertedId.toString());
+    });
+  });
+
   afterAll(async () => {
     await app.close();
   });

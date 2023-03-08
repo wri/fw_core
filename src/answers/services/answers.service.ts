@@ -207,4 +207,27 @@ export class AnswersService extends BaseService<
   ): Promise<number> {
     return this.count({ report: templateId });
   }
+
+  /**
+   * Loops through all report answers and deletes any that no longer
+   * have an associated template
+   */
+  async tidyUp(): Promise<void> {
+    // get all answers
+    const answers = await this.answerModel.find();
+    const templates = await this.templatesService.find({});
+    answers.forEach((answer) => {
+      const templateId = answer.report;
+      const template = templates.find(
+        (template) =>
+          template._id.toString() === templateId.toString() ||
+          template.editGroupId?.toString() === templateId.toString(),
+      );
+      if (!template) {
+        console.log('DELETING', answer.id);
+        //this.answerModel.findByIdAndDelete(answer.id);
+        answer.delete();
+      }
+    });
+  }
 }
