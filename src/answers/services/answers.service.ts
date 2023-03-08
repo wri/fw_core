@@ -224,8 +224,6 @@ export class AnswersService extends BaseService<
           template.editGroupId?.toString() === templateId.toString(),
       );
       if (!template) {
-        console.log('DELETING', answer.id);
-        //this.answerModel.findByIdAndDelete(answer.id);
         answer.delete();
       }
     });
