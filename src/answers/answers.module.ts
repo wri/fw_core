@@ -67,5 +67,6 @@ export class AnswersModule {
       .apply(TemplatePermissionsMiddleware)
       .exclude('/v3/gfw/templates/:templateId/answers/exports/:id')
       .forRoutes(AnswersController);
+      .forRoutes()
   }
 }
