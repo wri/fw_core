@@ -1,57 +1,72 @@
 import { Injectable } from '@nestjs/common';
-import config = require('config')
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
-import client from '../../common/redisClient';
 import deserialize from '../../common/deserlializer';
-import { IGeojson, IGeostore } from '../models/area.entity';
-import { IUser } from '../../common/user.model';
+import { ConfigService } from '@nestjs/config';
+import { IGeojson } from '../models/area.entity';
+import { RedisService } from '../../common/redis.service';
+import { IGeostore } from '../models/geostore.entity';
 
 @Injectable()
 export class GeostoreService {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly redisService: RedisService,
+  ) {}
+  private readonly logger = new Logger(GeostoreService.name);
 
-    private readonly logger = new Logger(GeostoreService.name)
+  async createGeostore(geojson: IGeojson, token: string): Promise<IGeostore> {
+    try {
+      const baseURL = this.configService.get('geostoreApi.url');
+      const url = `${baseURL}/geostore`;
+      const body = {
+        geojson,
+        lock: true,
+      };
+      const createGeostoreRequestConfig = {
+        headers: {
+          authorization: token,
+        },
+      };
+      const { data } = await axios.post(url, body, createGeostoreRequestConfig);
+      return data && deserialize(data.data);
+    } catch (error) {
+      this.logger.error('Error while creating geostore', error);
+      throw error;
+    }
+  }
 
-    async createGeostore(geojson: any, token: string): Promise<any> {
-        try {
-            const baseURL = config.get("geostoreAPI.url")
-            const url = `${baseURL}/geostore`
-            const body = {
-                geojson,
-                lock: true
-            }
-            const createGeostoreRequestConfig = {
-                headers: {
-                    authorization: token
-                }
-            };
-            const { data } = await axios.post(url, body, createGeostoreRequestConfig);
-            return data && deserialize(data.data)
-        } catch (error) {
-            this.logger.error("Error while creating geostore", error)
-        }
+  async getGeostore(
+    geostoreId: string,
+    token: string,
+  ): Promise<IGeostore | null> {
+    // check for geostore in redis hash
+    const geostoreString = await this.redisService.get(geostoreId.toString());
+    if (geostoreString) {
+      const geostore = JSON.parse(geostoreString);
+      this.logger.log(`Found Geostore ${geostore.id} in Redis store`);
+      return geostore;
     }
 
-    async getGeostore(geostoreId: any, token: string) {
-        // check for geostore in redis hash
-        let geostore: any = await client.get(geostoreId.toString())
-        if (!geostore) {
-            try {
-                const baseURL = config.get("geostoreAPI.url");
-                const url = `${baseURL}/geostore/${geostoreId}`
-                const getGeostoreRequestConfig = {
-                    headers: {
-                        authorization: token
-                    }
-                };
-                const { data } = await axios.get(url, getGeostoreRequestConfig);
-                geostore = deserialize(data.data);
-                client.set(geostoreId.toString(), geostore, 'EX', 7 * 60 * 60 * 24) // set to expire in 7 days
-            } catch (error) {
-                this.logger.error("Error while fetching geostore", error);
-                throw error;
-            }
-        }
-        return geostore;
+    try {
+      const baseURL = this.configService.get('geostoreApi.url');
+      const url = `${baseURL}/geostore/${geostoreId}`;
+      const getGeostoreRequestConfig = {
+        headers: {
+          authorization: token,
+        },
+      };
+      const { data } = await axios.get(url, getGeostoreRequestConfig);
+      const geostore = deserialize(data.data);
+      await this.redisService.set(
+        geostoreId.toString(),
+        JSON.stringify(geostore),
+      );
+      return geostore as IGeostore;
+    } catch (error: any) {
+      if (error.response.status === 404) return null;
+      this.logger.error('Error while fetching geostore', error);
+      throw error;
     }
+  }
 }

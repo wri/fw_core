@@ -1,72 +1,71 @@
-import { HttpException, HttpStatus, Injectable, NestMiddleware } from "@nestjs/common";
-import { Request, Response, NextFunction } from "express";
-import mongoose from "mongoose";
-import { EMemberRole } from "../../teams/models/teamMember.schema";
-import { TemplatesService } from "../../templates/templates.service";
-import { TeamMembersService } from "../../teams/services/teamMembers.service";
-import { TeamsService } from "../../teams/services/teams.service";
-
-
-type TRequest = {
-  body: {
-    loggedUser: any;
-  };
-  query: any;
-} & Request;
-
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NestMiddleware,
+} from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
+import { EMemberRole } from '../../teams/models/teamMember.schema';
+import { TemplatesService } from '../../templates/templates.service';
+import { TeamMembersService } from '../../teams/services/teamMembers.service';
+import { TeamsService } from '../../teams/services/teams.service';
+import { MongooseObjectId } from '../../common/objectId';
+import { TemplateDocument } from '../../templates/models/template.schema';
 
 @Injectable()
 export class TemplatePermissionsMiddleware implements NestMiddleware {
   constructor(
     private readonly teamsService: TeamsService,
     private readonly teamMembersService: TeamMembersService,
-    private readonly templatesService: TemplatesService
-  ) { }
+    private readonly templatesService: TemplatesService,
+  ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { user, params } = <TRequest>req;
+    const { user, params } = req;
     // creates a filter to get the report if the user is allowed to see it
     // looks like a monitor can see reports made by their team manager(s)
     // get the users teams
+
+    if (!params.templateId) {
+      throw new BadRequestException('Missing templateId');
+    }
+
     const teams = await this.teamsService.findAllByUserId(user.id);
 
-    // get managers of those teams
-    const managers = [];
+    const teamMemberIds: (MongooseObjectId | undefined)[] = [];
     for (const team of teams) {
-      let teamUsers = await this.teamMembersService.findAllTeamMembers(team.id, EMemberRole.Manager);
-      if (!teamUsers) teamUsers = [];
-      let teamManagers = teamUsers.filter(
-        teamUser => teamUser.role === EMemberRole.Manager || teamUser.role === EMemberRole.Administrator
-      );
-      teamManagers.forEach(manager => managers.push({ user: new mongoose.Types.ObjectId(manager.userId) }));
-    }
-    let filters = {};
-    if (teams.length > 0) {
-      filters = {
-        $and: [
-          { _id: new mongoose.Types.ObjectId(params.templateId) },
-          {
-            $or: [{ public: true }, { user: new mongoose.Types.ObjectId(user.id) }, ...managers]
-          }
-        ]
-      };
-    } else {
-      filters = {
-        $and: [
-          { _id: new mongoose.Types.ObjectId(params.templateId) },
-          {
-            $or: [{ public: true }, { user: new mongoose.Types.ObjectId(user.id) }]
-          }
-        ]
-      };
+      const members =
+        (await this.teamMembersService.findAllTeamMembers(
+          team.id,
+          EMemberRole.Manager,
+        )) ?? [];
+      teamMemberIds.push(...members.map((m) => m.userId));
     }
 
-    const template = await this.templatesService.findOne(filters);
+    const filter: mongoose.FilterQuery<TemplateDocument> = {
+      $and: [
+        { _id: new MongooseObjectId(params.templateId) },
+        {
+          $or: [
+            { public: true },
+            { user: new MongooseObjectId(user.id) },
+            ...teamMemberIds.map((id) => ({ user: id })),
+          ],
+        },
+      ],
+    };
+
+    const template = await this.templatesService.findOne(filter);
     if (!template) {
-      throw new HttpException("Template not found", HttpStatus.NOT_FOUND)
+      throw new ForbiddenException(
+        "User doesn't have permissions to view this answer",
+      );
     }
     req.template = template;
     req.userTeams = teams;
     next();
   }
-};
+}
