@@ -45,9 +45,8 @@ export class CreateAnswerInput {
   clickedPosition?: CreateAnswerPositionInput[];
 
   @IsOptional()
-  @IsInt()
-  @Transform(({ value }) => Number(value))
-  date?: number;
+  //@Transform(({ value }) => Number(value))
+  date?: string;
 
   @IsOptional()
   @IsMongoId()
