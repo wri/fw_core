@@ -27,6 +27,7 @@ import { ResponseService } from '../services/response.service';
 import { TemplatesService } from '../../templates/templates.service';
 import { IUser } from '../../common/user.model';
 import { AuthUser } from '../../common/decorators';
+import { EMemberRole, EMemberStatus } from 'src/teams/models/teamMember.schema';
 
 @Controller('areas')
 export class AreasController {
@@ -101,9 +102,13 @@ export class AreasController {
         });
         // get a users teams
         const userTeams = await this.teamsService.findAllByUserId(user.id); // get list of user's teams
+        const filteredTeams = userTeams.filter((team) => {
+          team.userRole !== EMemberRole.Left &&
+            team.status === EMemberStatus.Confirmed;
+        });
         //get areas for each team
         const allTeamAreas: (IArea | null)[] = userAreas;
-        for await (const team of userTeams) {
+        for await (const team of filteredTeams) {
           const teamAreas: string[] =
             await this.teamAreaRelationService.getAllAreasForTeam(team.id);
           const fullTeamAreas: Promise<IArea | null>[] = [];
