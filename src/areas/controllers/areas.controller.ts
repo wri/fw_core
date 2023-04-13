@@ -27,7 +27,10 @@ import { ResponseService } from '../services/response.service';
 import { TemplatesService } from '../../templates/templates.service';
 import { IUser } from '../../common/user.model';
 import { AuthUser } from '../../common/decorators';
-import { EMemberRole, EMemberStatus } from 'src/teams/models/teamMember.schema';
+import {
+  EMemberRole,
+  EMemberStatus,
+} from '../../teams/models/teamMember.schema';
 
 @Controller('areas')
 export class AreasController {
