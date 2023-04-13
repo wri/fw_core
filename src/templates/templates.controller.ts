@@ -547,7 +547,7 @@ export class TemplatesController {
         'This report has answers, you cannot delete. Please unpublish instead.',
       );
 
-    if (answers.length > 0)
+    if (answers.length > 0 && user.role !== 'ADMIN')
       await this.answersService.deleteMany({ report: { $in: idArray } });
 
     await this.templatesService.deleteAllVersions(id, template.editGroupId);
