@@ -29,7 +29,7 @@ export abstract class BaseService<
    * @returns The entity list
    */
   async find(filter: mongoose.FilterQuery<T>): Promise<T[]> {
-    this.logger.log(`Find by filter: ${JSON.stringify(filter)}`);
+    //this.logger.log(`Find by filter: ${JSON.stringify(filter)}`);
     return this.model.find(filter);
   }
 

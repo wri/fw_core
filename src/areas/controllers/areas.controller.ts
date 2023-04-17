@@ -27,7 +27,10 @@ import { ResponseService } from '../services/response.service';
 import { TemplatesService } from '../../templates/templates.service';
 import { IUser } from '../../common/user.model';
 import { AuthUser } from '../../common/decorators';
-import { EMemberRole, EMemberStatus } from 'src/teams/models/teamMember.schema';
+import {
+  EMemberRole,
+  EMemberStatus,
+} from '../../teams/models/teamMember.schema';
 
 @Controller('areas')
 export class AreasController {
@@ -103,8 +106,11 @@ export class AreasController {
         // get a users teams
         const userTeams = await this.teamsService.findAllByUserId(user.id); // get list of user's teams
         const filteredTeams = userTeams.filter((team) => {
-          team.userRole !== EMemberRole.Left &&
-            team.status === EMemberStatus.Confirmed;
+          return (
+            team.userRole !== EMemberRole.Left &&
+            team.status !== EMemberStatus.Declined &&
+            team.status !== EMemberStatus.Invited
+          );
         });
         //get areas for each team
         const allTeamAreas: (IArea | null)[] = userAreas;

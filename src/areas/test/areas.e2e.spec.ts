@@ -237,7 +237,7 @@ describe('Areas', () => {
         teamId: team1.insertedId,
         userId: new mongoose.Types.ObjectId(ROLES.USER.id),
         email: ROLES.USER.email,
-        status: EMemberStatus.Invited,
+        status: EMemberStatus.Confirmed,
         role: EMemberRole.Administrator,
       });
       await apiDbConnection.collection('areateamrelations').insertOne({
