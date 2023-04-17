@@ -105,14 +105,14 @@ export class AreasController {
         });
         // get a users teams
         const userTeams = await this.teamsService.findAllByUserId(user.id); // get list of user's teams
-        const filteredTeams = userTeams.filter((team) => {
+        /*         const filteredTeams = userTeams.filter((team) => {
           team.userRole !== EMemberRole.Left &&
             team.status !== EMemberStatus.Declined &&
             team.status !== EMemberStatus.Invited;
-        });
+        }); */
         //get areas for each team
         const allTeamAreas: (IArea | null)[] = userAreas;
-        for await (const team of filteredTeams) {
+        for await (const team of userTeams) {
           const teamAreas: string[] =
             await this.teamAreaRelationService.getAllAreasForTeam(team.id);
           const fullTeamAreas: Promise<IArea | null>[] = [];
