@@ -124,6 +124,7 @@ export class AreasController {
             team.status !== EMemberStatus.Invited
           );
         });
+        console.log(filteredTeams.length);
         //get areas for each team
         const allTeamAreas: (IArea | null)[] = userAreas;
         for await (const team of userTeams) {
