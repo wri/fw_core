@@ -105,6 +105,7 @@ export class AreasController {
         });
         // get a users teams
         const userTeams = await this.teamsService.findAllByUserId(user.id); // get list of user's teams
+        console.log(userTeams)
         /*         const filteredTeams = userTeams.filter((team) => {
           team.userRole !== EMemberRole.Left &&
             team.status !== EMemberStatus.Declined &&
