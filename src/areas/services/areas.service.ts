@@ -108,7 +108,7 @@ export class AreasService {
       this.logger.error('Error while creating geostore', error);
       throw error;
     }
-    if (geostore.areaHa > 2000000) throw 'Area is too large';
+    if (geostore?.areaHa > 2000000) throw 'Area is too large';
     try {
       coverage = await this.coverageService.getCoverage(
         {
