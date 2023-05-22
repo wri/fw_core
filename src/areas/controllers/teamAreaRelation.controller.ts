@@ -67,7 +67,10 @@ export class TeamAreaRelationController {
     const area = await this.areasService.getAreaMICROSERVICE(areaId);
     if (!area)
       throw new HttpException("Area doesn't exist", HttpStatus.NOT_FOUND);
-    const relations = await this.teamAreaRelationService.find({ areaId });
+    const relations = await this.teamAreaRelationService.find({
+      areaId,
+      teamId: { $exists: true, $ne: null },
+    });
     return relations.map((relation) => relation.teamId);
   }
 
