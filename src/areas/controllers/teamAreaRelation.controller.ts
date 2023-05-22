@@ -52,6 +52,18 @@ export class TeamAreaRelationController {
     return Promise.all(relations);
   }
 
+  @Post('/query')
+  async query(
+    @AuthUser() user: IUser,
+    @Body() body: any,
+  ): Promise<TeamAreaRelationDocument[]> {
+    if (user.role !== 'admin') {
+      throw new ForbiddenException('Only admins can query team area relations');
+    }
+
+    return this.teamAreaRelationService.find(body);
+  }
+
   @Delete()
   async deleteTeamAreaRelation(
     @Body() body: CreateTeamAreaRelationDto,
