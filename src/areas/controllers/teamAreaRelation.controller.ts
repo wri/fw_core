@@ -52,18 +52,6 @@ export class TeamAreaRelationController {
     return Promise.all(relations);
   }
 
-  @Post('/query')
-  async query(
-    @AuthUser() user: IUser,
-    @Body() body: any,
-  ): Promise<TeamAreaRelationDocument[]> {
-    if (user.role !== 'admin') {
-      throw new ForbiddenException('Only admins can query team area relations');
-    }
-
-    return this.teamAreaRelationService.find(body);
-  }
-
   @Delete()
   async deleteTeamAreaRelation(
     @Body() body: CreateTeamAreaRelationDto,
@@ -99,22 +87,22 @@ export class TeamAreaRelationController {
   }
 
   @Delete('/deleteRelation/:teamId/:areaId')
-  deleteOneRelation(
+  async deleteOneRelation(
     @Param('teamId') teamId: string,
     @Param('areaId') areaId: string,
-  ): void {
-    this.teamAreaRelationService.delete({ teamId, areaId });
+  ): Promise<void> {
+    await this.teamAreaRelationService.delete({ teamId, areaId });
   }
 
   // INTERNAL USE ONLY
   @Delete('/deleteAllForTeam/:teamId')
-  deleteAllTeamRelations(@Param('teamId') teamId: string): void {
-    this.teamAreaRelationService.delete({ teamId });
+  async deleteAllTeamRelations(@Param('teamId') teamId: string): Promise<void> {
+    await this.teamAreaRelationService.delete({ teamId });
   }
 
   // INTERNAL USE ONLY
   @Delete('/deleteAllForArea/:areaId')
-  deleteAllAreaRelations(@Param('areaId') areaId: string): void {
-    this.teamAreaRelationService.delete({ areaId });
+  async deleteAllAreaRelations(@Param('areaId') areaId: string): Promise<void> {
+    await this.teamAreaRelationService.delete({ areaId });
   }
 }
