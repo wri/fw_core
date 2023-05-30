@@ -9,6 +9,9 @@ import { IsAdminMiddleware } from '../middleware/isAdmin.middleware';
 import { IsTeamMemberMiddleware } from '../middleware/isTeamMember.middleware';
 import { IsAdminOrManagerMiddleware } from '../middleware/isAdminOrManager.middleware';
 import { UserService } from '../../common/user.service';
+import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
+import { TeamAreaRelationSchema } from '../../areas/models/teamAreaRelation.schema';
+import { TeamsModule } from './teams.module';
 
 @Module({
   imports: [
@@ -20,10 +23,11 @@ import { UserService } from '../../common/user.service';
       [{ name: 'teamuserrelations', schema: TeamMemberSchema }],
       'teamsDb',
     ),
+    TeamsModule,
   ],
   controllers: [TeamMembersController],
-  providers: [TeamsService, TeamMembersService, UserService],
-  exports: [TeamMembersService],
+  providers: [UserService],
+  exports: [],
 })
 export class TeamMembersModule {
   configure(consumer: MiddlewareConsumer) {

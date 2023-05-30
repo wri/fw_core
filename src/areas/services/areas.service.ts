@@ -74,12 +74,19 @@ export class AreasService {
       if (areas && areas.data) {
         // exclude areas that have wdpaid or admin object keys
         const areasToReturn = areas.data.filter((area) => {
-          const wdpa = !!area.attributes.wdpaid;
-          const gadm =
-            !!area.attributes.admin &&
+          if (area.attributes.wdpaid) {
+            return false;
+          }
+
+          const hasAdminKeys =
+            area.attributes.admin &&
             Object.keys(area.attributes.admin).length > 0 &&
-            !Object.values(area.attributes.admin).every((x) => x === null);
-          return !wdpa && !gadm;
+            Object.values(area.attributes.admin).some((x) => x !== null);
+          if (hasAdminKeys) {
+            return false;
+          }
+
+          return true;
         });
         return areasToReturn;
       } else return [];
