@@ -222,10 +222,12 @@ describe('Area Team Relations', () => {
       await request(app.getHttpServer())
         .delete(`/arearelations/teams`)
         .set('Authorization', `USER`)
-        .send({
-          areaId: constants.testArea.id.toString(),
-          teamId: team.insertedId.toString(),
-        })
+        .send([
+          {
+            areaId: constants.testArea.id.toString(),
+            teamId: team.insertedId.toString(),
+          },
+        ])
         .expect(200);
 
       const relation = await apiDbConnection

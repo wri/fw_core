@@ -54,9 +54,15 @@ export class TeamAreaRelationController {
 
   @Delete()
   async deleteTeamAreaRelation(
-    @Body() body: CreateTeamAreaRelationDto,
+    @Body(new ParseArrayPipe({ items: CreateTeamAreaRelationDto }))
+    body: CreateTeamAreaRelationDto[],
   ): Promise<void> {
-    await this.teamAreaRelationService.delete(body);
+    await this.teamAreaRelationService.delete({
+      $or: body.map((relation) => ({
+        areaId: relation.areaId,
+        teamId: relation.teamId,
+      })),
+    });
   }
 
   // INTERNAL USE ONLY
