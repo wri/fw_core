@@ -54,9 +54,15 @@ export class TeamAreaRelationController {
 
   @Delete()
   async deleteTeamAreaRelation(
-    @Body() body: CreateTeamAreaRelationDto,
+    @Body(new ParseArrayPipe({ items: CreateTeamAreaRelationDto }))
+    body: CreateTeamAreaRelationDto[],
   ): Promise<void> {
-    await this.teamAreaRelationService.delete(body);
+    await this.teamAreaRelationService.delete({
+      $or: body.map((relation) => ({
+        areaId: relation.areaId,
+        teamId: relation.teamId,
+      })),
+    });
   }
 
   // INTERNAL USE ONLY
@@ -67,7 +73,10 @@ export class TeamAreaRelationController {
     const area = await this.areasService.getAreaMICROSERVICE(areaId);
     if (!area)
       throw new HttpException("Area doesn't exist", HttpStatus.NOT_FOUND);
-    const relations = await this.teamAreaRelationService.find({ areaId });
+    const relations = await this.teamAreaRelationService.find({
+      areaId,
+      teamId: { $exists: true, $ne: null },
+    });
     return relations.map((relation) => relation.teamId);
   }
 
@@ -84,22 +93,22 @@ export class TeamAreaRelationController {
   }
 
   @Delete('/deleteRelation/:teamId/:areaId')
-  deleteOneRelation(
+  async deleteOneRelation(
     @Param('teamId') teamId: string,
     @Param('areaId') areaId: string,
-  ): void {
-    this.teamAreaRelationService.delete({ teamId, areaId });
+  ): Promise<void> {
+    await this.teamAreaRelationService.delete({ teamId, areaId });
   }
 
   // INTERNAL USE ONLY
   @Delete('/deleteAllForTeam/:teamId')
-  deleteAllTeamRelations(@Param('teamId') teamId: string): void {
-    this.teamAreaRelationService.delete({ teamId });
+  async deleteAllTeamRelations(@Param('teamId') teamId: string): Promise<void> {
+    await this.teamAreaRelationService.delete({ teamId });
   }
 
   // INTERNAL USE ONLY
   @Delete('/deleteAllForArea/:areaId')
-  deleteAllAreaRelations(@Param('areaId') areaId: string): void {
-    this.teamAreaRelationService.delete({ areaId });
+  async deleteAllAreaRelations(@Param('areaId') areaId: string): Promise<void> {
+    await this.teamAreaRelationService.delete({ areaId });
   }
 }

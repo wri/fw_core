@@ -4,10 +4,11 @@ import { RoutesController } from './routes.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Route, RouteSchema } from './models/route.schema';
 import { TeamsService } from '../teams/services/teams.service';
-import { TeamSchema } from '../teams/models/team.schema';
+import { Team, TeamSchema } from '../teams/models/team.schema';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
 import { TeamMemberSchema } from '../teams/models/teamMember.schema';
 import { UserService } from '../common/user.service';
+import { TeamsModule } from '../teams/modules/teams.module';
 
 @Module({
   imports: [
@@ -23,8 +24,9 @@ import { UserService } from '../common/user.service';
       [{ name: 'teamuserrelations', schema: TeamMemberSchema }],
       'teamsDb',
     ),
+    TeamsModule,
   ],
   controllers: [RoutesController],
-  providers: [RoutesService, TeamsService, TeamMembersService, UserService],
+  providers: [RoutesService, UserService],
 })
 export class RoutesModule {}

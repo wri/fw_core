@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { GeostoreService } from './geostore.service';
 import { Logger } from '@nestjs/common';
 import fs from 'fs';
@@ -9,6 +9,7 @@ import { IArea, IGeojson } from '../models/area.entity';
 import { IUser } from '../../common/user.model';
 import { ConfigService } from '@nestjs/config';
 import { IGeostore } from '../models/geostore.entity';
+import { max } from 'class-validator';
 
 @Injectable()
 export class AreasService {
@@ -74,12 +75,19 @@ export class AreasService {
       if (areas && areas.data) {
         // exclude areas that have wdpaid or admin object keys
         const areasToReturn = areas.data.filter((area) => {
-          const wdpa = !!area.attributes.wdpaid;
-          const gadm =
-            !!area.attributes.admin &&
+          if (area.attributes.wdpaid) {
+            return false;
+          }
+
+          const hasAdminKeys =
+            area.attributes.admin &&
             Object.keys(area.attributes.admin).length > 0 &&
-            !Object.values(area.attributes.admin).every((x) => x === null);
-          return !wdpa && !gadm;
+            Object.values(area.attributes.admin).some((x) => x !== null);
+          if (hasAdminKeys) {
+            return false;
+          }
+
+          return true;
         });
         return areasToReturn;
       } else return [];
@@ -108,7 +116,13 @@ export class AreasService {
       this.logger.error('Error while creating geostore', error);
       throw error;
     }
-    //if (geostore?.areaHa > 2000000) throw 'Area is too large';
+
+    const maxAreaSizeHa = 2_000_000;
+    if (geostore.areaHa > maxAreaSizeHa)
+      throw new BadRequestException(
+        `Maximum Area size exceded. Maximum area size is ${maxAreaSizeHa.toLocaleString()} ha`,
+      );
+
     try {
       coverage = await this.coverageService.getCoverage(
         {

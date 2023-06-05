@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
 import { CreateTeamMemberDto } from '../dto/createTeamMember.dto';
 import { TeamDocument } from '../models/team.schema';
 import {
@@ -14,6 +15,7 @@ import { TeamMembersService } from './teamMembers.service';
 export class TeamsService {
   constructor(
     @InjectModel('gfwteams', 'teamsDb') private teamModel: Model<TeamDocument>,
+    private teamAreaRelationService: TeamAreaRelationService,
     private readonly teamMembersService: TeamMembersService,
   ) {}
 
@@ -91,6 +93,9 @@ export class TeamsService {
 
   async delete(id: string): Promise<void> {
     await this.teamModel.findByIdAndDelete(id);
+
+    // Remove all team area relations
+    await this.teamAreaRelationService.delete({ teamId: id });
 
     // Remove all team user relations
     await this.teamMembersService.removeAllUsersOnTeam(id);

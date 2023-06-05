@@ -8,7 +8,6 @@ import { AreasModule } from '../areas/modules/areas.module';
 import { S3Service } from '../answers/services/s3Service';
 import { TemplatesModule } from '../templates/templates.module';
 import { TeamsModule } from '../teams/modules/teams.module';
-import { TeamMembersModule } from '../teams/modules/teamMembers.module';
 
 @Module({
   imports: [
@@ -19,7 +18,6 @@ import { TeamMembersModule } from '../teams/modules/teamMembers.module';
     AreasModule,
     forwardRef(() => TemplatesModule),
     TeamsModule,
-    TeamMembersModule,
   ],
   controllers: [AssignmentsController],
   providers: [AssignmentsService, UserService, S3Service],

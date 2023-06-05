@@ -7,7 +7,6 @@ import { TemplateSchema } from './models/template.schema';
 import { AreasModule } from '../areas/modules/areas.module';
 import { AnswersModule } from '../answers/answers.module';
 import { TeamsModule } from '../teams/modules/teams.module';
-import { TeamMembersModule } from '../teams/modules/teamMembers.module';
 
 @Module({
   imports: [
@@ -18,7 +17,6 @@ import { TeamMembersModule } from '../teams/modules/teamMembers.module';
     AnswersModule,
     AreasModule,
     TeamsModule,
-    TeamMembersModule,
   ],
   controllers: [TemplatesController],
   providers: [TemplatesService, UserService],
