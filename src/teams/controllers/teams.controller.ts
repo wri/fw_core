@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { TeamDocument } from '../models/team.schema';
 import { TeamsService } from '../services/teams.service';
@@ -24,6 +25,7 @@ import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.s
 import { AuthUser } from '../../common/decorators';
 import { IUser } from '../../common/user.model';
 import mongoose from 'mongoose';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('teams')
 export class TeamsController {
@@ -31,6 +33,7 @@ export class TeamsController {
     private readonly teamsService: TeamsService,
     private readonly teamMembersService: TeamMembersService,
     private readonly teamAreaRelationService: TeamAreaRelationService,
+    private readonly configService: ConfigService,
   ) {}
   private readonly logger = new Logger(TeamsController.name);
 
@@ -100,6 +103,35 @@ export class TeamsController {
 
         team.members = members;
       }
+
+      // array of area ids
+      const areas = await this.teamAreaRelationService.find({ teamId });
+      if (areas) team.areas = areas.map((area) => area.areaId);
+      else team.areas = [];
+
+      teamsToSend.push(team);
+    }
+    return { data: serializeTeam(teamsToSend) };
+  }
+
+  @Get('/everyTeam')
+  async getEveryTeam(@AuthUser() user: IUser): Promise<any> {
+    const token = user.token;
+    if (token !== `Bearer ${this.configService.get('service.token')}`)
+      throw new UnauthorizedException();
+    const teams = await this.teamsService.findAll();
+
+    // get members of teams and areas of team
+    const teamsToSend: TeamDocument[] = [];
+    for await (const team of teams) {
+      const teamId = team._id;
+      const members: TeamMemberDocument[] =
+        await this.teamMembersService.findAllTeamMembers(
+          teamId,
+          EMemberRole.Administrator,
+        );
+
+      team.members = members;
 
       // array of area ids
       const areas = await this.teamAreaRelationService.find({ teamId });
