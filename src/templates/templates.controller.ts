@@ -264,7 +264,7 @@ export class TemplatesController {
     const token = user.token;
     if (token !== `Bearer ${this.configService.get('service.token')}`)
       throw new UnauthorizedException();
-    const answers = this.answersService.find({});
+    const answers = await this.answersService.find({});
     return { data: serializeAnswers(answers) };
   }
 
