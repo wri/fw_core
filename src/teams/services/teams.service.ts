@@ -110,4 +110,8 @@ export class TeamsService {
     );
     return teamsManaged.map((team) => team.teamId.toString());
   }
+
+  async findAll(): Promise<TeamDocument[]> {
+    return await this.teamModel.find({});
+  }
 }
