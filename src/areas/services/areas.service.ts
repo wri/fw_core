@@ -9,7 +9,6 @@ import { IArea, IGeojson } from '../models/area.entity';
 import { IUser } from '../../common/user.model';
 import { ConfigService } from '@nestjs/config';
 import { IGeostore } from '../models/geostore.entity';
-import { max } from 'class-validator';
 
 @Injectable()
 export class AreasService {

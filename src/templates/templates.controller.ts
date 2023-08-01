@@ -259,6 +259,15 @@ export class TemplatesController {
     return { data: serializeAnswers(answers) };
   }
 
+  @Get('/everyAnswer')
+  async getEveryAnswer(@AuthUser() user: IUser): Promise<IAnswerReturn> {
+    const token = user.token;
+    if (token !== `Bearer ${this.configService.get('service.token')}`)
+      throw new UnauthorizedException();
+    const answers = await this.answersService.find({});
+    return { data: serializeAnswers(answers) };
+  }
+
   @Get('/:id')
   async findOne(
     @Param('id', ValidateMongoId) id: string,
