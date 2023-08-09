@@ -117,10 +117,12 @@ export class AreasController {
         for await (const team of filteredTeams) {
           const teamAreas: string[] =
             await this.teamAreaRelationService.getAllAreasForTeam(team.id);
-          const fullTeamAreas: Promise<IArea | null>[] = [];
+          const fullTeamAreas: IArea[] = [];
           // get full area for each array member and push to user areas array
           for await (const teamAreaId of teamAreas) {
-            const area = this.areasService.getAreaMICROSERVICE(teamAreaId);
+            const area = await this.areasService.getAreaMICROSERVICE(
+              teamAreaId,
+            );
             if (!area) {
               // area not found - delete area-team and area-template relations
               await this.teamAreaRelationService.delete({
@@ -131,11 +133,10 @@ export class AreasController {
               });
             } else fullTeamAreas.push(area);
           }
-          const resolvedTeamAreas = await Promise.all(fullTeamAreas);
-          resolvedTeamAreas.forEach((area) => {
+          fullTeamAreas.forEach((area) => {
             if (area) area.attributes.teamId = team.id;
           });
-          allTeamAreas.push(...resolvedTeamAreas);
+          allTeamAreas.push(...fullTeamAreas);
         }
         // format areas
         data = await this.responseService.buildAreasResponse(
