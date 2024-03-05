@@ -49,7 +49,6 @@ async function bootstrap() {
       }
       res.status = error.status || res.status || 500;
       if (res.status >= 500) {
-        console.log(process.env.ENV);
         Sentry.captureException(error); // send error to sentry
         Logger.error(error);
       } else {
