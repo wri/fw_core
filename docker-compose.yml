@@ -14,6 +14,7 @@ services:
       MICROSERVICE_TOKEN: ${microservice_token}
       MONGODB_HOST: mongo
       MONGODB_PORT: 27017
+      ENV: local
       DB_SECRET: '{ "username": "admin", "password": "password" }'
       DB_DATABASE: gfw_db
       S3_ACCESS_KEY_ID: ${myS3Key}
@@ -97,6 +98,7 @@ services:
 
 volumes:
   gfw-mongodb-data:
+
 
 networks:
   gfw-nest-network:
