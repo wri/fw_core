@@ -251,10 +251,15 @@ describe('Answers', () => {
       );
     });
 
-    it('should return all monitor answers for managers', async () => {
+    it('should return all monitor answers for managers in team area', async () => {
+      const teamAreaId = new mongoose.Types.ObjectId();
       const team = await teamsDbConnection
         .collection('gfwteams')
         .insertOne({ name: 'Test' });
+      await apiDbConnection.collection('areateamrelations').insertOne({
+        teamId: team.insertedId.toString(),
+        areaId: teamAreaId.toString(),
+      });
       await teamsDbConnection.collection('teamuserrelations').insertOne({
         teamId: team.insertedId,
         userId: new mongoose.Types.ObjectId(ROLES.USER.id),
@@ -288,15 +293,13 @@ describe('Answers', () => {
         user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{ name: 'question-1', value: 'test' }],
       });
-      const userAnswer1 = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: template.insertedId,
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
       const userAnswer2 = await formsDbConnection
         .collection('answers')
         .insertOne({
@@ -304,6 +307,7 @@ describe('Answers', () => {
           reportName: 'answer 2',
           language: 'en',
           user: new mongoose.Types.ObjectId(ROLES.USER.id),
+          areaOfInterest: new mongoose.Types.ObjectId(teamAreaId),
           responses: [{ name: 'question-1', value: 'test' }],
         });
       const response = await request(app.getHttpServer())
@@ -313,16 +317,12 @@ describe('Answers', () => {
 
       expect(response.body).toHaveProperty('data');
       expect(Array.isArray(response.body.data)).toBe(true);
-      expect(response.body.data.length).toBe(3);
+      expect(response.body.data.length).toBe(2);
       expect(response.body.data[0]).toHaveProperty(
         'id',
         managerAnswer.insertedId.toString(),
       );
       expect(response.body.data[1]).toHaveProperty(
-        'id',
-        userAnswer1.insertedId.toString(),
-      );
-      expect(response.body.data[2]).toHaveProperty(
         'id',
         userAnswer2.insertedId.toString(),
       );
