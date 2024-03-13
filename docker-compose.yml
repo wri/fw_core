@@ -87,6 +87,7 @@ services:
     networks:
       - gfw-nest-network
     command: yarn test
+
   docs:
     build: .
     ports:

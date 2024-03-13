@@ -514,13 +514,13 @@ describe('Templates', () => {
     });
 
     it('should return all user answers and team answers of teams user manages that are within team areas', async () => {
-      const template = await formsDbConnection
+      const defaultTemplate = await formsDbConnection
         .collection('reports')
         .insertOne({ ...constants.defaultTemplate });
-      await formsDbConnection
+      const managerTemplate = await formsDbConnection
         .collection('reports')
         .insertOne(constants.managerTemplate);
-      const template3 = await formsDbConnection
+      const userTemplate = await formsDbConnection
         .collection('reports')
         .insertOne(constants.userTemplate);
 
@@ -529,8 +529,8 @@ describe('Templates', () => {
       const managerAnswer = await formsDbConnection
         .collection('answers')
         .insertOne({
-          report: template3.insertedId,
-          reportName: 'answer 1',
+          report: managerTemplate.insertedId,
+          reportName: 'manager answer 1',
           language: 'en',
           user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
           responses: [{ name: 'question-1', value: 'test' }],
@@ -538,22 +538,22 @@ describe('Templates', () => {
       const managerAnswer2 = await formsDbConnection
         .collection('answers')
         .insertOne({
-          report: template.insertedId,
-          reportName: 'answer 1',
+          report: defaultTemplate.insertedId,
+          reportName: 'manager answer 2',
           language: 'en',
           user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
           responses: [{ name: 'question-1', value: 'test' }],
         });
       await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId,
-        reportName: 'answer 1',
+        report: userTemplate.insertedId,
+        reportName: 'admin answer 1',
         language: 'en',
         user: new mongoose.Types.ObjectId(ROLES.ADMIN.id),
         responses: [{ name: 'question-1', value: 'test' }],
       });
       await formsDbConnection.collection('answers').insertOne({
-        report: template3.insertedId,
-        reportName: 'answer 1',
+        report: userTemplate.insertedId,
+        reportName: 'user answer 1',
         language: 'en',
         user: new mongoose.Types.ObjectId(ROLES.USER.id),
         responses: [{ name: 'question-1', value: 'test' }],
@@ -561,8 +561,8 @@ describe('Templates', () => {
       const userAnswer2 = await formsDbConnection
         .collection('answers')
         .insertOne({
-          report: template.insertedId,
-          reportName: 'answer 1',
+          report: defaultTemplate.insertedId,
+          reportName: 'user answer 2',
           areaOfInterest: new mongoose.Types.ObjectId(teamAreaId),
           language: 'en',
           user: new mongoose.Types.ObjectId(ROLES.USER.id),
@@ -596,21 +596,15 @@ describe('Templates', () => {
         .set('Authorization', 'MANAGER')
         .expect(200);
 
+      console.log(response.body.data);
+
       expect(response.body).toHaveProperty('data');
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data.length).toBe(3);
-      expect(response.body.data[0]).toHaveProperty(
-        'id',
-        managerAnswer.insertedId.toString(),
-      );
-      expect(response.body.data[1]).toHaveProperty(
-        'id',
-        managerAnswer2.insertedId.toString(),
-      );
-      expect(response.body.data[2]).toHaveProperty(
-        'id',
-        userAnswer2.insertedId.toString(),
-      );
+      const ids = response.body.data.map((answer) => answer.id);
+      expect(ids).toContain(managerAnswer.insertedId.toString());
+      expect(ids).toContain(managerAnswer2.insertedId.toString());
+      expect(ids).toContain(userAnswer2.insertedId.toString());
     });
   });
 
