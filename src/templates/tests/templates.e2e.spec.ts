@@ -513,7 +513,7 @@ describe('Templates', () => {
         .expect(401);
     });
 
-    it('should return all user answers and team answers of teams user manages', async () => {
+    it('should return all user answers and team answers of teams user manages that are within team areas', async () => {
       const template = await formsDbConnection
         .collection('reports')
         .insertOne({ ...constants.defaultTemplate });
@@ -523,6 +523,8 @@ describe('Templates', () => {
       const template3 = await formsDbConnection
         .collection('reports')
         .insertOne(constants.userTemplate);
+
+      const teamAreaId = new mongoose.Types.ObjectId();
 
       const managerAnswer = await formsDbConnection
         .collection('answers')
@@ -549,20 +551,19 @@ describe('Templates', () => {
         user: new mongoose.Types.ObjectId(ROLES.ADMIN.id),
         responses: [{ name: 'question-1', value: 'test' }],
       });
-      const userAnswer1 = await formsDbConnection
-        .collection('answers')
-        .insertOne({
-          report: template3.insertedId,
-          reportName: 'answer 1',
-          language: 'en',
-          user: new mongoose.Types.ObjectId(ROLES.USER.id),
-          responses: [{ name: 'question-1', value: 'test' }],
-        });
+      await formsDbConnection.collection('answers').insertOne({
+        report: template3.insertedId,
+        reportName: 'answer 1',
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [{ name: 'question-1', value: 'test' }],
+      });
       const userAnswer2 = await formsDbConnection
         .collection('answers')
         .insertOne({
           report: template.insertedId,
           reportName: 'answer 1',
+          areaOfInterest: new mongoose.Types.ObjectId(teamAreaId),
           language: 'en',
           user: new mongoose.Types.ObjectId(ROLES.USER.id),
           responses: [{ name: 'question-1', value: 'test' }],
@@ -585,6 +586,10 @@ describe('Templates', () => {
         role: EMemberRole.Manager,
         status: EMemberStatus.Confirmed,
       });
+      await apiDbConnection.collection('areateamrelations').insertOne({
+        teamId: team1.insertedId.toString(),
+        areaId: teamAreaId.toString(),
+      });
 
       const response = await request(app.getHttpServer())
         .get(`/templates/allAnswers`)
@@ -593,7 +598,7 @@ describe('Templates', () => {
 
       expect(response.body).toHaveProperty('data');
       expect(Array.isArray(response.body.data)).toBe(true);
-      expect(response.body.data.length).toBe(4);
+      expect(response.body.data.length).toBe(3);
       expect(response.body.data[0]).toHaveProperty(
         'id',
         managerAnswer.insertedId.toString(),
@@ -603,10 +608,6 @@ describe('Templates', () => {
         managerAnswer2.insertedId.toString(),
       );
       expect(response.body.data[2]).toHaveProperty(
-        'id',
-        userAnswer1.insertedId.toString(),
-      );
-      expect(response.body.data[3]).toHaveProperty(
         'id',
         userAnswer2.insertedId.toString(),
       );
