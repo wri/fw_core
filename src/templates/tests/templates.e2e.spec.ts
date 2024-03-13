@@ -596,8 +596,6 @@ describe('Templates', () => {
         .set('Authorization', 'MANAGER')
         .expect(200);
 
-      console.log(response.body.data);
-
       expect(response.body).toHaveProperty('data');
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data.length).toBe(3);
