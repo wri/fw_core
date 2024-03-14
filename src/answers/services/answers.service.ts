@@ -111,17 +111,28 @@ export class AnswersService extends BaseService<
     loggedUser: IUser;
     teams: TeamDocument[];
   }): Promise<IAnswer[]> {
-    let filter = {};
-    const teamMembers = await this.teamMembersService.findEveryTeamMember(
+    // get all templates
+    const publicTemplates =
+      await this.templatesService.findAllPublicTemplates();
+    const userTemplates = await this.templatesService.findAllByUserId(
       loggedUser.id,
     );
-    teamMembers.push(loggedUser.id);
+    const templates = [...publicTemplates, ...userTemplates];
 
-    filter = { user: { $in: teamMembers } };
+    const answers: IAnswer[] = [];
 
-    const answers = await this.answerModel.find(filter);
+    // get answers for each template
+    for await (const template of templates) {
+      answers.push(
+        ...(await this.getAllTemplateAnswers({
+          template,
+          user: loggedUser,
+          userTeams: teams,
+        })),
+      );
+    }
 
-    return await this.addUsernameToAnswers(answers);
+    return answers;
   }
 
   async filterAnswersByArea({
