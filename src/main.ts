@@ -27,8 +27,13 @@ async function bootstrap() {
 
   Sentry.init({
     dsn: 'https://a6b18ef7ce1d43298127081511289af7@o163691.ingest.sentry.io/4504083459211264',
-    environment: process.env.NODE_ENV,
+    environment: process.env.ENV,
     sampleRate: 1,
+    integrations: [
+      new Sentry.Integrations.Http({ tracing: true }),
+      new Sentry.Integrations.OnUncaughtException(),
+      new Sentry.Integrations.OnUnhandledRejection(),
+    ],
   });
 
   app.use(async (req, res, next) => {
@@ -44,7 +49,7 @@ async function bootstrap() {
       }
       res.status = error.status || res.status || 500;
       if (res.status >= 500) {
-        //Sentry.captureException(error); // send error to sentry
+        Sentry.captureException(error); // send error to sentry
         Logger.error(error);
       } else {
         Logger.log(error);
