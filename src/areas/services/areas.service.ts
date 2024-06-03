@@ -180,7 +180,6 @@ export class AreasService {
         throw e;
       }
     } else geostoreId = existingArea.attributes.geostore;
-
     try {
       const params = {
         geostoreId,

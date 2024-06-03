@@ -259,6 +259,15 @@ export class TemplatesController {
     return { data: serializeAnswers(answers) };
   }
 
+  @Get('/everyAnswer')
+  async getEveryAnswer(@AuthUser() user: IUser): Promise<IAnswerReturn> {
+    const token = user.token;
+    if (token !== `Bearer ${this.configService.get('service.token')}`)
+      throw new UnauthorizedException();
+    const answers = await this.answersService.find({});
+    return { data: serializeAnswers(answers) };
+  }
+
   @Get('/:id')
   async findOne(
     @Param('id', ValidateMongoId) id: string,
@@ -547,7 +556,7 @@ export class TemplatesController {
         'This report has answers, you cannot delete. Please unpublish instead.',
       );
 
-    if (answers.length > 0)
+    if (answers.length > 0 && user.role !== 'ADMIN')
       await this.answersService.deleteMany({ report: { $in: idArray } });
 
     await this.templatesService.deleteAllVersions(id, template.editGroupId);

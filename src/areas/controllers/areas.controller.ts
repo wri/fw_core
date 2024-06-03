@@ -27,6 +27,10 @@ import { ResponseService } from '../services/response.service';
 import { TemplatesService } from '../../templates/templates.service';
 import { IUser } from '../../common/user.model';
 import { AuthUser } from '../../common/decorators';
+import {
+  EMemberRole,
+  EMemberStatus,
+} from '../../teams/models/teamMember.schema';
 
 @Controller('areas')
 export class AreasController {
@@ -101,22 +105,38 @@ export class AreasController {
         });
         // get a users teams
         const userTeams = await this.teamsService.findAllByUserId(user.id); // get list of user's teams
+        const filteredTeams = userTeams.filter((team) => {
+          return (
+            team.userRole !== EMemberRole.Left &&
+            team.status !== EMemberStatus.Declined &&
+            team.status !== EMemberStatus.Invited
+          );
+        });
         //get areas for each team
         const allTeamAreas: (IArea | null)[] = userAreas;
-        for await (const team of userTeams) {
+        for await (const team of filteredTeams) {
           const teamAreas: string[] =
             await this.teamAreaRelationService.getAllAreasForTeam(team.id);
-          const fullTeamAreas: Promise<IArea | null>[] = [];
+          const fullTeamAreas: IArea[] = [];
           // get full area for each array member and push to user areas array
           for await (const teamAreaId of teamAreas) {
-            const area = this.areasService.getAreaMICROSERVICE(teamAreaId);
-            fullTeamAreas.push(area);
+            const area = await this.areasService.getAreaMICROSERVICE(
+              teamAreaId,
+            );
+            if (!area) {
+              // area not found - delete area-team and area-template relations
+              await this.teamAreaRelationService.delete({
+                areaId: teamAreaId,
+              });
+              await this.templateAreaRelationService.deleteMany({
+                areaId: teamAreaId,
+              });
+            } else fullTeamAreas.push(area);
           }
-          const resolvedTeamAreas = await Promise.all(fullTeamAreas);
-          resolvedTeamAreas.forEach((area) => {
+          fullTeamAreas.forEach((area) => {
             if (area) area.attributes.teamId = team.id;
           });
-          allTeamAreas.push(...resolvedTeamAreas);
+          allTeamAreas.push(...fullTeamAreas);
         }
         // format areas
         data = await this.responseService.buildAreasResponse(

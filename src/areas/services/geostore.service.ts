@@ -44,7 +44,7 @@ export class GeostoreService {
     const geostoreString = await this.redisService.get(geostoreId.toString());
     if (geostoreString) {
       const geostore = JSON.parse(geostoreString);
-      this.logger.log(`Found Geostore ${geostore.id} in Redis store`);
+      //this.logger.log(`Found Geostore ${geostore.id} in Redis store`);
       return geostore;
     }
 
