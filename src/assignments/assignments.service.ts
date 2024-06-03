@@ -81,6 +81,7 @@ export class AssignmentsService {
       const url = await this.s3Service.uploadFile(
         image.path,
         image.originalname,
+        true,
       );
       newAssignment.image = url;
     }
@@ -193,6 +194,7 @@ export class AssignmentsService {
       const url = await this.s3Service.uploadFile(
         image.path,
         image.originalname,
+        true,
       );
       assignmentToUpdate.image = url;
     }
