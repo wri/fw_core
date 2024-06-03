@@ -64,7 +64,7 @@ export class CreateAnswerInput {
     | CreateAnswerPositionInput[]
     | undefined;
 
-  privateFiles: [string];
+  publicFiles: [string];
 }
 
 class CreateAnswerPositionInput {

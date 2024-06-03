@@ -1,10 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 
+export interface IAnswerFile {
+  url: string;
+  isPublic: boolean;
+}
+
 export interface IAnswerResponse {
   name: string;
-  value?: string | string[];
-  private?: boolean;
+  value?: string | string[] | IAnswerFile | IAnswerFile[];
 }
 
 export interface IAnswer {
