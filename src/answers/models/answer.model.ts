@@ -4,6 +4,7 @@ import * as mongoose from 'mongoose';
 export interface IAnswerResponse {
   name: string;
   value?: string | string[];
+  private?: boolean;
 }
 
 export interface IAnswer {

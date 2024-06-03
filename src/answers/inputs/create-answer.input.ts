@@ -63,6 +63,8 @@ export class CreateAnswerInput {
     | number
     | CreateAnswerPositionInput[]
     | undefined;
+
+  privateFiles: [string];
 }
 
 class CreateAnswerPositionInput {
