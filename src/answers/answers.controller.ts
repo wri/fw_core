@@ -120,11 +120,11 @@ export class AnswersController {
       if (question.type === QuestionType.AUDIO) {
         const [file] = files;
         const isPublic = fields.publicFiles?.includes(file.originalname);
-        const fileUrl = await this.s3Service.uploadFile(
-          file.path,
-          file.originalname,
+        const fileUrl = await this.s3Service.uploadFile({
+          filePath: file.path,
+          fullFileName: file.originalname,
           isPublic,
-        );
+        });
         return answer.responses.push({
           name: question.name,
           value: { url: fileUrl, isPublic },
@@ -134,11 +134,11 @@ export class AnswersController {
       if (question.type === QuestionType.IMAGE) {
         for await (const file of files) {
           const isPublic = fields.publicFiles?.includes(file.originalname);
-          const returnedUrl = await this.s3Service.uploadFile(
-            file.path,
-            file.originalname,
+          const returnedUrl = await this.s3Service.uploadFile({
+            filePath: file.path,
+            fullFileName: file.originalname,
             isPublic,
-          );
+          });
           return answer.responses.push({
             name: question.name,
             value: { url: returnedUrl, isPublic },

@@ -26,13 +26,13 @@ export class S3Service {
     return fullFilename.split('.').slice(-1)[0];
   }
 
-  async uploadFile(
-    filePath: string,
-    fullFileName: string,
-    isPublic: boolean,
-  ): Promise<string> {
-    const ext = this.getExtension(fullFileName);
-    const data = await fs.readFile(filePath);
+  async uploadFile(opts: {
+    filePath: string;
+    fullFileName: string;
+    isPublic?: boolean;
+  }): Promise<string> {
+    const ext = this.getExtension(opts.fullFileName);
+    const data = await fs.readFile(opts.filePath);
     const buffer = Buffer.from(data);
     const uuid = v4();
 
@@ -40,7 +40,7 @@ export class S3Service {
       Bucket: this.S3_BUCKET,
       Key: `${this.S3_FOLDER}/${uuid}.${ext}`,
       Body: buffer,
-      ACL: isPublic ? 'public-read' : 'private',
+      ACL: opts.isPublic ? 'public-read' : 'private',
     };
 
     const upload = await this.s3.upload(uploadParams).promise();
