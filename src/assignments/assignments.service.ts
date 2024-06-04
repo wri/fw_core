@@ -78,11 +78,11 @@ export class AssignmentsService {
 
     // save image
     if (image) {
-      const url = await this.s3Service.uploadFile(
-        image.path,
-        image.originalname,
-        true,
-      );
+      const url = await this.s3Service.uploadFile({
+        filePath: image.path,
+        fullFileName: image.originalname,
+        isPublic: true,
+      });
       newAssignment.image = url;
     }
 
@@ -191,11 +191,11 @@ export class AssignmentsService {
 
     // save image
     if (image) {
-      const url = await this.s3Service.uploadFile(
-        image.path,
-        image.originalname,
-        true,
-      );
+      const url = await this.s3Service.uploadFile({
+        filePath: image.path,
+        fullFileName: image.originalname,
+        isPublic: true,
+      });
       assignmentToUpdate.image = url;
     }
 
