@@ -13,14 +13,13 @@ import { TemplatesService } from '../../templates/templates.service';
 import { S3Service } from './s3Service';
 import { TeamsService } from '../../teams/services/teams.service';
 import mongoose from 'mongoose';
-import { ObjectId } from 'mongodb';
 
 const mockS3Service = {
   generatePresignedUrl: jest.fn(),
 };
 
 const mockAnswer = {
-  report: new ObjectId(), // mongoose.Types.ObjectId(),
+  report: new mongoose.Types.ObjectId(),
   reportName: 'name',
   language: 'en',
   user: new mongoose.Types.ObjectId(),
