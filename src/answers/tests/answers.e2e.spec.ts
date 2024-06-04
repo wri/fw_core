@@ -773,12 +773,12 @@ describe('Answers', () => {
       const answerResponses = response.body.data.attributes.responses;
       expect(answerResponses).toHaveLength(1);
       const firstAnswerResponse = answerResponses[0];
+      console.log('VALUE', firstAnswerResponse.value);
       expect(firstAnswerResponse.name).toBe('question-1');
-      expect(firstAnswerResponse.value).toBeInstanceOf(Array);
-      expect(firstAnswerResponse.value).toHaveLength(1);
-      expect(firstAnswerResponse.value[0]).toBe(
-        'https://s3.amazonaws.com/bucket/folder/uuid.ext',
-      );
+      expect(firstAnswerResponse.value).toBeInstanceOf(Object);
+      expect(firstAnswerResponse.value).toMatchObject({
+        url: 'https://s3.amazonaws.com/bucket/folder/uuid.ext',
+      });
     });
 
     it('should return a 401 if submitting an assignment the user is not a monitor on', async () => {
