@@ -773,7 +773,6 @@ describe('Answers', () => {
       const answerResponses = response.body.data.attributes.responses;
       expect(answerResponses).toHaveLength(1);
       const firstAnswerResponse = answerResponses[0];
-      console.log('VALUE', firstAnswerResponse.value);
       expect(firstAnswerResponse.name).toBe('question-1');
       expect(firstAnswerResponse.value).toBeInstanceOf(Object);
       expect(firstAnswerResponse.value).toMatchObject({

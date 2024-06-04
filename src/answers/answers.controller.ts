@@ -182,6 +182,7 @@ export class AnswersController {
     const assignmentId = fields.assignmentId;
     if (!assignmentId) {
       const answerModel = await this.answersService.create(answer);
+      const answerWithUrls = await this.answersService.getUrls(answerModel);
       return { data: serializeAnswers(answerModel) };
     }
 

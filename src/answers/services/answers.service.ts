@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Answer, AnswerDocument, IAnswer } from '../models/answer.model';
+import {
+  Answer,
+  AnswerDocument,
+  IAnswer,
+  IAnswerFile,
+  IAnswerResponse,
+} from '../models/answer.model';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { IUser } from '../../common/user.model';
@@ -9,12 +15,12 @@ import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import { UserService } from '../../common/user.service';
 import { TemplateDocument } from '../../templates/models/template.schema';
-import { TeamsService } from '../../teams/services/teams.service';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
 import { UpdateAnswerDto } from '../dto/update-answer.dto';
 import { BaseService } from '../../common/base.service';
 import { TemplatesService } from '../../templates/templates.service';
 import { MongooseObjectId } from '../../common/objectId';
+import { S3Service } from './s3Service';
 
 @Injectable()
 export class AnswersService extends BaseService<
@@ -26,10 +32,10 @@ export class AnswersService extends BaseService<
     @InjectModel(Answer.name, 'formsDb')
     private answerModel: Model<AnswerDocument>,
     private readonly teamMembersService: TeamMembersService,
-    private readonly teamsService: TeamsService,
     private readonly teamAreaRelationService: TeamAreaRelationService,
     private readonly userService: UserService,
     private readonly templatesService: TemplatesService,
+    private readonly s3Service: S3Service,
   ) {
     super(AnswersService.name, answerModel);
   }
@@ -82,10 +88,8 @@ export class AnswersService extends BaseService<
 
   async getAllAnswers({
     loggedUser,
-    teams,
   }: {
     loggedUser: IUser;
-    teams: TeamDocument[];
   }): Promise<IAnswer[]> {
     let filter = {};
     const teamMembers = await this.teamMembersService.findEveryTeamMember(
@@ -227,5 +231,49 @@ export class AnswersService extends BaseService<
         answer.delete();
       }
     });
+  }
+
+  async getUrls(answer: AnswerDocument): Promise<AnswerDocument> {
+    const responses = answer.responses;
+    for await (const response of responses) {
+      if (this.responseType(response) === 'url_array') {
+        if (Array.isArray(response.value)) {
+          const newArray: IAnswerFile[] = [];
+          for await (const file of response.value) {
+            const castFile = file as IAnswerFile;
+            newArray.push({
+              url: await this.s3Service.generatePresignedUrl({
+                key: castFile.url,
+              }),
+              isPublic: castFile.isPublic,
+            });
+            response.value = newArray;
+          }
+        }
+      }
+      if (this.responseType(response) === 'url_object') {
+        const castFile = response.value as IAnswerFile;
+        response.value = {
+          url: await this.s3Service.generatePresignedUrl({
+            key: castFile.url,
+          }),
+          isPublic: castFile.isPublic,
+        };
+      }
+    }
+    answer.responses = responses;
+    return answer;
+  }
+
+  responseType(response: IAnswerResponse): string {
+    if (Array.isArray(response.value)) {
+      if (typeof response.value[0] !== 'string' && response.value[0].url)
+        return 'url_array';
+      return 'string_array';
+    }
+
+    if (response.value && typeof response.value !== 'string')
+      return 'url_object';
+    return 'string';
   }
 }

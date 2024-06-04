@@ -39,31 +39,31 @@ export class Answer {
   reportName: string; // report answer name
 
   @Prop({ required: false })
-  templateName: string;
+  templateName?: string;
 
   @Prop({ required: false, trim: true })
-  fullName: string; // name of monitor making report
+  fullName?: string; // name of monitor making report
 
   @Prop({ required: false, trim: true })
-  username: string;
+  username?: string;
 
   @Prop({ required: false })
-  teamId: string;
+  teamId?: string;
 
   @Prop({ required: false })
-  areaOfInterestName: string;
+  areaOfInterestName?: string;
 
   @Prop({ required: false })
-  areaOfInterest: mongoose.Schema.Types.ObjectId;
+  areaOfInterest?: mongoose.Schema.Types.ObjectId;
 
   @Prop({ required: true })
   language: string;
 
   @Prop({ required: false, default: [] })
-  userPosition: [];
+  userPosition?: [];
 
   @Prop({ required: false, default: [] })
-  clickedPosition: [];
+  clickedPosition?: [];
 
   @Prop({ required: true })
   user: mongoose.Schema.Types.ObjectId;
@@ -85,3 +85,5 @@ export interface IAnswerReturn {
 }
 
 export const AnswerSchema = SchemaFactory.createForClass(Answer);
+
+export default mongoose.model('answer', AnswerSchema);
