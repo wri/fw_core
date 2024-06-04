@@ -41,8 +41,10 @@ describe('Answers', () => {
     getNameByIdMICROSERVICE: (_id) => 'Full Name',
   };
   const s3Service = {
-    uploadFile: (_file, _name) =>
+    uploadFile: (_file, _name, _isPublic) =>
       `https://s3.amazonaws.com/bucket/folder/uuid.ext`,
+    generatePresignedUrl: (_input: { key: 'some key' }) =>
+      'https://s3.amazonaws.com/bucket/folder/presigned.ext',
   };
 
   beforeAll(async () => {
@@ -61,7 +63,7 @@ describe('Answers', () => {
         GeostoreService,
         CoverageService,
         DatasetService,
-        S3Service,
+        { provide: S3Service, useValue: jest.fn() },
         { provide: getModelToken('gfwteams', 'teamsDb'), useValue: jest.fn() },
         {
           provide: getModelToken('teamuserrelations', 'teamsDb'),
@@ -487,6 +489,48 @@ describe('Answers', () => {
       );
     });
 
+    it('should generate a presigned URL', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate });
+      const userAnswer1 = await formsDbConnection
+        .collection('answers')
+        .insertOne({
+          report: template.insertedId,
+          reportName: 'answer 1',
+          language: 'en',
+          user: new mongoose.Types.ObjectId(ROLES.USER.id),
+          responses: [
+            { name: 'question-1', value: { url: 'some url', isPublic: false } },
+          ],
+        });
+      const response = await request(app.getHttpServer())
+        .get(
+          `/templates/${template.insertedId.toString()}/answers/${userAnswer1.insertedId.toString()}`,
+        )
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty(
+        'id',
+        userAnswer1.insertedId.toString(),
+      );
+      expect(response.body.data).toHaveProperty('attributes');
+      expect(response.body.data.attributes).toHaveProperty(
+        'report',
+        template.insertedId.toString(),
+      );
+      expect(response.body.data.attributes).toHaveProperty(
+        'reportName',
+        'answer 1',
+      );
+      expect(response.body.data.attributes.responses[0].value).toMatchObject({
+        url: 'https://s3.amazonaws.com/bucket/folder/presigned.ext',
+        isPublic: false,
+      });
+    });
+
     it('should return an answer containing the creators full name', async () => {
       const template = await formsDbConnection
         .collection('reports')
@@ -776,7 +820,7 @@ describe('Answers', () => {
       expect(firstAnswerResponse.name).toBe('question-1');
       expect(firstAnswerResponse.value).toBeInstanceOf(Object);
       expect(firstAnswerResponse.value).toMatchObject({
-        url: 'https://s3.amazonaws.com/bucket/folder/uuid.ext',
+        url: 'https://s3.amazonaws.com/bucket/folder/presigned.ext',
       });
     });
 
