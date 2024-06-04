@@ -183,7 +183,7 @@ export class AnswersController {
     if (!assignmentId) {
       const answerModel = await this.answersService.create(answer);
       const answerWithUrls = await this.answersService.getUrls(answerModel);
-      return { data: serializeAnswers(answerModel) };
+      return { data: serializeAnswers(answerWithUrls) };
     }
 
     const assignment = await this.assignmentService.findOne({
@@ -203,13 +203,14 @@ export class AnswersController {
 
     answer.assignmentId = new mongoose.Types.ObjectId(assignmentId);
     const answerModel = await this.answersService.create(answer);
+    const answerWithUrls = await this.answersService.getUrls(answerModel);
 
     if (assignment.status !== AssignmentStatus.COMPLETED)
       await this.assignmentService.update(assignmentId, {
         status: AssignmentStatus.COMPLETED,
       });
 
-    return { data: serializeAnswers(answerModel) };
+    return { data: serializeAnswers(answerWithUrls) };
   }
 
   /**
@@ -319,9 +320,11 @@ export class AnswersController {
         HttpStatus.NOT_FOUND,
       );
 
+    const answerWithUrls = await this.answersService.getUrls(answer);
+
     return {
       data: serializeAnswers(
-        await this.answersService.addUsernameToAnswer(answer),
+        await this.answersService.addUsernameToAnswer(answerWithUrls),
       ),
     };
   }
