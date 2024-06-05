@@ -1,8 +1,10 @@
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import AWS from 'aws-sdk';
 import fs from 'fs/promises';
 import { v4 } from 'uuid';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class S3Service {
@@ -10,6 +12,8 @@ export class S3Service {
   private readonly S3_BUCKET: string;
   private readonly S3_FOLDER: string;
   private readonly PRESIGNED_URL_EXPIRY_SECONDS = 60 * 5;
+  private readonly s3Client: S3Client;
+
   constructor(configService: ConfigService) {
     AWS.config.update({
       accessKeyId: configService.getOrThrow('s3.accessKeyId'),
@@ -20,6 +24,13 @@ export class S3Service {
     this.S3_FOLDER = configService.getOrThrow('s3.folder');
 
     this.s3 = new AWS.S3();
+
+    this.s3Client = new S3Client({
+      credentials: {
+        accessKeyId: configService.getOrThrow('s3.accessKeyId'),
+        secretAccessKey: configService.getOrThrow('s3.secretAccessKey'),
+      },
+    });
   }
 
   getExtension(fullFilename: string): string | undefined {
@@ -51,7 +62,7 @@ export class S3Service {
     key: string;
     expiry?: number;
   }): Promise<string> {
-    const expiresAt = new Date();
+    /*     const expiresAt = new Date();
     expiresAt.setSeconds(
       expiresAt.getSeconds() +
         (input.expiry ?? this.PRESIGNED_URL_EXPIRY_SECONDS),
@@ -60,9 +71,19 @@ export class S3Service {
     const params: AWS.S3.PutObjectRequest = {
       Bucket: this.S3_BUCKET,
       Key: input.key,
-      Expires: expiresAt,
-    };
+      Expires: 5,
+    }; */
 
-    return this.s3.getSignedUrl('putObject', params);
+    const expires = input.expiry ?? this.PRESIGNED_URL_EXPIRY_SECONDS;
+
+    const getObjectCommand = new GetObjectCommand({
+      Bucket: this.S3_BUCKET,
+      Key: input.key,
+    });
+
+    //return this.s3.getSignedUrl('putObject', params);
+    return getSignedUrl(this.s3Client, getObjectCommand, {
+      expiresIn: expires,
+    });
   }
 }
