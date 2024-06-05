@@ -75,10 +75,12 @@ export class S3Service {
     }; */
 
     const expires = input.expiry ?? this.PRESIGNED_URL_EXPIRY_SECONDS;
+    const splitArray = input.key.split(this.S3_BUCKET);
+    if (splitArray.length !== 2) return input.key;
 
     const getObjectCommand = new GetObjectCommand({
       Bucket: this.S3_BUCKET,
-      Key: input.key,
+      Key: `${this.S3_BUCKET}/${splitArray[splitArray.length - 1]}`,
     });
 
     //return this.s3.getSignedUrl('putObject', params);
