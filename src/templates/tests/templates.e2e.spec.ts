@@ -598,7 +598,7 @@ describe('Templates', () => {
 
       expect(response.body).toHaveProperty('data');
       expect(Array.isArray(response.body.data)).toBe(true);
-      expect(response.body.data.length).toBe(3);
+      expect(response.body.data.length).toBe(4);
       const ids = response.body.data.map((answer) => answer.id);
       expect(ids).toContain(managerAnswer.insertedId.toString());
       expect(ids).toContain(managerAnswer2.insertedId.toString());
