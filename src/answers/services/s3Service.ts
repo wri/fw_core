@@ -75,7 +75,7 @@ export class S3Service {
     }; */
 
     const expires = input.expiry ?? this.PRESIGNED_URL_EXPIRY_SECONDS;
-    const splitArray = input.key.split(this.S3_BUCKET);
+    const splitArray = input.key.split(this.S3_FOLDER);
 
     console.log('key', input.key);
     console.log('split', splitArray);
@@ -83,7 +83,7 @@ export class S3Service {
 
     const getObjectCommand = new GetObjectCommand({
       Bucket: this.S3_BUCKET,
-      Key: `${this.S3_BUCKET}/${splitArray[splitArray.length - 1]}`,
+      Key: `${this.S3_FOLDER}/${splitArray[splitArray.length - 1]}`,
     });
 
     //return this.s3.getSignedUrl('putObject', params);
