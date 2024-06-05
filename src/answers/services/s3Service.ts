@@ -77,9 +77,7 @@ export class S3Service {
     const expires = input.expiry ?? this.PRESIGNED_URL_EXPIRY_SECONDS;
     const splitArray = input.key.split(this.S3_FOLDER);
 
-    console.log('key', input.key);
-    console.log('split', splitArray);
-    if (splitArray.length !== 2) return input.key;
+    if (splitArray.length < 2) return input.key;
 
     const getObjectCommand = new GetObjectCommand({
       Bucket: this.S3_BUCKET,
