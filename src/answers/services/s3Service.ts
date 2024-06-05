@@ -86,4 +86,15 @@ export class S3Service {
       expiresIn: expires,
     });
   }
+
+  async updateFile(opts: { url: string; isPublic: boolean }): Promise<void> {
+    const uploadParams: AWS.S3.PutObjectRequest = {
+      Bucket: this.S3_BUCKET,
+      Key: opts.url,
+      ACL: opts.isPublic ? 'public-read' : 'private',
+    };
+
+    await this.s3.putObjectAcl(uploadParams).promise();
+    return;
+  }
 }

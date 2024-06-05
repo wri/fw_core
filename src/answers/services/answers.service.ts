@@ -4,6 +4,7 @@ import {
   AnswerDocument,
   IAnswer,
   IAnswerFile,
+  IAnswerResponse,
 } from '../models/answer.model';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -158,13 +159,26 @@ export class AnswersService extends BaseService<
     return await this.addUsernameToAnswers(answers);
   }
 
-  async findOne(filter) {
-    return await this.answerModel.findOne(filter);
+  async findOne(filter): Promise<AnswerDocument | null> {
+    return this.answerModel.findOne(filter);
   }
 
-  /*   update(id: number, updateAnswerDto: UpdateAnswerDto) {
-    return `This action updates a #${id} answer`;
-  } */
+  async updateImagePermissions(
+    input: UpdateAnswerDto,
+  ): Promise<AnswerDocument | undefined> {
+    const answer = await this.findOne({ id: input.id });
+    if (!answer) throw new Error('answer does not exist');
+    const promises = answer.responses.map(
+      async (response) =>
+        await this.updateResponse({
+          response,
+          privateFiles: input.privateFiles,
+          publicFiles: input.publicFiles,
+        }),
+    );
+    answer.responses = await Promise.all(promises);
+    return answer?.save();
+  }
 
   async deleteMany(filter): Promise<void> {
     await this.answerModel.deleteMany(filter);
@@ -285,5 +299,61 @@ export class AnswersService extends BaseService<
     responseValue: string | string[] | IAnswerFile | IAnswerFile[] | undefined,
   ): responseValue is IAnswerFile[] {
     return Array.isArray(responseValue) && typeof responseValue[0] !== 'string';
+  }
+
+  async updateResponse({
+    response,
+    privateFiles,
+    publicFiles,
+  }: {
+    response: IAnswerResponse;
+    privateFiles: string[];
+    publicFiles: string[];
+  }): Promise<IAnswerResponse> {
+    if (this.isURLObjectType(response.value)) {
+      if (privateFiles.includes(response.value.url)) {
+        await this.s3Service.updateFile({
+          url: response.value.url,
+          isPublic: false,
+        });
+        return {
+          name: response.name,
+          value: { url: response.value.url, isPublic: false },
+        };
+      }
+      if (publicFiles.includes(response.value.url)) {
+        await this.s3Service.updateFile({
+          url: response.value.url,
+          isPublic: true,
+        });
+        return {
+          name: response.name,
+          value: { url: response.value.url, isPublic: true },
+        };
+      }
+      return response;
+    }
+    if (this.isUrlArrayType(response.value)) {
+      const promises = response.value.map(async (file) => {
+        if (privateFiles.includes(file.url)) {
+          await this.s3Service.updateFile({
+            url: file.url,
+            isPublic: false,
+          });
+          return { url: file.url, isPublic: false };
+        }
+        if (publicFiles.includes(file.url)) {
+          await this.s3Service.updateFile({
+            url: file.url,
+            isPublic: true,
+          });
+          return { url: file.url, isPublic: true };
+        }
+        return file;
+      });
+      const resolvedPromises = await Promise.all(promises);
+      return { name: response.name, value: resolvedPromises };
+    }
+    return response;
   }
 }

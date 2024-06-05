@@ -1,5 +1,4 @@
-export class UpdateAnswerDto {
-  id: string;
+export class UpdateAnswerInput {
   privateFiles: [string];
   publicFiles: [string];
 }
