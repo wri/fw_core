@@ -319,7 +319,7 @@ describe('Answers', () => {
 
       expect(response.body).toHaveProperty('data');
       expect(Array.isArray(response.body.data)).toBe(true);
-      expect(response.body.data.length).toBe(2);
+      expect(response.body.data.length).toBe(3);
       expect(response.body.data[0]).toHaveProperty(
         'id',
         managerAnswer.insertedId.toString(),
