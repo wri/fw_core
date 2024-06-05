@@ -133,7 +133,10 @@ export class TeamMembersService {
     );
   }
 
-  async removeAllUsersOnTeam(teamId: string) {
+  async removeAllUsersOnTeam(teamId: string): Promise<{
+    acknowledged: boolean;
+    deletedCount: number;
+  }> {
     return await this.teamMemberModel.deleteMany({
       teamId: new mongoose.Types.ObjectId(teamId),
     });

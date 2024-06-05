@@ -225,7 +225,6 @@ export class TemplatesController {
     user.id = userId;
     const answers = await this.answersService.getAllAnswers({
       loggedUser: user,
-      teams: [],
     });
 
     if (!answers)
@@ -238,12 +237,8 @@ export class TemplatesController {
   async getAllAnswers(@AuthUser() user: IUser): Promise<IAnswerReturn> {
     this.logger.log(`Obtaining all answers for user`);
 
-    // get teams the user is part of
-    const userTeams = await this.teamsService.findAllByUserId(user.id);
-
     const answers = await this.answersService.getAllAnswers({
       loggedUser: user,
-      teams: userTeams,
     });
 
     for await (const answer of answers) {
