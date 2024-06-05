@@ -83,7 +83,7 @@ export class S3Service {
 
     const getObjectCommand = new GetObjectCommand({
       Bucket: this.S3_BUCKET,
-      Key: `${this.S3_FOLDER}/${splitArray[splitArray.length - 1]}`,
+      Key: `${this.S3_FOLDER}${splitArray[splitArray.length - 1]}`,
     });
 
     //return this.s3.getSignedUrl('putObject', params);
