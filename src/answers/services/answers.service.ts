@@ -236,16 +236,15 @@ export class AnswersService extends BaseService<
     const responses = answer.responses;
     for await (const response of responses) {
       if (response.value && this.isUrlArrayType(response.value)) {
-        const newArray: IAnswerFile[] = [];
-        for await (const file of response.value) {
-          newArray.push({
+        const presignedUrlPromises = response.value.map(
+          async (file: IAnswerFile) => ({
             url: await this.s3Service.generatePresignedUrl({
               key: file.url,
             }),
             isPublic: file.isPublic,
-          });
-        }
-        response.value = newArray;
+          }),
+        );
+        response.value = await Promise.all(presignedUrlPromises);
       }
       if (response.value && this.isURLObjectType(response.value)) {
         response.value = {
