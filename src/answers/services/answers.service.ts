@@ -4,7 +4,6 @@ import {
   AnswerDocument,
   IAnswer,
   IAnswerFile,
-  IAnswerResponse,
 } from '../models/answer.model';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -236,22 +235,20 @@ export class AnswersService extends BaseService<
   async getUrls(answer: AnswerDocument): Promise<AnswerDocument> {
     const responses = answer.responses;
     for await (const response of responses) {
-      if (this.responseType(response) === 'url_array') {
-        if (Array.isArray(response.value)) {
-          const newArray: IAnswerFile[] = [];
-          for await (const file of response.value) {
-            const castFile = file as IAnswerFile;
-            newArray.push({
-              url: await this.s3Service.generatePresignedUrl({
-                key: castFile.url,
-              }),
-              isPublic: castFile.isPublic,
-            });
-            response.value = newArray;
-          }
+      if (response.value && this.isUrlArrayType(response.value)) {
+        const newArray: IAnswerFile[] = [];
+        for await (const file of response.value) {
+          const castFile = file as IAnswerFile;
+          newArray.push({
+            url: await this.s3Service.generatePresignedUrl({
+              key: castFile.url,
+            }),
+            isPublic: castFile.isPublic,
+          });
         }
+        response.value = newArray;
       }
-      if (this.responseType(response) === 'url_object') {
+      if (response.value && this.isURLObjectType(response.value)) {
         const castFile = response.value as IAnswerFile;
         response.value = {
           url: await this.s3Service.generatePresignedUrl({
@@ -265,15 +262,31 @@ export class AnswersService extends BaseService<
     return answer;
   }
 
-  responseType(response: IAnswerResponse): string {
-    if (Array.isArray(response.value)) {
-      if (typeof response.value[0] !== 'string' && response.value[0].url)
-        return 'url_array';
-      return 'string_array';
-    }
+  isStringType(
+    responseValue: string | string[] | IAnswerFile | IAnswerFile[] | undefined,
+  ): responseValue is string {
+    return typeof responseValue === 'string';
+  }
 
-    if (response.value && typeof response.value !== 'string')
-      return 'url_object';
-    return 'string';
+  isStringArrayType(
+    responseValue: string | string[] | IAnswerFile | IAnswerFile[] | undefined,
+  ): responseValue is string[] {
+    return Array.isArray(responseValue) && typeof responseValue[0] === 'string';
+  }
+
+  isURLObjectType(
+    responseValue: string | string[] | IAnswerFile | IAnswerFile[] | undefined,
+  ): responseValue is IAnswerFile {
+    return (
+      !!responseValue &&
+      !Array.isArray(responseValue) &&
+      typeof responseValue !== 'string'
+    );
+  }
+
+  isUrlArrayType(
+    responseValue: string | string[] | IAnswerFile | IAnswerFile[] | undefined,
+  ): responseValue is IAnswerFile[] {
+    return Array.isArray(responseValue) && typeof responseValue[0] !== 'string';
   }
 }

@@ -56,36 +56,28 @@ describe('AnswerService', () => {
     expect(answerService).toBeDefined();
   });
 
-  describe('responseType', () => {
-    it('should return string with no value', async () => {
-      const string_response: IAnswerResponse = {
-        name: 'name',
-      };
-      const string_result = answerService.responseType(string_response);
-      expect(string_result).toBe('string');
-    });
-
-    it('should return string', async () => {
+  describe('isStringType', () => {
+    it('should return true for string', async () => {
       const string_response: IAnswerResponse = {
         name: 'name',
         value: 'some string',
       };
-      const string_result = answerService.responseType(string_response);
-      expect(string_result).toBe('string');
+      const string_result = answerService.isStringType(string_response.value);
+      expect(string_result).toBe(true);
     });
 
-    it('should return string_array', async () => {
+    it('should return false for a string array', async () => {
       const string_array_response: IAnswerResponse = {
         name: 'name',
         value: ['some string', 'some other string'],
       };
-      const string_array_result = answerService.responseType(
-        string_array_response,
+      const string_array_result = answerService.isStringType(
+        string_array_response.value,
       );
-      expect(string_array_result).toBe('string_array');
+      expect(string_array_result).toBe(false);
     });
 
-    it('should return url_array', async () => {
+    it('should return false for url array', async () => {
       const url_array_response: IAnswerResponse = {
         name: 'name',
         value: [
@@ -93,17 +85,206 @@ describe('AnswerService', () => {
           { url: 'some other string', isPublic: false },
         ],
       };
-      const url_array_result = answerService.responseType(url_array_response);
-      expect(url_array_result).toBe('url_array');
+      const url_array_result = answerService.isStringType(
+        url_array_response.value,
+      );
+      expect(url_array_result).toBe(false);
     });
 
-    it('should return url_object', async () => {
+    it('should return false for url object', async () => {
       const url_object_response: IAnswerResponse = {
         name: 'name',
         value: { url: 'some string', isPublic: false },
       };
-      const url_object_result = answerService.responseType(url_object_response);
-      expect(url_object_result).toBe('url_object');
+      const url_object_result = answerService.isStringType(
+        url_object_response.value,
+      );
+      expect(url_object_result).toBe(false);
+    });
+
+    it('should return false for undefined', async () => {
+      const url_object_response: IAnswerResponse = {
+        name: 'name',
+      };
+      const url_object_result = answerService.isStringType(
+        url_object_response.value,
+      );
+      expect(url_object_result).toBe(false);
+    });
+  });
+
+  describe('isStringArrayType', () => {
+    it('should return false for string', async () => {
+      const string_response: IAnswerResponse = {
+        name: 'name',
+        value: 'some string',
+      };
+      const string_result = answerService.isStringArrayType(
+        string_response.value,
+      );
+      expect(string_result).toBe(false);
+    });
+
+    it('should return true for a string array', async () => {
+      const string_array_response: IAnswerResponse = {
+        name: 'name',
+        value: ['some string', 'some other string'],
+      };
+      const string_array_result = answerService.isStringArrayType(
+        string_array_response.value,
+      );
+      expect(string_array_result).toBe(true);
+    });
+
+    it('should return false for url array', async () => {
+      const url_array_response: IAnswerResponse = {
+        name: 'name',
+        value: [
+          { url: 'some string', isPublic: false },
+          { url: 'some other string', isPublic: false },
+        ],
+      };
+      const url_array_result = answerService.isStringArrayType(
+        url_array_response.value,
+      );
+      expect(url_array_result).toBe(false);
+    });
+
+    it('should return false for url object', async () => {
+      const url_object_response: IAnswerResponse = {
+        name: 'name',
+        value: { url: 'some string', isPublic: false },
+      };
+      const url_object_result = answerService.isStringArrayType(
+        url_object_response.value,
+      );
+      expect(url_object_result).toBe(false);
+    });
+
+    it('should return false for undefined', async () => {
+      const url_object_response: IAnswerResponse = {
+        name: 'name',
+      };
+      const url_object_result = answerService.isStringArrayType(
+        url_object_response.value,
+      );
+      expect(url_object_result).toBe(false);
+    });
+  });
+
+  describe('isURLObjectType', () => {
+    it('should return false for string', async () => {
+      const string_response: IAnswerResponse = {
+        name: 'name',
+        value: 'some string',
+      };
+      const string_result = answerService.isURLObjectType(
+        string_response.value,
+      );
+      expect(string_result).toBe(false);
+    });
+
+    it('should return false for a string array', async () => {
+      const string_array_response: IAnswerResponse = {
+        name: 'name',
+        value: ['some string', 'some other string'],
+      };
+      const string_array_result = answerService.isURLObjectType(
+        string_array_response.value,
+      );
+      expect(string_array_result).toBe(false);
+    });
+
+    it('should return false for url array', async () => {
+      const url_array_response: IAnswerResponse = {
+        name: 'name',
+        value: [
+          { url: 'some string', isPublic: false },
+          { url: 'some other string', isPublic: false },
+        ],
+      };
+      const url_array_result = answerService.isURLObjectType(
+        url_array_response.value,
+      );
+      expect(url_array_result).toBe(false);
+    });
+
+    it('should return true for url object', async () => {
+      const url_object_response: IAnswerResponse = {
+        name: 'name',
+        value: { url: 'some string', isPublic: false },
+      };
+      const url_object_result = answerService.isURLObjectType(
+        url_object_response.value,
+      );
+      expect(url_object_result).toBe(true);
+    });
+
+    it('should return false for undefined', async () => {
+      const url_object_response: IAnswerResponse = {
+        name: 'name',
+      };
+      const url_object_result = answerService.isURLObjectType(
+        url_object_response.value,
+      );
+      expect(url_object_result).toBe(false);
+    });
+  });
+
+  describe('isUrlArrayType', () => {
+    it('should return false for string', async () => {
+      const string_response: IAnswerResponse = {
+        name: 'name',
+        value: 'some string',
+      };
+      const string_result = answerService.isUrlArrayType(string_response.value);
+      expect(string_result).toBe(false);
+    });
+
+    it('should return false for a string array', async () => {
+      const string_array_response: IAnswerResponse = {
+        name: 'name',
+        value: ['some string', 'some other string'],
+      };
+      const string_array_result = answerService.isUrlArrayType(
+        string_array_response.value,
+      );
+      expect(string_array_result).toBe(false);
+    });
+
+    it('should return true for url array', async () => {
+      const url_array_response: IAnswerResponse = {
+        name: 'name',
+        value: [
+          { url: 'some string', isPublic: false },
+          { url: 'some other string', isPublic: false },
+        ],
+      };
+      const url_array_result = answerService.isUrlArrayType(
+        url_array_response.value,
+      );
+      expect(url_array_result).toBe(true);
+    });
+
+    it('should return false for url object', async () => {
+      const url_object_response: IAnswerResponse = {
+        name: 'name',
+        value: { url: 'some string', isPublic: false },
+      };
+      const url_object_result = answerService.isUrlArrayType(
+        url_object_response.value,
+      );
+      expect(url_object_result).toBe(false);
+    });
+
+    it('should return false for undefined', async () => {
+      const url_object_response: IAnswerResponse = {
+        name: 'name',
+      };
+      const url_object_result = answerService.isUrlArrayType(
+        url_object_response.value,
+      );
+      expect(url_object_result).toBe(false);
     });
   });
 
