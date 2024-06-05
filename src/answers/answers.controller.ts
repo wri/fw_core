@@ -119,25 +119,31 @@ export class AnswersController {
 
       if (question.type === QuestionType.AUDIO) {
         const [file] = files;
-        const fileUrl = await this.s3Service.uploadFile(
-          file.path,
-          file.originalname,
-        );
-        return answer.responses.push({ name: question.name, value: fileUrl });
+        const isPublic = fields.publicFiles?.includes(file.originalname);
+        const fileUrl = await this.s3Service.uploadFile({
+          filePath: file.path,
+          fullFileName: file.originalname,
+          isPublic,
+        });
+        return answer.responses.push({
+          name: question.name,
+          value: { url: fileUrl, isPublic },
+        });
       }
 
       if (question.type === QuestionType.IMAGE) {
-        const fileUploadPromises = files?.map((file) =>
-          this.s3Service.uploadFile(file.path, file.originalname),
-        );
-        const imageFileUrls = fileUploadPromises
-          ? await Promise.all(fileUploadPromises)
-          : undefined;
-
-        return answer.responses.push({
-          name: question.name,
-          value: imageFileUrls,
-        });
+        for await (const file of files) {
+          const isPublic = fields.publicFiles?.includes(file.originalname);
+          const returnedUrl = await this.s3Service.uploadFile({
+            filePath: file.path,
+            fullFileName: file.originalname,
+            isPublic,
+          });
+          return answer.responses.push({
+            name: question.name,
+            value: { url: returnedUrl, isPublic },
+          });
+        }
       }
 
       return;
@@ -176,7 +182,8 @@ export class AnswersController {
     const assignmentId = fields.assignmentId;
     if (!assignmentId) {
       const answerModel = await this.answersService.create(answer);
-      return { data: serializeAnswers(answerModel) };
+      const answerWithUrls = await this.answersService.getUrls(answerModel);
+      return { data: serializeAnswers(answerWithUrls) };
     }
 
     const assignment = await this.assignmentService.findOne({
@@ -196,13 +203,14 @@ export class AnswersController {
 
     answer.assignmentId = new mongoose.Types.ObjectId(assignmentId);
     const answerModel = await this.answersService.create(answer);
+    const answerWithUrls = await this.answersService.getUrls(answerModel);
 
     if (assignment.status !== AssignmentStatus.COMPLETED)
       await this.assignmentService.update(assignmentId, {
         status: AssignmentStatus.COMPLETED,
       });
 
-    return { data: serializeAnswers(answerModel) };
+    return { data: serializeAnswers(answerWithUrls) };
   }
 
   /**
@@ -312,9 +320,11 @@ export class AnswersController {
         HttpStatus.NOT_FOUND,
       );
 
+    const answerWithUrls = await this.answersService.getUrls(answer);
+
     return {
       data: serializeAnswers(
-        await this.answersService.addUsernameToAnswer(answer),
+        await this.answersService.addUsernameToAnswer(answerWithUrls),
       ),
     };
   }

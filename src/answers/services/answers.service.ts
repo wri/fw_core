@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Answer, AnswerDocument, IAnswer } from '../models/answer.model';
-import { FilterQuery, Model } from 'mongoose';
+import {
+  Answer,
+  AnswerDocument,
+  IAnswer,
+  IAnswerFile,
+} from '../models/answer.model';
+import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { IUser } from '../../common/user.model';
 import { TeamDocument } from '../../teams/models/team.schema';
@@ -9,12 +14,12 @@ import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import { UserService } from '../../common/user.service';
 import { TemplateDocument } from '../../templates/models/template.schema';
-import { TeamsService } from '../../teams/services/teams.service';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
 import { UpdateAnswerDto } from '../dto/update-answer.dto';
 import { BaseService } from '../../common/base.service';
 import { TemplatesService } from '../../templates/templates.service';
 import { MongooseObjectId } from '../../common/objectId';
+import { S3Service } from './s3Service';
 
 @Injectable()
 export class AnswersService extends BaseService<
@@ -26,10 +31,10 @@ export class AnswersService extends BaseService<
     @InjectModel(Answer.name, 'formsDb')
     private answerModel: Model<AnswerDocument>,
     private readonly teamMembersService: TeamMembersService,
-    private readonly teamsService: TeamsService,
     private readonly teamAreaRelationService: TeamAreaRelationService,
     private readonly userService: UserService,
     private readonly templatesService: TemplatesService,
+    private readonly s3Service: S3Service,
   ) {
     super(AnswersService.name, answerModel);
   }
@@ -48,7 +53,7 @@ export class AnswersService extends BaseService<
     user: IUser;
     userTeams: TeamDocument[];
   }): Promise<IAnswer[]> {
-    let filter: FilterQuery<AnswerDocument> = {};
+    let filter = {};
     const confirmedUsers: (mongoose.Types.ObjectId | undefined)[] = [];
     // add current user to users array
     confirmedUsers.push(new mongoose.Types.ObjectId(user.id));
@@ -63,11 +68,6 @@ export class AnswersService extends BaseService<
       confirmedUsers.push(...users.map((user) => user.userId));
     }
 
-    // get all team areas
-    const teamAreasRelations = await this.teamAreaRelationService.find({
-      teamId: { $in: userTeams.map((team) => team.id) },
-    });
-
     // Admin users and owners of the report template can check all report answers
     if (
       user.role === 'ADMIN' ||
@@ -77,28 +77,9 @@ export class AnswersService extends BaseService<
         $and: [{ report: template._id }],
       };
     } else {
-      // users can see their own answers and answers their team members have made as long as
-      // area is in team areas
+      // users can see their own answers and answers their team members have made
       filter = {
-        $or: [
-          {
-            $and: [
-              { report: template._id }, // report is from the template
-              { user: { $in: confirmedUsers } }, // user is in the teams
-              {
-                areaOfInterest: {
-                  $in: teamAreasRelations.map((relations) => relations.areaId), // report is from the team area
-                },
-              },
-            ],
-          },
-          {
-            $and: [
-              { report: template._id }, // report is from the template
-              { user: new mongoose.Types.ObjectId(user.id) }, // is user's report
-            ],
-          },
-        ],
+        $and: [{ report: template._id }, { user: { $in: confirmedUsers } }],
       };
     }
     return await this.addUsernameToAnswers(await this.answerModel.find(filter));
@@ -106,33 +87,20 @@ export class AnswersService extends BaseService<
 
   async getAllAnswers({
     loggedUser,
-    teams,
   }: {
     loggedUser: IUser;
-    teams: TeamDocument[];
   }): Promise<IAnswer[]> {
-    // get all templates
-    const publicTemplates =
-      await this.templatesService.findAllPublicTemplates();
-    const userTemplates = await this.templatesService.findAllByUserId(
+    let filter = {};
+    const teamMembers = await this.teamMembersService.findEveryTeamMember(
       loggedUser.id,
     );
-    const templates = [...publicTemplates, ...userTemplates];
+    teamMembers.push(loggedUser.id);
 
-    const answers: IAnswer[] = [];
+    filter = { user: { $in: teamMembers } };
 
-    // get answers for each template
-    for await (const template of templates) {
-      answers.push(
-        ...(await this.getAllTemplateAnswers({
-          template,
-          user: loggedUser,
-          userTeams: teams,
-        })),
-      );
-    }
+    const answers = await this.answerModel.find(filter);
 
-    return answers;
+    return await this.addUsernameToAnswers(answers);
   }
 
   async filterAnswersByArea({
@@ -262,5 +230,60 @@ export class AnswersService extends BaseService<
         answer.delete();
       }
     });
+  }
+
+  async getUrls(answer: AnswerDocument): Promise<AnswerDocument> {
+    const responses = answer.responses;
+    for await (const response of responses) {
+      if (response.value && this.isUrlArrayType(response.value)) {
+        const presignedUrlPromises = response.value.map(
+          async (file: IAnswerFile) => ({
+            url: await this.s3Service.generatePresignedUrl({
+              key: file.url,
+            }),
+            isPublic: file.isPublic,
+          }),
+        );
+        response.value = await Promise.all(presignedUrlPromises);
+      }
+      if (response.value && this.isURLObjectType(response.value)) {
+        response.value = {
+          url: await this.s3Service.generatePresignedUrl({
+            key: response.value.url,
+          }),
+          isPublic: response.value.isPublic,
+        };
+      }
+    }
+    answer.responses = responses;
+    return answer;
+  }
+
+  isStringType(
+    responseValue: string | string[] | IAnswerFile | IAnswerFile[] | undefined,
+  ): responseValue is string {
+    return typeof responseValue === 'string';
+  }
+
+  isStringArrayType(
+    responseValue: string | string[] | IAnswerFile | IAnswerFile[] | undefined,
+  ): responseValue is string[] {
+    return Array.isArray(responseValue) && typeof responseValue[0] === 'string';
+  }
+
+  isURLObjectType(
+    responseValue: string | string[] | IAnswerFile | IAnswerFile[] | undefined,
+  ): responseValue is IAnswerFile {
+    return (
+      !!responseValue &&
+      !Array.isArray(responseValue) &&
+      typeof responseValue !== 'string'
+    );
+  }
+
+  isUrlArrayType(
+    responseValue: string | string[] | IAnswerFile | IAnswerFile[] | undefined,
+  ): responseValue is IAnswerFile[] {
+    return Array.isArray(responseValue) && typeof responseValue[0] !== 'string';
   }
 }
