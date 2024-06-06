@@ -191,7 +191,6 @@ export class AnswersService extends BaseService<
     input: UpdateAnswerDto,
   ): Promise<AnswerDocument | undefined> {
     const answer = await this.answerModel.findById(input.id);
-    console.log('ANSWER', input.id, answer?.id, answer?.responses);
     if (!answer) throw new Error('answer does not exist');
     const promises = answer.responses.map(
       async (response) =>
@@ -335,6 +334,7 @@ export class AnswersService extends BaseService<
     privateFiles: string[];
     publicFiles: string[];
   }): Promise<IAnswerResponse> {
+    console.log('updating response', response);
     if (this.isURLObjectType(response.value)) {
       if (privateFiles.includes(response.value.url)) {
         await this.s3Service.updateFile({
