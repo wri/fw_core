@@ -82,13 +82,14 @@ export class S3Service {
   async updateFile(opts: { url: string; isPublic: boolean }): Promise<void> {
     const url = opts.url.split(this.S3_FOLDER).pop();
     console.log(url, `${this.S3_FOLDER}${url}`);
+    console.log('isPublic', opts.isPublic);
     const uploadParams: AWS.S3.PutObjectRequest = {
       Bucket: this.S3_BUCKET,
       Key: `${this.S3_FOLDER}${url}`,
       ACL: opts.isPublic ? 'public-read' : 'private',
     };
 
-    this.logger.log(`updating file ${uploadParams}`);
+    this.logger.log(`updating file ${uploadParams.ACL}`);
 
     await this.s3.putObjectAcl(uploadParams).promise();
     return;
