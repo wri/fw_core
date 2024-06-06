@@ -31,6 +31,7 @@ import { GeostoreService } from '../../areas/services/geostore.service';
 import { CoverageService } from '../../areas/services/coverage.service';
 import { DatasetService } from '../../areas/services/dataset.service';
 import { faker } from '@faker-js/faker';
+import { ConfigService } from '@nestjs/config';
 
 describe('Answers', () => {
   let app: INestApplication;
@@ -80,6 +81,12 @@ describe('Answers', () => {
         {
           provide: getModelToken('areateamrelations', 'apiDb'),
           useValue: jest.fn(),
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            getOrThrow: (key: string) => key,
+          },
         },
       ],
     })

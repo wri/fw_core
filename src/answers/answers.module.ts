@@ -58,6 +58,7 @@ import { AreasModule } from '../areas/modules/areas.module';
     TeamMembersService,
     S3Service,
     UserService,
+    ConfigService,
   ],
   exports: [AnswersService],
 })

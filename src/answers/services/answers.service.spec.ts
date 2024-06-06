@@ -43,6 +43,12 @@ describe('AnswerService', () => {
         { provide: UserService, useValue: jest.fn() },
         { provide: TemplatesService, useValue: jest.fn() },
         { provide: S3Service, useValue: mockS3Service },
+        {
+          provide: ConfigService,
+          useValue: {
+            getOrThrow: (key: string) => key,
+          },
+        },
       ],
     }).compile();
 
