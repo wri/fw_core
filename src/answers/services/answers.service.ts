@@ -21,6 +21,7 @@ import { BaseService } from '../../common/base.service';
 import { TemplatesService } from '../../templates/templates.service';
 import { MongooseObjectId } from '../../common/objectId';
 import { S3Service } from './s3Service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AnswersService extends BaseService<
@@ -28,6 +29,8 @@ export class AnswersService extends BaseService<
   IAnswer,
   UpdateAnswerDto
 > {
+  private readonly S3_FOLDER: string;
+
   constructor(
     @InjectModel(Answer.name, 'formsDb')
     private answerModel: Model<AnswerDocument>,
@@ -36,8 +39,11 @@ export class AnswersService extends BaseService<
     private readonly userService: UserService,
     private readonly templatesService: TemplatesService,
     private readonly s3Service: S3Service,
+    configService: ConfigService,
   ) {
     super(AnswersService.name, answerModel);
+
+    this.S3_FOLDER = configService.getOrThrow('s3.folder');
   }
 
   async create(answerInput: IAnswer): Promise<AnswerDocument> {
@@ -335,13 +341,20 @@ export class AnswersService extends BaseService<
     privateFiles: string[];
     publicFiles: string[];
   }): Promise<IAnswerResponse> {
-    console.log('updating response', response);
-    console.log('urlobjct', this.isURLObjectType(response.value));
-    console.log('private files', privateFiles);
-
+    const privateFilenames = privateFiles.map((file) => {
+      const filenameArray = file.split(this.S3_FOLDER);
+      return filenameArray.pop();
+    });
+    const publicFilenames = publicFiles.map((file) => {
+      const filenameArray = file.split(this.S3_FOLDER);
+      return filenameArray.pop();
+    });
     if (this.isURLObjectType(response.value)) {
-      console.log('url', response.value?.url);
-      if (privateFiles.includes(response.value.url)) {
+      if (
+        privateFilenames.includes(
+          response.value.url.split(this.S3_FOLDER).pop(),
+        )
+      ) {
         await this.s3Service.updateFile({
           url: response.value.url,
           isPublic: false,
@@ -351,7 +364,9 @@ export class AnswersService extends BaseService<
           value: { url: response.value.url, isPublic: false },
         };
       }
-      if (publicFiles.includes(response.value.url)) {
+      if (
+        publicFilenames.includes(response.value.url.split(this.S3_FOLDER).pop())
+      ) {
         await this.s3Service.updateFile({
           url: response.value.url,
           isPublic: true,
@@ -365,14 +380,14 @@ export class AnswersService extends BaseService<
     }
     if (this.isUrlArrayType(response.value)) {
       const promises = response.value.map(async (file) => {
-        if (privateFiles.includes(file.url)) {
+        if (privateFilenames.includes(file.url.split(this.S3_FOLDER).pop())) {
           await this.s3Service.updateFile({
             url: file.url,
             isPublic: false,
           });
           return { url: file.url, isPublic: false };
         }
-        if (publicFiles.includes(file.url)) {
+        if (publicFilenames.includes(file.url.split(this.S3_FOLDER).pop())) {
           await this.s3Service.updateFile({
             url: file.url,
             isPublic: true,
