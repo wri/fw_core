@@ -207,7 +207,6 @@ export class AnswersService extends BaseService<
         }),
     );
     answer.responses = await Promise.all(promises);
-    console.log('responses', answer.responses);
     return answer?.save();
   }
 
