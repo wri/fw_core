@@ -14,6 +14,7 @@ import { S3Service } from './s3Service';
 import { TeamsService } from '../../teams/services/teams.service';
 import mongoose from 'mongoose';
 import { faker } from '@faker-js/faker';
+import { ConfigService } from '@nestjs/config';
 
 const mockS3Service = {
   generatePresignedUrl: jest.fn(),

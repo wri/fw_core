@@ -18,6 +18,7 @@ import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.serv
 import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema';
 import { AssignmentsModule } from '../assignments/assignments.module';
 import { AreasModule } from '../areas/modules/areas.module';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
