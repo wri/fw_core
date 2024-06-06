@@ -190,7 +190,7 @@ export class AnswersService extends BaseService<
   async updateImagePermissions(
     input: UpdateAnswerDto,
   ): Promise<AnswerDocument | undefined> {
-    const answer = await this.findOne({ id: input.id });
+    const answer = await this.answerModel.findById(input.id);
     console.log('ANSWER', input.id, answer?.id, answer?.responses);
     if (!answer) throw new Error('answer does not exist');
     const promises = answer.responses.map(
