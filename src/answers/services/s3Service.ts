@@ -1,5 +1,5 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import AWS from 'aws-sdk';
 import fs from 'fs/promises';
@@ -32,6 +32,7 @@ export class S3Service {
       },
     });
   }
+  private readonly logger = new Logger(S3Service.name);
 
   getExtension(fullFilename: string): string | undefined {
     return fullFilename.split('.').slice(-1)[0];
@@ -84,6 +85,8 @@ export class S3Service {
       Key: opts.url,
       ACL: opts.isPublic ? 'public-read' : 'private',
     };
+
+    this.logger.log(`updating file ${uploadParams}`);
 
     await this.s3.putObjectAcl(uploadParams).promise();
     return;

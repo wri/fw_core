@@ -13,6 +13,7 @@ import {
   BadRequestException,
   UnauthorizedException,
   Patch,
+  Logger,
 } from '@nestjs/common';
 import { AnswersService } from './services/answers.service';
 import { Request } from 'express';
@@ -42,6 +43,7 @@ export class AnswersController {
     private readonly s3Service: S3Service,
     private readonly assignmentService: AssignmentsService,
   ) {}
+  private readonly logger = new Logger(AnswersController.name);
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor({ dest: './tmp' }))
@@ -331,7 +333,7 @@ export class AnswersController {
     };
   }
 
-  @Patch(':id')
+  @Patch('/:id')
   async update(
     @Param('id') id: string,
     @Body() input: UpdateAnswerInput,
@@ -344,6 +346,7 @@ export class AnswersController {
         'No answer found with your permissions',
         HttpStatus.NOT_FOUND,
       );
+    this.logger.log(`updating answer ${answer.id}`);
     return this.answersService.updateImagePermissions({ id, ...input });
   }
 
