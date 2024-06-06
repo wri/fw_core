@@ -3,7 +3,6 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
-  IsInt,
   IsMongoId,
   IsNotEmpty,
   IsNumberString,

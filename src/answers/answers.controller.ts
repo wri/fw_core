@@ -12,6 +12,7 @@ import {
   UploadedFiles,
   BadRequestException,
   UnauthorizedException,
+  Patch,
 } from '@nestjs/common';
 import { AnswersService } from './services/answers.service';
 import { Request } from 'express';
@@ -30,6 +31,7 @@ import { QuestionType } from '../templates/question-type.enum';
 import { CreateAnswerInput } from './inputs/create-answer.input';
 import { AuthUser } from '../common/decorators';
 import { IUser } from '../common/user.model';
+import { UpdateAnswerInput } from './inputs/update-answer.input';
 
 @Controller('templates/:templateId/answers')
 export class AnswersController {
@@ -329,10 +331,21 @@ export class AnswersController {
     };
   }
 
-  /*   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAnswerDto: UpdateAnswerDto) {
-    return this.answersService.update(id, updateAnswerDto);
-  } */
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() input: UpdateAnswerInput,
+    @Req() request: Request,
+  ) {
+    const { user } = request;
+    const answer = await this.answersService.findById(id);
+    if (!answer || user.id !== answer.user.toString())
+      throw new HttpException(
+        'No answer found with your permissions',
+        HttpStatus.NOT_FOUND,
+      );
+    return this.answersService.updateImagePermissions({ id, ...input });
+  }
 
   @Delete('/:id')
   async remove(

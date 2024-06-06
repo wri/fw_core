@@ -13,9 +13,11 @@ import { TemplatesService } from '../../templates/templates.service';
 import { S3Service } from './s3Service';
 import { TeamsService } from '../../teams/services/teams.service';
 import mongoose from 'mongoose';
+import { faker } from '@faker-js/faker';
 
 const mockS3Service = {
   generatePresignedUrl: jest.fn(),
+  updateFile: jest.fn(),
 };
 
 const mockAnswer = {
@@ -390,6 +392,107 @@ describe('AnswerService', () => {
       if (!Array.isArray(value)) throw new Error();
       expect(value[0]).toBe('some url');
       expect(value[1]).toBe('some other url');
+      expect(s3Spy).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('updateResponse', () => {
+    it('should update the permissions for a file in a response', async () => {
+      const s3Spy = jest
+        .spyOn(s3Service, 'updateFile')
+        .mockResolvedValue(undefined);
+      const url1 = faker.internet.url();
+      const response: IAnswerResponse = {
+        name: 'name',
+        value: { url: url1, isPublic: false },
+      };
+
+      const result = await answerService.updateResponse({
+        response,
+        privateFiles: [],
+        publicFiles: [url1],
+      });
+
+      expect(result).toMatchObject({
+        value: { url: url1, isPublic: true },
+      });
+      expect(s3Spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should update the permissions for multiple files in a response', async () => {
+      const s3Spy = jest
+        .spyOn(s3Service, 'updateFile')
+        .mockResolvedValue(undefined);
+      const url1 = faker.internet.url();
+      const url2 = faker.internet.url();
+      const url3 = faker.internet.url();
+      const response: IAnswerResponse = {
+        name: 'name',
+        value: [
+          { url: url1, isPublic: false },
+          { url: url2, isPublic: true },
+          { url: url3, isPublic: true },
+        ],
+      };
+
+      const result = await answerService.updateResponse({
+        response,
+        privateFiles: [url2],
+        publicFiles: [url1],
+      });
+
+      expect(result).toMatchObject({
+        value: [
+          { url: url1, isPublic: true },
+          { url: url2, isPublic: false },
+          { url: url3, isPublic: true },
+        ],
+      });
+      expect(s3Spy).toHaveBeenCalledTimes(2);
+    });
+
+    it('should leave string responses alone', async () => {
+      const s3Spy = jest
+        .spyOn(s3Service, 'updateFile')
+        .mockResolvedValue(undefined);
+      const url1 = faker.internet.url();
+      const response: IAnswerResponse = {
+        name: 'name',
+        value: url1,
+      };
+
+      const result = await answerService.updateResponse({
+        response,
+        privateFiles: [],
+        publicFiles: [url1],
+      });
+
+      expect(result).toMatchObject({
+        value: url1,
+      });
+      expect(s3Spy).toHaveBeenCalledTimes(0);
+    });
+
+    it('should leave string array responses alone', async () => {
+      const s3Spy = jest
+        .spyOn(s3Service, 'updateFile')
+        .mockResolvedValue(undefined);
+      const url1 = faker.internet.url();
+      const url2 = faker.internet.url();
+      const response: IAnswerResponse = {
+        name: 'name',
+        value: [url1, url2],
+      };
+
+      const result = await answerService.updateResponse({
+        response,
+        privateFiles: [],
+        publicFiles: [url1],
+      });
+
+      expect(result).toMatchObject({
+        value: [url1, url2],
+      });
       expect(s3Spy).toHaveBeenCalledTimes(0);
     });
   });

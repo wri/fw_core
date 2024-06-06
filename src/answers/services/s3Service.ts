@@ -62,18 +62,6 @@ export class S3Service {
     key: string;
     expiry?: number;
   }): Promise<string> {
-    /*     const expiresAt = new Date();
-    expiresAt.setSeconds(
-      expiresAt.getSeconds() +
-        (input.expiry ?? this.PRESIGNED_URL_EXPIRY_SECONDS),
-    );
-
-    const params: AWS.S3.PutObjectRequest = {
-      Bucket: this.S3_BUCKET,
-      Key: input.key,
-      Expires: 5,
-    }; */
-
     const expires = input.expiry ?? this.PRESIGNED_URL_EXPIRY_SECONDS;
     const splitArray = input.key.split(this.S3_FOLDER);
 
@@ -88,5 +76,16 @@ export class S3Service {
     return getSignedUrl(this.s3Client, getObjectCommand, {
       expiresIn: expires,
     });
+  }
+
+  async updateFile(opts: { url: string; isPublic: boolean }): Promise<void> {
+    const uploadParams: AWS.S3.PutObjectRequest = {
+      Bucket: this.S3_BUCKET,
+      Key: opts.url,
+      ACL: opts.isPublic ? 'public-read' : 'private',
+    };
+
+    await this.s3.putObjectAcl(uploadParams).promise();
+    return;
   }
 }
