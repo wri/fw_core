@@ -332,7 +332,18 @@ export class AnswersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() input: UpdateAnswerInput) {
+  async update(
+    @Param('id') id: string,
+    @Body() input: UpdateAnswerInput,
+    @Req() request: Request,
+  ) {
+    const { user } = request;
+    const answer = await this.answersService.findById(id);
+    if (!answer || user.id !== answer.user.toString())
+      throw new HttpException(
+        'No answer found with your permissions',
+        HttpStatus.NOT_FOUND,
+      );
     return this.answersService.updateImagePermissions({ id, ...input });
   }
 

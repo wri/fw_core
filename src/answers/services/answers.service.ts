@@ -6,7 +6,7 @@ import {
   IAnswerFile,
   IAnswerResponse,
 } from '../models/answer.model';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { IUser } from '../../common/user.model';
 import { TeamDocument } from '../../teams/models/team.schema';
@@ -54,7 +54,7 @@ export class AnswersService extends BaseService<
     user: IUser;
     userTeams: TeamDocument[];
   }): Promise<IAnswer[]> {
-    let filter = {};
+    let filter: FilterQuery<AnswerDocument> = {};
     const confirmedUsers: (mongoose.Types.ObjectId | undefined)[] = [];
     // add current user to users array
     confirmedUsers.push(new mongoose.Types.ObjectId(user.id));
@@ -69,6 +69,11 @@ export class AnswersService extends BaseService<
       confirmedUsers.push(...users.map((user) => user.userId));
     }
 
+    // get all team areas
+    const teamAreasRelations = await this.teamAreaRelationService.find({
+      teamId: { $in: userTeams.map((team) => team.id) },
+    });
+
     // Admin users and owners of the report template can check all report answers
     if (
       user.role === 'ADMIN' ||
@@ -78,9 +83,28 @@ export class AnswersService extends BaseService<
         $and: [{ report: template._id }],
       };
     } else {
-      // users can see their own answers and answers their team members have made
+      // users can see their own answers and answers their team members have made as long as
+      // area is in team areas
       filter = {
-        $and: [{ report: template._id }, { user: { $in: confirmedUsers } }],
+        $or: [
+          {
+            $and: [
+              { report: template._id }, // report is from the template
+              { user: { $in: confirmedUsers } }, // user is in the teams
+              {
+                areaOfInterest: {
+                  $in: teamAreasRelations.map((relations) => relations.areaId), // report is from the team area
+                },
+              },
+            ],
+          },
+          {
+            $and: [
+              { report: template._id }, // report is from the template
+              { user: new mongoose.Types.ObjectId(user.id) }, // is user's report
+            ],
+          },
+        ],
       };
     }
     return await this.addUsernameToAnswers(await this.answerModel.find(filter));

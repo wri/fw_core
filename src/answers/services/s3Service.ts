@@ -62,23 +62,14 @@ export class S3Service {
     key: string;
     expiry?: number;
   }): Promise<string> {
-    /*     const expiresAt = new Date();
-    expiresAt.setSeconds(
-      expiresAt.getSeconds() +
-        (input.expiry ?? this.PRESIGNED_URL_EXPIRY_SECONDS),
-    );
-
-    const params: AWS.S3.PutObjectRequest = {
-      Bucket: this.S3_BUCKET,
-      Key: input.key,
-      Expires: 5,
-    }; */
-
     const expires = input.expiry ?? this.PRESIGNED_URL_EXPIRY_SECONDS;
+    const splitArray = input.key.split(this.S3_FOLDER);
+
+    if (splitArray.length < 2) return input.key;
 
     const getObjectCommand = new GetObjectCommand({
       Bucket: this.S3_BUCKET,
-      Key: input.key,
+      Key: `${this.S3_FOLDER}${splitArray[splitArray.length - 1]}`,
     });
 
     //return this.s3.getSignedUrl('putObject', params);
