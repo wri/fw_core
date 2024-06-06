@@ -201,6 +201,7 @@ export class AnswersService extends BaseService<
         }),
     );
     answer.responses = await Promise.all(promises);
+    console.log('responses', answer.responses);
     return answer?.save();
   }
 
@@ -335,7 +336,11 @@ export class AnswersService extends BaseService<
     publicFiles: string[];
   }): Promise<IAnswerResponse> {
     console.log('updating response', response);
+    console.log('urlobjct', this.isURLObjectType(response.value));
+    console.log('private files', privateFiles);
+
     if (this.isURLObjectType(response.value)) {
+      console.log('url', response.value?.url);
       if (privateFiles.includes(response.value.url)) {
         await this.s3Service.updateFile({
           url: response.value.url,
