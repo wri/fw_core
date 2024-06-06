@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   Answer,
   AnswerDocument,
@@ -191,6 +191,7 @@ export class AnswersService extends BaseService<
     input: UpdateAnswerDto,
   ): Promise<AnswerDocument | undefined> {
     const answer = await this.findOne({ id: input.id });
+    console.log('ANSWER', answer?.id, answer?.responses);
     if (!answer) throw new Error('answer does not exist');
     const promises = answer.responses.map(
       async (response) =>
