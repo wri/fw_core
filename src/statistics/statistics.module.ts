@@ -1,15 +1,13 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
-import { TeamsService } from '../services/teams.service';
-import { TeamsController } from '../controllers/teams.controller';
+import { Module } from '@nestjs/common';
+import { TeamsService } from '../teams/services/teams.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { TeamSchema } from '../models/team.schema';
-import { TeamMembersService } from '../services/teamMembers.service';
-import { TeamMemberSchema } from '../models/teamMember.schema';
-import { IsAdminOrManagerMiddleware } from '../middleware/isAdminOrManager.middleware';
-import { IsAdminMiddleware } from '../middleware/isAdmin.middleware';
-import { UserService } from '../../common/user.service';
-import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
-import { TeamAreaRelationSchema } from '../../areas/models/teamAreaRelation.schema';
+import { TeamSchema } from '../teams/models/team.schema';
+import { TeamMembersService } from '../teams/services/teamMembers.service';
+import { TeamMemberSchema } from '../teams/models/teamMember.schema';
+import { StatisticsController } from './statistics.controller';
+import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
+import { UserService } from '../common/user.service';
+import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema';
 
 @Module({
   imports: [
@@ -26,24 +24,12 @@ import { TeamAreaRelationSchema } from '../../areas/models/teamAreaRelation.sche
       'apiDb',
     ),
   ],
-  controllers: [TeamsController],
+  controllers: [StatisticsController],
   providers: [
     TeamsService,
     TeamMembersService,
-    UserService,
     TeamAreaRelationService,
+    UserService,
   ],
-  exports: [TeamsService, TeamAreaRelationService, TeamMembersService],
 })
-export class TeamsModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(IsAdminOrManagerMiddleware).forRoutes({
-      path: '/teams/:teamId',
-      method: RequestMethod.PATCH,
-    });
-    consumer.apply(IsAdminMiddleware).forRoutes({
-      path: '/teams/:teamId',
-      method: RequestMethod.DELETE,
-    });
-  }
-}
+export class StatisticsModule {}

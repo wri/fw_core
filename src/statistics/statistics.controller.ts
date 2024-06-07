@@ -1,16 +1,10 @@
-import { Controller, Get, Logger, Param } from '@nestjs/common';
+import { Controller, Get, Logger } from '@nestjs/common';
 import { TeamDocument } from '../teams/models/team.schema';
 import { TeamsService } from '../teams/services/teams.service';
 import { TeamMembersService } from '../teams/services/teamMembers.service';
-import {
-  EMemberRole,
-  TeamMemberDocument,
-} from '../teams/models/teamMember.schema';
-import serializeTeam from '../teams/serializers/team.serializer';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
 import { AuthUser } from '../common/decorators';
 import { IUser } from '../common/user.model';
-import mongoose from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import _ from 'lodash';
 
@@ -27,19 +21,21 @@ export class StatisticsController {
   @Get('/teams')
   async teamStats(@AuthUser() user: IUser): Promise<any> {
     const teams: TeamDocument[] = await this.teamsService.findAll();
-    const teamMembers = await this.teamMembersService.findAll();
+    const teamMemberCounts =
+      await this.teamMembersService.getTeamMemberCounts();
 
-    const groupedMembers = _.groupBy(teamMembers, (member) => member.teamId);
+    /*     const groupedMembers = _.groupBy(teamMembers, (member) => member.teamId);
     const memberCounts: number[] = [];
     for (const [key, value] of Object.entries(groupedMembers))
-      memberCounts.push(value.length);
+      memberCounts.push(value.length); */
 
     return {
       teamCount: teams.length,
       teamMembers: {
-        mean: memberCounts.reduce((p, c) => p + c, 0) / memberCounts.length,
-        median: this.median(memberCounts),
-        max: Math.max(...memberCounts),
+        mean:
+          teamMemberCounts.reduce((p, c) => p + c, 0) / teamMemberCounts.length,
+        median: this.median(teamMemberCounts),
+        max: Math.max(...teamMemberCounts),
       },
     };
   }

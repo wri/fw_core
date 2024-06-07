@@ -219,4 +219,10 @@ export class TeamMembersService {
   async findAll(): Promise<TeamMemberDocument[]> {
     return this.teamMemberModel.find({});
   }
+
+  async getTeamMemberCounts(): Promise<number[]> {
+    return this.teamMemberModel.aggregate([
+      { $group: { _id: '$teamId', count: { $sum: 1 } } },
+    ]);
+  }
 }
