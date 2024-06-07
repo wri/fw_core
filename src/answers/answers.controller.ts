@@ -341,12 +341,10 @@ export class AnswersController {
   ) {
     const { user } = request;
     const answer = await this.answersService.findById(id);
-    if (!answer || user.id !== answer.user.toString())
-      throw new HttpException(
-        'No answer found with your permissions',
-        HttpStatus.NOT_FOUND,
-      );
-    this.logger.log(`updating answer ${answer.id}`);
+    if (!answer)
+      throw new HttpException('No answer found', HttpStatus.NOT_FOUND);
+    if (user.id !== answer.user.toString())
+      throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
     return this.answersService.updateImagePermissions({ id, ...input });
   }
 
