@@ -21,8 +21,11 @@ export class StatisticsController {
   async teamStats(@AuthUser() user: IUser): Promise<any> {
     const teams: TeamDocument[] = await this.teamsService.findAll();
     const teamMemberCounts =
-      await this.teamMembersService.getTeamMemberCounts();
-
+      (await this.teamMembersService.getTeamMemberCounts()) as any as {
+        _id: string;
+        count: number;
+      }[];
+    const counts = teamMemberCounts.map((count) => count.count);
     /*     const groupedMembers = _.groupBy(teamMembers, (member) => member.teamId);
     const memberCounts: number[] = [];
     for (const [key, value] of Object.entries(groupedMembers))
@@ -31,10 +34,9 @@ export class StatisticsController {
     return {
       teamCount: teams.length,
       teamMembers: {
-        mean:
-          teamMemberCounts.reduce((p, c) => p + c, 0) / teamMemberCounts.length,
-        median: this.median(teamMemberCounts),
-        max: Math.max(...teamMemberCounts),
+        mean: counts.reduce((p, c) => p + c, 0) / counts.length,
+        median: this.median(counts),
+        max: Math.max(...counts),
       },
     };
   }
