@@ -86,12 +86,13 @@ export class S3Service {
     const uploadParams: AWS.S3.PutObjectRequest = {
       Bucket: this.S3_BUCKET,
       Key: `${this.S3_FOLDER}${url}`,
-      ACL: opts.isPublic ? 'public-read' : 'private',
+      ACL: opts.isPublic ? 'public-read' : 'authenticated-read',
     };
 
     this.logger.log(`updating file ${uploadParams.ACL}`);
 
-    await this.s3.putObjectAcl(uploadParams).promise();
+    const result = await this.s3.putObjectAcl(uploadParams).promise();
+    console.log(JSON.stringify(result));
     return;
   }
 }
