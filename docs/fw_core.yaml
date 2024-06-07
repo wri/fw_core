@@ -354,6 +354,36 @@ paths:
       description: Deletes the answer with the given id
       tags:
         - Answers
+    patch:
+      summary: ''
+      operationId: patch-v3-gfw-templates-templateId-answers-answerId
+      responses:
+        '200':
+          description: OK
+      description: Update file privacy for responses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                privateFiles:
+                  type: array
+                  x-stoplight:
+                    id: onowqzxehppe3
+                  items:
+                    x-stoplight:
+                      id: 1qy3opiw523is
+                    type: string
+                publicFiles:
+                  type: array
+                  x-stoplight:
+                    id: s2q83vxb0fv7t
+                  items:
+                    x-stoplight:
+                      id: 81blr358xfpc6
+                    type: string
+        description: urls of the files whose permissions need updating
   /v3/gfw/templates/allAnswers:
     get:
       summary: Get Every Answer
@@ -1504,7 +1534,26 @@ components:
         user:
           type: string
         responses:
-          type: string
+          type: object
+          properties:
+            name:
+              x-stoplight:
+                id: rv4b81wcqykuw
+              type:
+                - string
+            value:
+              type:
+                - object
+                - string
+                - array
+              x-stoplight:
+                id: 5m2qliynolhb3
+              properties:
+                url:
+                  x-stoplight:
+                    id: fwp3yh2509pvf
+                  type:
+                    - string
         createdAt:
           type: string
         assignmentId:
