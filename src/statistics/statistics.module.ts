@@ -8,9 +8,22 @@ import { StatisticsController } from './statistics.controller';
 import { TeamAreaRelationService } from '../areas/services/teamAreaRelation.service';
 import { UserService } from '../common/user.service';
 import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema';
+import { AnswersService } from '../answers/services/answers.service';
+import { Answer, AnswerSchema } from '../answers/models/answer.model';
+import { TemplateSchema } from '../templates/models/template.schema';
+import { TemplatesService } from '../templates/templates.service';
+import { S3Service } from '../answers/services/s3Service';
 
 @Module({
   imports: [
+    MongooseModule.forFeature(
+      [{ name: 'reports', schema: TemplateSchema }],
+      'formsDb',
+    ),
+    MongooseModule.forFeature(
+      [{ name: Answer.name, schema: AnswerSchema }],
+      'formsDb',
+    ),
     MongooseModule.forFeature(
       [{ name: 'gfwteams', schema: TeamSchema }],
       'teamsDb',
@@ -30,6 +43,9 @@ import { TeamAreaRelationSchema } from '../areas/models/teamAreaRelation.schema'
     TeamMembersService,
     TeamAreaRelationService,
     UserService,
+    AnswersService,
+    TemplatesService,
+    S3Service,
   ],
 })
 export class StatisticsModule {}
