@@ -22,7 +22,6 @@ export class StatisticsController {
     const teams: TeamDocument[] = await this.teamsService.findAll();
     const teamMemberCounts =
       await this.teamMembersService.getTeamMemberCounts();
-
     /*     const groupedMembers = _.groupBy(teamMembers, (member) => member.teamId);
     const memberCounts: number[] = [];
     for (const [key, value] of Object.entries(groupedMembers))

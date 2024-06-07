@@ -222,7 +222,7 @@ export class TeamMembersService {
 
   async getTeamMemberCounts(): Promise<number[]> {
     return this.teamMemberModel.aggregate([
-      { $group: { _id: '$teamId', count: { $sum: 1 } } },
+      { $group: { _id: { $teamId: 0 }, count: { $sum: 1 } } },
     ]);
   }
 }
