@@ -285,6 +285,7 @@ export class AnswersService extends BaseService<
             url: await this.s3Service.generatePresignedUrl({
               key: file.url,
             }),
+            originalUrl: file.url,
             isPublic: file.isPublic,
           }),
         );
@@ -295,6 +296,7 @@ export class AnswersService extends BaseService<
           url: await this.s3Service.generatePresignedUrl({
             key: response.value.url,
           }),
+          originalUrl: response.value.url,
           isPublic: response.value.isPublic,
         };
       }

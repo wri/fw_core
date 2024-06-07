@@ -3,6 +3,7 @@ import * as mongoose from 'mongoose';
 
 export interface IAnswerFile {
   url: string;
+  originalUrl?: string;
   isPublic: boolean;
 }
 
