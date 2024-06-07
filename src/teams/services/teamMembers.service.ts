@@ -215,4 +215,8 @@ export class TeamMembersService {
       errors,
     };
   }
+
+  async findAll(): Promise<TeamMemberDocument[]> {
+    return this.teamMemberModel.find({});
+  }
 }
