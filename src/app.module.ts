@@ -16,6 +16,7 @@ import { RoutesModule } from './routes/routes.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { SentryInterceptor } from './common/sentry.interceptor';
 import { CommonModule } from './common/common.module';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { CommonModule } from './common/common.module';
     }),
     AssignmentsModule,
     RoutesModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
   providers: [

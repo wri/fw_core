@@ -1417,7 +1417,7 @@ describe('Answers', () => {
         .expect(404);
     });
 
-    it('should return 404 if user doesnt own answer', async () => {
+    it('should return 403 if user doesnt own answer', async () => {
       const url1 = faker.internet.url();
       const template = await formsDbConnection
         .collection('reports')
@@ -1443,7 +1443,7 @@ describe('Answers', () => {
           privateFiles: [],
           publicFiles: [url1],
         })
-        .expect(404);
+        .expect(403);
     });
   });
 
