@@ -13,6 +13,7 @@ import { Answer, AnswerSchema } from '../answers/models/answer.model';
 import { TemplateSchema } from '../templates/models/template.schema';
 import { TemplatesService } from '../templates/templates.service';
 import { S3Service } from '../answers/services/s3Service';
+import { StatisticsService } from './statistics.service';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { S3Service } from '../answers/services/s3Service';
     AnswersService,
     TemplatesService,
     S3Service,
+    StatisticsService,
   ],
 })
 export class StatisticsModule {}
