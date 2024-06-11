@@ -22,7 +22,7 @@ export class StatisticsController {
   private readonly logger = new Logger(StatisticsController.name);
 
   @Get('/teams')
-  async teamStats(@AuthUser() user: IUser): Promise<string> {
+  async teamStats(@AuthUser() user: IUser): Promise<any> {
     if (
       this.configService.get('ENV') === 'production' &&
       user.role !== 'ADMIN'
@@ -33,7 +33,7 @@ export class StatisticsController {
     const id = new mongoose.Types.ObjectId().toString();
     this.statisticsService.getTeamStats(id);
 
-    return id;
+    return { id };
   }
 
   @Get('/reports')
@@ -48,11 +48,12 @@ export class StatisticsController {
     const id = new mongoose.Types.ObjectId().toString();
     this.statisticsService.getReportStats(id);
 
-    return id;
+    return { id };
   }
 
   @Get('/stats/:id')
   async getStats(@Param('id') id: string): Promise<any> {
-    return this.redisService.get(id);
+    const data = await this.redisService.get(id);
+    return JSON.parse(data);
   }
 }
