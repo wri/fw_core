@@ -150,8 +150,8 @@ describe('Answers', () => {
         .set('Authorization', 'USER')
         .expect(200);
 
-      expect(response.body.data).toHaveProperty('id');
-      expect(response.body.data.id).toBeInstanceOf('string');
+      expect(response.body).toHaveProperty('id');
+      expect(response.body.id).toBeInstanceOf('string');
 
       const data = await request(app.getHttpServer())
         .get(`/statistics/results/${response.body.data.id}`)
