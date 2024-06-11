@@ -51,9 +51,10 @@ export class StatisticsController {
     return { id };
   }
 
-  @Get('/stats/:id')
+  @Get('/results/:id')
   async getStats(@Param('id') id: string): Promise<any> {
     const data = await this.redisService.get(id);
-    return JSON.parse(data);
+    if (data) return JSON.parse(data);
+    return null;
   }
 }
