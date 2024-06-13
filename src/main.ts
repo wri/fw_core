@@ -30,7 +30,7 @@ async function bootstrap() {
     environment: process.env.ENV,
     sampleRate: 1,
     integrations: [
-      new Sentry.Integrations.Http({ tracing: true }),
+      new Sentry.Integrations.Http(),
       new Sentry.Integrations.OnUncaughtException(),
       new Sentry.Integrations.OnUnhandledRejection(),
     ],

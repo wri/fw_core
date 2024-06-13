@@ -12,6 +12,8 @@ import {
   UploadedFiles,
   BadRequestException,
   UnauthorizedException,
+  Patch,
+  Logger,
 } from '@nestjs/common';
 import { AnswersService } from './services/answers.service';
 import { Request } from 'express';
@@ -30,6 +32,7 @@ import { QuestionType } from '../templates/question-type.enum';
 import { CreateAnswerInput } from './inputs/create-answer.input';
 import { AuthUser } from '../common/decorators';
 import { IUser } from '../common/user.model';
+import { UpdateAnswerInput } from './inputs/update-answer.input';
 
 @Controller('templates/:templateId/answers')
 export class AnswersController {
@@ -40,6 +43,7 @@ export class AnswersController {
     private readonly s3Service: S3Service,
     private readonly assignmentService: AssignmentsService,
   ) {}
+  private readonly logger = new Logger(AnswersController.name);
 
   @Post()
   @UseInterceptors(AnyFilesInterceptor({ dest: './tmp' }))
@@ -119,25 +123,31 @@ export class AnswersController {
 
       if (question.type === QuestionType.AUDIO) {
         const [file] = files;
-        const fileUrl = await this.s3Service.uploadFile(
-          file.path,
-          file.originalname,
-        );
-        return answer.responses.push({ name: question.name, value: fileUrl });
+        const isPublic = fields.publicFiles?.includes(file.originalname);
+        const fileUrl = await this.s3Service.uploadFile({
+          filePath: file.path,
+          fullFileName: file.originalname,
+          isPublic,
+        });
+        return answer.responses.push({
+          name: question.name,
+          value: { url: fileUrl, isPublic },
+        });
       }
 
       if (question.type === QuestionType.IMAGE) {
-        const fileUploadPromises = files?.map((file) =>
-          this.s3Service.uploadFile(file.path, file.originalname),
-        );
-        const imageFileUrls = fileUploadPromises
-          ? await Promise.all(fileUploadPromises)
-          : undefined;
-
-        return answer.responses.push({
-          name: question.name,
-          value: imageFileUrls,
-        });
+        for await (const file of files) {
+          const isPublic = fields.publicFiles?.includes(file.originalname);
+          const returnedUrl = await this.s3Service.uploadFile({
+            filePath: file.path,
+            fullFileName: file.originalname,
+            isPublic,
+          });
+          return answer.responses.push({
+            name: question.name,
+            value: { url: returnedUrl, isPublic },
+          });
+        }
       }
 
       return;
@@ -176,7 +186,8 @@ export class AnswersController {
     const assignmentId = fields.assignmentId;
     if (!assignmentId) {
       const answerModel = await this.answersService.create(answer);
-      return { data: serializeAnswers(answerModel) };
+      const answerWithUrls = await this.answersService.getUrls(answerModel);
+      return { data: serializeAnswers(answerWithUrls) };
     }
 
     const assignment = await this.assignmentService.findOne({
@@ -196,13 +207,14 @@ export class AnswersController {
 
     answer.assignmentId = new mongoose.Types.ObjectId(assignmentId);
     const answerModel = await this.answersService.create(answer);
+    const answerWithUrls = await this.answersService.getUrls(answerModel);
 
     if (assignment.status !== AssignmentStatus.COMPLETED)
       await this.assignmentService.update(assignmentId, {
         status: AssignmentStatus.COMPLETED,
       });
 
-    return { data: serializeAnswers(answerModel) };
+    return { data: serializeAnswers(answerWithUrls) };
   }
 
   /**
@@ -312,17 +324,29 @@ export class AnswersController {
         HttpStatus.NOT_FOUND,
       );
 
+    const answerWithUrls = await this.answersService.getUrls(answer);
+
     return {
       data: serializeAnswers(
-        await this.answersService.addUsernameToAnswer(answer),
+        await this.answersService.addUsernameToAnswer(answerWithUrls),
       ),
     };
   }
 
-  /*   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAnswerDto: UpdateAnswerDto) {
-    return this.answersService.update(id, updateAnswerDto);
-  } */
+  @Patch('/:id')
+  async update(
+    @Param('id') id: string,
+    @Body() input: UpdateAnswerInput,
+    @Req() request: Request,
+  ) {
+    const { user } = request;
+    const answer = await this.answersService.findById(id);
+    if (!answer)
+      throw new HttpException('No answer found', HttpStatus.NOT_FOUND);
+    if (user.id !== answer.user.toString())
+      throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
+    return this.answersService.updateImagePermissions({ id, ...input });
+  }
 
   @Delete('/:id')
   async remove(
