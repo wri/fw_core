@@ -355,11 +355,7 @@ paths:
       tags:
         - Answers
     patch:
-<<<<<<< HEAD
-      summary: ''
-=======
       summary: Update report response file privacy
->>>>>>> staging
       operationId: patch-v3-gfw-templates-templateId-answers-answerId
       responses:
         '200':
@@ -388,11 +384,8 @@ paths:
                       id: 81blr358xfpc6
                     type: string
         description: urls of the files whose permissions need updating
-<<<<<<< HEAD
-=======
       tags:
         - Answers
->>>>>>> staging
   /v3/gfw/templates/allAnswers:
     get:
       summary: Get Every Answer
@@ -1156,12 +1149,8 @@ paths:
   /v3/gfw/statistics/teams:
     get:
       summary: Get teams statistics
-<<<<<<< HEAD
-      tags: []
-=======
       tags:
         - Statistics
->>>>>>> staging
       responses:
         '200':
           description: OK
@@ -1179,12 +1168,8 @@ paths:
   /v3/gfw/statistics/reports:
     get:
       summary: Get teams statistics
-<<<<<<< HEAD
-      tags: []
-=======
       tags:
         - Statistics
->>>>>>> staging
       responses:
         '200':
           description: OK
@@ -1203,12 +1188,8 @@ paths:
   '/v3/gfw/statistics/results/{id}':
     get:
       summary: Get teams statistics
-<<<<<<< HEAD
-      tags: []
-=======
       tags:
         - Statistics
->>>>>>> staging
       responses:
         '200':
           description: OK
