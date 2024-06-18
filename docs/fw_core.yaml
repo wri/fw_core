@@ -1149,7 +1149,8 @@ paths:
   /v3/gfw/statistics/teams:
     get:
       summary: Get teams statistics
-      tags: []
+      tags:
+        - Statistics
       responses:
         '200':
           description: OK
@@ -1167,7 +1168,8 @@ paths:
   /v3/gfw/statistics/reports:
     get:
       summary: Get teams statistics
-      tags: []
+      tags:
+        - Statistics
       responses:
         '200':
           description: OK
@@ -1186,7 +1188,8 @@ paths:
   '/v3/gfw/statistics/results/{id}':
     get:
       summary: Get teams statistics
-      tags: []
+      tags:
+        - Statistics
       responses:
         '200':
           description: OK
