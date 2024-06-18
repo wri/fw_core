@@ -1144,6 +1144,77 @@ paths:
           $ref: '#/components/responses/Error'
       operationId: get-v3-gfw-routes-team-teamId-area-areaId
       description: Returns all routes for team area either made for that team or made by the user
+  /v3/gfw/statistics/teams:
+    get:
+      summary: Get teams statistics
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    x-stoplight:
+                      id: hlephdr9zi68c
+      operationId: get-v3-gfw-statistics-teams
+      description: 'Supplies an id to use in the /results/{id} endpoint'
+  /v3/gfw/statistics/reports:
+    get:
+      summary: Get teams statistics
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    x-stoplight:
+                      id: hlephdr9zi68c
+      operationId: get-v3-gfw-statistics-reports
+      description: 'Supplies an id to use in the /results/{id} endpoint'
+    parameters: []
+  '/v3/gfw/statistics/results/{id}':
+    get:
+      summary: Get teams statistics
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    x-stoplight:
+                      id: hlephdr9zi68c
+        '':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    x-stoplight:
+                      id: 3v0hplqj3k7oc
+      operationId: get-v3-gfw-statistics-results
+      description: Use the id from statistics/teams or statistics/reports to get the data
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
 components:
   schemas:
     AssignmentModel:
