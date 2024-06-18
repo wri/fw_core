@@ -355,7 +355,7 @@ paths:
       tags:
         - Answers
     patch:
-      summary: ''
+      summary: Update report response file privacy
       operationId: patch-v3-gfw-templates-templateId-answers-answerId
       responses:
         '200':
@@ -384,6 +384,8 @@ paths:
                       id: 81blr358xfpc6
                     type: string
         description: urls of the files whose permissions need updating
+      tags:
+        - Answers
   /v3/gfw/templates/allAnswers:
     get:
       summary: Get Every Answer
