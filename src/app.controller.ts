@@ -9,4 +9,10 @@ export class AppController {
   healthcheck(): string {
     return 'OK';
   }
+
+  @Get('/error')
+  error(): string {
+    throw new Error('Error Test')
+    return 'OK';
+  }
 }
