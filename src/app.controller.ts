@@ -12,7 +12,7 @@ export class AppController {
 
   @Get('/error')
   error(): string {
-    throw new Error('Error Test')
+    throw new Error('Error Test');
     return 'OK';
   }
 }
