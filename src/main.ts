@@ -1,5 +1,5 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as Sentry from '@sentry/node';
 import ErrorSerializer from './common/error.serializer';
@@ -7,6 +7,7 @@ import { IUser } from './common/user.model';
 import { TemplateDocument } from './templates/models/template.schema';
 import { TeamDocument } from './teams/models/team.schema';
 import { CacheControlInterceptor } from './common/interceptors/cachecontrol.interceptor';
+import { SentryFilter } from './common/interceptors/error.filter';
 
 declare global {
   namespace Express {
@@ -23,10 +24,12 @@ async function bootstrap() {
   app.enableCors();
   app.useGlobalInterceptors(new CacheControlInterceptor());
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  const { httpAdapter } = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new SentryFilter(httpAdapter))
   app.setGlobalPrefix('v3/gfw');
 
-  Sentry.init({
-    dsn: 'https://a6b18ef7ce1d43298127081511289af7@o163691.ingest.sentry.io/4504083459211264',
+/*   Sentry.init({
+    dsn: 'https://a6b18ef7ce1d43298127081511289af7@o163691.ingest.us.sentry.io/4504083459211264',
     environment: process.env.ENV,
     sampleRate: 1,
     integrations: [
@@ -34,19 +37,21 @@ async function bootstrap() {
       new Sentry.Integrations.OnUncaughtException(),
       new Sentry.Integrations.OnUnhandledRejection(),
     ],
-  });
+  }); */
 
   app.use(async (req, res, next) => {
     try {
       await next();
     } catch (inErr: any) {
       let error = inErr;
+      console.log("ERROR")
       try {
         error = JSON.parse(inErr);
       } catch (e) {
         Logger.error('Could not parse error message - is it JSON?: ', inErr);
         error = inErr;
       }
+      console.log(error)
       res.status = error.status || res.status || 500;
       if (res.status >= 500) {
         Sentry.captureException(error); // send error to sentry

@@ -42,26 +42,43 @@ export class StatisticsService {
 
   async getReportStats(id: string): Promise<void> {
     const reports: AnswerDocument[] = await this.answerService.find({});
-    const reportStats: {
+    const reportStats = this.calculateYearStats(reports.map(report => report.createdAt))
+
+    await this.redisService.set(id, JSON.stringify(reportStats), {
+      expireIn: 60 * 60 * 24,
+    }); // set to expire in a day
+
+    return;
+  }
+
+  median(array: number[]): number {
+    if (array.length === 0) return 0;
+    array = [...array].sort((a, b) => a - b);
+    const half = Math.floor(array.length / 2);
+    return array.length % 2 ? array[half] : (array[half - 1] + array[half]) / 2;
+  }
+
+  calculateYearStats(dates: string[]) {
+    const stats: {
       year: string;
       count: number;
       months: { month: string; count: number }[];
     }[] = [];
-    reports.forEach((report) => {
-      const date = new Date(report.createdAt);
+    dates.forEach((dateString) => {
+      const date = new Date(dateString);
       const year = date.getFullYear().toString();
       const month = date.toLocaleString('default', { month: 'long' });
-      const yearObjIndex = reportStats.findIndex(
+      const yearObjIndex = stats.findIndex(
         (yearStat) => yearStat.year === year,
       );
       if (yearObjIndex === -1)
-        reportStats.push({
+        stats.push({
           year,
           count: 1,
           months: [{ month, count: 1 }],
         });
       else {
-        const yearObj = reportStats[yearObjIndex];
+        const yearObj = stats[yearObjIndex];
         const months = yearObj.months;
         const monthObjIndex = months.findIndex(
           (monthStat) => monthStat.month === month,
@@ -78,25 +95,13 @@ export class StatisticsService {
             count: foundMonth.count + 1,
           };
         }
-        reportStats[yearObjIndex] = {
+        stats[yearObjIndex] = {
           year: yearObj.year,
           count: yearObj.count + 1,
           months,
         };
       }
     });
-
-    await this.redisService.set(id, JSON.stringify(reportStats), {
-      expireIn: 60 * 60 * 24,
-    }); // set to expire in a day
-
-    return;
-  }
-
-  median(array: number[]): number {
-    if (array.length === 0) return 0;
-    array = [...array].sort((a, b) => a - b);
-    const half = Math.floor(array.length / 2);
-    return array.length % 2 ? array[half] : (array[half - 1] + array[half]) / 2;
+    return stats;
   }
 }
