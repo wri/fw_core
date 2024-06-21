@@ -25,7 +25,7 @@ export class StatisticsService {
     const counts = teamMemberCounts.map((count) => count.count);
 
     const teamStats = {
-      teamCreated: this.calculateYearStats(teams.map(team=>team.createdAt)),
+      teamCreated: this.calculateYearStats(teams.map((team) => team.createdAt)),
       teamCount: teams.length,
       teamMembers: {
         mean: counts.reduce((p, c) => p + c, 0) / counts.length,
