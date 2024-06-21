@@ -42,7 +42,9 @@ export class StatisticsService {
 
   async getReportStats(id: string): Promise<void> {
     const reports: AnswerDocument[] = await this.answerService.find({});
-    const reportStats = this.calculateYearStats(reports.map(report => report.createdAt))
+    const reportStats = this.calculateYearStats(
+      reports.map((report) => report.createdAt),
+    );
 
     await this.redisService.set(id, JSON.stringify(reportStats), {
       expireIn: 60 * 60 * 24,

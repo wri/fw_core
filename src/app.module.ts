@@ -13,10 +13,10 @@ import { TemplatesModule } from './templates/templates.module';
 import { AnswersModule } from './answers/answers.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { RoutesModule } from './routes/routes.module';
-import { SentryModule } from "@ntegral/nestjs-sentry";
+import { SentryModule } from '@ntegral/nestjs-sentry';
 import { CommonModule } from './common/common.module';
 import { StatisticsModule } from './statistics/statistics.module';
-import * as Sentry from "@sentry/node";
+import * as Sentry from '@sentry/node';
 
 @Module({
   imports: [
@@ -39,7 +39,7 @@ import * as Sentry from "@sentry/node";
       useFactory: async (cfg: ConfigService) => ({
         dsn: 'https://a6b18ef7ce1d43298127081511289af7@o163691.ingest.us.sentry.io/4504083459211264',
         debug: true,
-        environment: cfg.get("ENV"),
+        environment: cfg.get('ENV'),
         integrations: [
           new Sentry.Integrations.Http({ tracing: true }),
           new Sentry.Integrations.OnUncaughtException(),
@@ -50,10 +50,7 @@ import * as Sentry from "@sentry/node";
     }),
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    UserService,
-  ],
+  providers: [AppService, UserService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
