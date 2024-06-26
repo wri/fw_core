@@ -297,10 +297,10 @@ export class AnswersController {
         'No answer found with your permissions',
         HttpStatus.NOT_FOUND,
       );
-
+      const answerWithUrls = await this.answersService.getUrls(answer);
     return {
       data: serializeAnswers(
-        await this.answersService.addUsernameToAnswer(answer),
+        await this.answersService.addUsernameToAnswer(answerWithUrls),
       ),
     };
   }
