@@ -267,7 +267,7 @@ export class AnswersController {
     };
   }
 
-  @Get('/exportImages/:id')
+  @Get('/imageExports/:id')
   async findOneForImageExport(@Param('id') id: string) {
     const answer = await this.answersService.findOne({
       _id: new mongoose.Types.ObjectId(id),
