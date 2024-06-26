@@ -267,6 +267,26 @@ export class AnswersController {
     };
   }
 
+  @Get('/exportImages/:id')
+  async findOneForImageExport(@Param('id') id: string) {
+    const answer = await this.answersService.findOne({
+      _id: new mongoose.Types.ObjectId(id),
+    });
+    if (!answer)
+      throw new HttpException(
+        'No answer found with your permissions',
+        HttpStatus.NOT_FOUND,
+      );
+
+      const answerWithUrls = await this.answersService.getUrls(answer);
+
+    return {
+      data: serializeAnswers(
+        await this.answersService.addUsernameToAnswer(answerWithUrls),
+      ),
+    };
+  }
+
   @Get('/exports/:id')
   async findOneForExport(@Param('id') id: string) {
     const answer = await this.answersService.findOne({
