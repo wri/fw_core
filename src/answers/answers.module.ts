@@ -67,7 +67,7 @@ export class AnswersModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(TemplatePermissionsMiddleware)
-      .exclude('/v3/gfw/templates/:templateId/answers/exports/:id')
+      .exclude('/v3/gfw/templates/:templateId/answers/exports/:id', '/v3/gfw/templates/:templateId/answers/imageExports/:id')
       .forRoutes(AnswersController);
   }
 }
