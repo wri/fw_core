@@ -136,7 +136,7 @@ export class AnswersController {
       }
 
       if (question.type === QuestionType.IMAGE) {
-        const urls: {url: string; isPublic: boolean;}[] = [];
+        const urls: { url: string; isPublic: boolean }[] = [];
         for await (const file of files) {
           const isPublic = fields.publicFiles?.includes(file.originalname);
           const returnedUrl = await this.s3Service.uploadFile({
@@ -144,9 +144,9 @@ export class AnswersController {
             fullFileName: file.originalname,
             isPublic,
           });
-          urls.push({ url: returnedUrl, isPublic })
+          urls.push({ url: returnedUrl, isPublic });
         }
-        return answer.responses.push({name: question.name, value: urls})
+        return answer.responses.push({ name: question.name, value: urls });
       }
 
       return;
