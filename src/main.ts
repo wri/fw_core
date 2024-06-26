@@ -28,17 +28,6 @@ async function bootstrap() {
   app.useGlobalFilters(new SentryFilter(httpAdapter));
   app.setGlobalPrefix('v3/gfw');
 
-  /*   Sentry.init({
-    dsn: 'https://a6b18ef7ce1d43298127081511289af7@o163691.ingest.us.sentry.io/4504083459211264',
-    environment: process.env.ENV,
-    sampleRate: 1,
-    integrations: [
-      new Sentry.Integrations.Http(),
-      new Sentry.Integrations.OnUncaughtException(),
-      new Sentry.Integrations.OnUnhandledRejection(),
-    ],
-  }); */
-
   app.use(async (req, res, next) => {
     try {
       await next();
