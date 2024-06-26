@@ -828,9 +828,7 @@ describe('Answers', () => {
       const firstAnswerResponse = answerResponses[0];
       expect(firstAnswerResponse.name).toBe('question-1');
       expect(firstAnswerResponse.value).toBeInstanceOf(Object);
-      expect(firstAnswerResponse.value).toMatchObject({
-        url: 'https://s3.amazonaws.com/bucket/folder/presigned.ext',
-      });
+      expect(firstAnswerResponse.value).toMatchObject([{"originalUrl": "https://s3.amazonaws.com/bucket/folder/uuid.ext", "url": "https://s3.amazonaws.com/bucket/folder/presigned.ext"}]);
     });
 
     it('should return a 401 if submitting an assignment the user is not a monitor on', async () => {
