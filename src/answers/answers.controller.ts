@@ -143,7 +143,7 @@ export class AnswersController {
             fullFileName: file.originalname,
             isPublic,
           });
-          return answer.responses.push({
+          answer.responses.push({
             name: question.name,
             value: { url: returnedUrl, isPublic },
           });
