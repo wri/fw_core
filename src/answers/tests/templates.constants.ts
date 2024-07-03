@@ -19,6 +19,17 @@ export default {
           en: 'test',
         },
       },
+      {
+        type: 'text',
+        name: 'question-2',
+        conditions: [],
+        childQuestions: [],
+        order: 0,
+        required: false,
+        label: {
+          en: 'test2',
+        },
+      },
     ],
     languages: ['en'],
     status: 'published',

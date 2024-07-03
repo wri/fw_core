@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Answer, AnswerDocument, IAnswer } from '../models/answer.model';
+import {
+  Answer,
+  AnswerDocument,
+  IAnswer,
+  IAnswerFile,
+  IAnswerResponse,
+} from '../models/answer.model';
 import { FilterQuery, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { IUser } from '../../common/user.model';
@@ -9,12 +15,13 @@ import { TeamMembersService } from '../../teams/services/teamMembers.service';
 import mongoose from 'mongoose';
 import { UserService } from '../../common/user.service';
 import { TemplateDocument } from '../../templates/models/template.schema';
-import { TeamsService } from '../../teams/services/teams.service';
 import { TeamAreaRelationService } from '../../areas/services/teamAreaRelation.service';
 import { UpdateAnswerDto } from '../dto/update-answer.dto';
 import { BaseService } from '../../common/base.service';
 import { TemplatesService } from '../../templates/templates.service';
 import { MongooseObjectId } from '../../common/objectId';
+import { S3Service } from './s3Service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AnswersService extends BaseService<
@@ -22,16 +29,21 @@ export class AnswersService extends BaseService<
   IAnswer,
   UpdateAnswerDto
 > {
+  private readonly S3_FOLDER: string;
+
   constructor(
     @InjectModel(Answer.name, 'formsDb')
     private answerModel: Model<AnswerDocument>,
     private readonly teamMembersService: TeamMembersService,
-    private readonly teamsService: TeamsService,
     private readonly teamAreaRelationService: TeamAreaRelationService,
     private readonly userService: UserService,
     private readonly templatesService: TemplatesService,
+    private readonly s3Service: S3Service,
+    configService: ConfigService,
   ) {
     super(AnswersService.name, answerModel);
+
+    this.S3_FOLDER = configService.getOrThrow('s3.folder');
   }
 
   async create(answerInput: IAnswer): Promise<AnswerDocument> {
@@ -106,33 +118,20 @@ export class AnswersService extends BaseService<
 
   async getAllAnswers({
     loggedUser,
-    teams,
   }: {
     loggedUser: IUser;
-    teams: TeamDocument[];
   }): Promise<IAnswer[]> {
-    // get all templates
-    const publicTemplates =
-      await this.templatesService.findAllPublicTemplates();
-    const userTemplates = await this.templatesService.findAllByUserId(
+    let filter = {};
+    const teamMembers = await this.teamMembersService.findEveryTeamMember(
       loggedUser.id,
     );
-    const templates = [...publicTemplates, ...userTemplates];
+    teamMembers.push(loggedUser.id);
 
-    const answers: IAnswer[] = [];
+    filter = { user: { $in: teamMembers } };
 
-    // get answers for each template
-    for await (const template of templates) {
-      answers.push(
-        ...(await this.getAllTemplateAnswers({
-          template,
-          user: loggedUser,
-          userTeams: teams,
-        })),
-      );
-    }
+    const answers = await this.answerModel.find(filter);
 
-    return answers;
+    return await this.addUsernameToAnswers(answers);
   }
 
   async filterAnswersByArea({
@@ -190,13 +189,26 @@ export class AnswersService extends BaseService<
     return await this.addUsernameToAnswers(answers);
   }
 
-  async findOne(filter) {
-    return await this.answerModel.findOne(filter);
+  async findOne(filter): Promise<AnswerDocument | null> {
+    return this.answerModel.findOne(filter);
   }
 
-  /*   update(id: number, updateAnswerDto: UpdateAnswerDto) {
-    return `This action updates a #${id} answer`;
-  } */
+  async updateImagePermissions(
+    input: UpdateAnswerDto,
+  ): Promise<AnswerDocument | undefined> {
+    const answer = await this.answerModel.findById(input.id);
+    if (!answer) throw new Error('answer does not exist');
+    const promises = answer.responses.map(
+      async (response) =>
+        await this.updateResponse({
+          response,
+          privateFiles: input.privateFiles,
+          publicFiles: input.publicFiles,
+        }),
+    );
+    answer.responses = await Promise.all(promises);
+    return answer?.save();
+  }
 
   async deleteMany(filter): Promise<void> {
     await this.answerModel.deleteMany(filter);
@@ -262,5 +274,132 @@ export class AnswersService extends BaseService<
         answer.delete();
       }
     });
+  }
+
+  async getUrls(answer: AnswerDocument): Promise<AnswerDocument> {
+    const responses = answer.responses;
+    for await (const response of responses) {
+      if (response.value && this.isUrlArrayType(response.value)) {
+        const presignedUrlPromises = response.value.map(
+          async (file: IAnswerFile) => ({
+            url: await this.s3Service.generatePresignedUrl({
+              key: file.url,
+            }),
+            originalUrl: file.url,
+            isPublic: file.isPublic,
+          }),
+        );
+        response.value = await Promise.all(presignedUrlPromises);
+      }
+      if (response.value && this.isURLObjectType(response.value)) {
+        response.value = {
+          url: await this.s3Service.generatePresignedUrl({
+            key: response.value.url,
+          }),
+          originalUrl: response.value.url,
+          isPublic: response.value.isPublic,
+        };
+      }
+    }
+    answer.responses = responses;
+    return answer;
+  }
+
+  isStringType(
+    responseValue: string | string[] | IAnswerFile | IAnswerFile[] | undefined,
+  ): responseValue is string {
+    return typeof responseValue === 'string';
+  }
+
+  isStringArrayType(
+    responseValue: string | string[] | IAnswerFile | IAnswerFile[] | undefined,
+  ): responseValue is string[] {
+    return Array.isArray(responseValue) && typeof responseValue[0] === 'string';
+  }
+
+  isURLObjectType(
+    responseValue: string | string[] | IAnswerFile | IAnswerFile[] | undefined,
+  ): responseValue is IAnswerFile {
+    return (
+      !!responseValue &&
+      !Array.isArray(responseValue) &&
+      typeof responseValue !== 'string'
+    );
+  }
+
+  isUrlArrayType(
+    responseValue: string | string[] | IAnswerFile | IAnswerFile[] | undefined,
+  ): responseValue is IAnswerFile[] {
+    return Array.isArray(responseValue) && typeof responseValue[0] !== 'string';
+  }
+
+  async updateResponse({
+    response,
+    privateFiles,
+    publicFiles,
+  }: {
+    response: IAnswerResponse;
+    privateFiles: string[];
+    publicFiles: string[];
+  }): Promise<IAnswerResponse> {
+    const privateFilenames = privateFiles.map((file) => {
+      const filenameArray = file.split(this.S3_FOLDER);
+      return filenameArray.pop();
+    });
+    const publicFilenames = publicFiles.map((file) => {
+      const filenameArray = file.split(this.S3_FOLDER);
+      return filenameArray.pop();
+    });
+    if (this.isURLObjectType(response.value)) {
+      if (
+        privateFilenames.includes(
+          response.value.url.split(this.S3_FOLDER).pop(),
+        )
+      ) {
+        await this.s3Service.updateFile({
+          url: response.value.url,
+          isPublic: false,
+        });
+        return {
+          name: response.name,
+          value: { url: response.value.url, isPublic: false },
+        };
+      }
+      if (
+        publicFilenames.includes(response.value.url.split(this.S3_FOLDER).pop())
+      ) {
+        await this.s3Service.updateFile({
+          url: response.value.url,
+          isPublic: true,
+        });
+        return {
+          name: response.name,
+          value: { url: response.value.url, isPublic: true },
+        };
+      }
+      return response;
+    }
+    if (this.isUrlArrayType(response.value)) {
+      const promises = response.value.map(async (file) => {
+        if (privateFilenames.includes(file.url.split(this.S3_FOLDER).pop())) {
+          await this.s3Service.updateFile({
+            url: file.url,
+            isPublic: false,
+          });
+          return { url: file.url, isPublic: false };
+        }
+        if (publicFilenames.includes(file.url.split(this.S3_FOLDER).pop())) {
+          await this.s3Service.updateFile({
+            url: file.url,
+            isPublic: true,
+          });
+          return { url: file.url, isPublic: true };
+        }
+        return file;
+      });
+      const resolvedPromises = await Promise.all(promises);
+      return { name: response.name, value: resolvedPromises };
+    }
+    return response;
   }
 }

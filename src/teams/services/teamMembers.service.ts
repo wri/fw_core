@@ -133,7 +133,10 @@ export class TeamMembersService {
     );
   }
 
-  async removeAllUsersOnTeam(teamId: string) {
+  async removeAllUsersOnTeam(teamId: string): Promise<{
+    acknowledged: boolean;
+    deletedCount: number;
+  }> {
     return await this.teamMemberModel.deleteMany({
       teamId: new mongoose.Types.ObjectId(teamId),
     });
@@ -211,5 +214,15 @@ export class TeamMembersService {
       teamsNotDeletedFrom,
       errors,
     };
+  }
+
+  async findAll(): Promise<TeamMemberDocument[]> {
+    return this.teamMemberModel.find({});
+  }
+
+  async getTeamMemberCounts(): Promise<number[]> {
+    return this.teamMemberModel.aggregate([
+      { $group: { _id: '$teamId', count: { $sum: 1 } } },
+    ]);
   }
 }

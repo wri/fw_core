@@ -354,6 +354,38 @@ paths:
       description: Deletes the answer with the given id
       tags:
         - Answers
+    patch:
+      summary: Update report response file privacy
+      operationId: patch-v3-gfw-templates-templateId-answers-answerId
+      responses:
+        '200':
+          description: OK
+      description: Update file privacy for responses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                privateFiles:
+                  type: array
+                  x-stoplight:
+                    id: onowqzxehppe3
+                  items:
+                    x-stoplight:
+                      id: 1qy3opiw523is
+                    type: string
+                publicFiles:
+                  type: array
+                  x-stoplight:
+                    id: s2q83vxb0fv7t
+                  items:
+                    x-stoplight:
+                      id: 81blr358xfpc6
+                    type: string
+        description: urls of the files whose permissions need updating
+      tags:
+        - Answers
   /v3/gfw/templates/allAnswers:
     get:
       summary: Get Every Answer
@@ -1114,6 +1146,80 @@ paths:
           $ref: '#/components/responses/Error'
       operationId: get-v3-gfw-routes-team-teamId-area-areaId
       description: Returns all routes for team area either made for that team or made by the user
+  /v3/gfw/statistics/teams:
+    get:
+      summary: Get teams statistics
+      tags:
+        - Statistics
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    x-stoplight:
+                      id: hlephdr9zi68c
+      operationId: get-v3-gfw-statistics-teams
+      description: 'Supplies an id to use in the /results/{id} endpoint'
+  /v3/gfw/statistics/reports:
+    get:
+      summary: Get teams statistics
+      tags:
+        - Statistics
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    x-stoplight:
+                      id: hlephdr9zi68c
+      operationId: get-v3-gfw-statistics-reports
+      description: 'Supplies an id to use in the /results/{id} endpoint'
+    parameters: []
+  '/v3/gfw/statistics/results/{id}':
+    get:
+      summary: Get teams statistics
+      tags:
+        - Statistics
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    x-stoplight:
+                      id: hlephdr9zi68c
+        '':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    x-stoplight:
+                      id: 3v0hplqj3k7oc
+      operationId: get-v3-gfw-statistics-results
+      description: Use the id from statistics/teams or statistics/reports to get the data
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
 components:
   schemas:
     AssignmentModel:
@@ -1504,7 +1610,26 @@ components:
         user:
           type: string
         responses:
-          type: string
+          type: object
+          properties:
+            name:
+              x-stoplight:
+                id: rv4b81wcqykuw
+              type:
+                - string
+            value:
+              type:
+                - object
+                - string
+                - array
+              x-stoplight:
+                id: 5m2qliynolhb3
+              properties:
+                url:
+                  x-stoplight:
+                    id: fwp3yh2509pvf
+                  type:
+                    - string
         createdAt:
           type: string
         assignmentId:

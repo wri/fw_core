@@ -3,7 +3,6 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
-  IsInt,
   IsMongoId,
   IsNotEmpty,
   IsNumberString,
@@ -62,6 +61,8 @@ export class CreateAnswerInput {
     | number
     | CreateAnswerPositionInput[]
     | undefined;
+
+  publicFiles: [string];
 }
 
 class CreateAnswerPositionInput {

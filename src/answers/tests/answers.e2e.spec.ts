@@ -30,6 +30,8 @@ import { AreasService } from '../../areas/services/areas.service';
 import { GeostoreService } from '../../areas/services/geostore.service';
 import { CoverageService } from '../../areas/services/coverage.service';
 import { DatasetService } from '../../areas/services/dataset.service';
+import { faker } from '@faker-js/faker';
+import { ConfigService } from '@nestjs/config';
 
 describe('Answers', () => {
   let app: INestApplication;
@@ -41,8 +43,11 @@ describe('Answers', () => {
     getNameByIdMICROSERVICE: (_id) => 'Full Name',
   };
   const s3Service = {
-    uploadFile: (_file, _name) =>
+    uploadFile: (_file, _name, _isPublic) =>
       `https://s3.amazonaws.com/bucket/folder/uuid.ext`,
+    generatePresignedUrl: (_input: { key: 'some key' }) =>
+      'https://s3.amazonaws.com/bucket/folder/presigned.ext',
+    updateFile: (_file, _name, _isPublic) => undefined,
   };
 
   beforeAll(async () => {
@@ -61,7 +66,7 @@ describe('Answers', () => {
         GeostoreService,
         CoverageService,
         DatasetService,
-        S3Service,
+        { provide: S3Service, useValue: jest.fn() },
         { provide: getModelToken('gfwteams', 'teamsDb'), useValue: jest.fn() },
         {
           provide: getModelToken('teamuserrelations', 'teamsDb'),
@@ -76,6 +81,12 @@ describe('Answers', () => {
         {
           provide: getModelToken('areateamrelations', 'apiDb'),
           useValue: jest.fn(),
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            getOrThrow: (key: string) => key,
+          },
         },
       ],
     })
@@ -487,6 +498,48 @@ describe('Answers', () => {
       );
     });
 
+    it('should generate a presigned URL', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate });
+      const userAnswer1 = await formsDbConnection
+        .collection('answers')
+        .insertOne({
+          report: template.insertedId,
+          reportName: 'answer 1',
+          language: 'en',
+          user: new mongoose.Types.ObjectId(ROLES.USER.id),
+          responses: [
+            { name: 'question-1', value: { url: 'some url', isPublic: false } },
+          ],
+        });
+      const response = await request(app.getHttpServer())
+        .get(
+          `/templates/${template.insertedId.toString()}/answers/${userAnswer1.insertedId.toString()}`,
+        )
+        .set('Authorization', 'USER')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty(
+        'id',
+        userAnswer1.insertedId.toString(),
+      );
+      expect(response.body.data).toHaveProperty('attributes');
+      expect(response.body.data.attributes).toHaveProperty(
+        'report',
+        template.insertedId.toString(),
+      );
+      expect(response.body.data.attributes).toHaveProperty(
+        'reportName',
+        'answer 1',
+      );
+      expect(response.body.data.attributes.responses[0].value).toMatchObject({
+        url: 'https://s3.amazonaws.com/bucket/folder/presigned.ext',
+        isPublic: false,
+      });
+    });
+
     it('should return an answer containing the creators full name', async () => {
       const template = await formsDbConnection
         .collection('reports')
@@ -774,11 +827,13 @@ describe('Answers', () => {
       expect(answerResponses).toHaveLength(1);
       const firstAnswerResponse = answerResponses[0];
       expect(firstAnswerResponse.name).toBe('question-1');
-      expect(firstAnswerResponse.value).toBeInstanceOf(Array);
-      expect(firstAnswerResponse.value).toHaveLength(1);
-      expect(firstAnswerResponse.value[0]).toBe(
-        'https://s3.amazonaws.com/bucket/folder/uuid.ext',
-      );
+      expect(firstAnswerResponse.value).toBeInstanceOf(Object);
+      expect(firstAnswerResponse.value).toMatchObject([
+        {
+          originalUrl: 'https://s3.amazonaws.com/bucket/folder/uuid.ext',
+          url: 'https://s3.amazonaws.com/bucket/folder/presigned.ext',
+        },
+      ]);
     });
 
     it('should return a 401 if submitting an assignment the user is not a monitor on', async () => {
@@ -1184,6 +1239,214 @@ describe('Answers', () => {
         'id',
         answer.insertedId.toString(),
       );
+    });
+  });
+
+  describe('PATCH /templates/:templateId/answers/:id', () => {
+    afterEach(async () => {
+      await teamsDbConnection.collection('gfwteams').deleteMany({});
+      await teamsDbConnection.collection('teamuserrelations').deleteMany({});
+      await formsDbConnection.collection('reports').deleteMany({});
+      await formsDbConnection.collection('answers').deleteMany({});
+    });
+
+    it('should return a 401 without authorisation', async () => {
+      return await request(app.getHttpServer())
+        .post(`/templates/${2}/answers`)
+        .expect(401);
+    });
+
+    it('should update an answers response permissions', async () => {
+      const url1 = faker.internet.url();
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate });
+      const mockAnswer = {
+        report: template.insertedId,
+        reportName: faker.lorem.word(),
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [
+          { name: 'question-1', value: { url: url1, isPublic: false } },
+        ],
+      };
+      const userAnswer1 = await formsDbConnection
+        .collection('answers')
+        .insertOne(mockAnswer);
+      await request(app.getHttpServer())
+        .patch(
+          `/templates/${template.insertedId.toString()}/answers/${userAnswer1.insertedId.toString()}`,
+        )
+        .set('Authorization', 'USER')
+        .send({
+          privateFiles: [],
+          publicFiles: [url1],
+        })
+        .expect(200);
+
+      const answer = await formsDbConnection
+        .collection('answers')
+        .findOne({ report: template.insertedId });
+      expect(answer).toBeDefined();
+      expect(answer).toHaveProperty('reportName', mockAnswer.reportName);
+      expect(answer).toHaveProperty('responses');
+      expect(answer?.responses[0]).toHaveProperty('name', 'question-1');
+      expect(answer?.responses[0].value).toMatchObject({
+        url: url1,
+        isPublic: true,
+      });
+    });
+
+    it('should update an answers array of images response permissions', async () => {
+      const url1 = faker.internet.url();
+      const url2 = faker.internet.url();
+      const url3 = faker.internet.url();
+      const url4 = faker.internet.url();
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate });
+      const mockAnswer = {
+        report: template.insertedId,
+        reportName: faker.lorem.word(),
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [
+          {
+            name: 'question-1',
+            value: [
+              { url: url1, isPublic: false },
+              { url: url2, isPublic: true },
+              { url: url3, isPublic: true },
+              { url: url4, isPublic: false },
+            ],
+          },
+        ],
+      };
+      const userAnswer1 = await formsDbConnection
+        .collection('answers')
+        .insertOne(mockAnswer);
+      await request(app.getHttpServer())
+        .patch(
+          `/templates/${template.insertedId.toString()}/answers/${userAnswer1.insertedId.toString()}`,
+        )
+        .set('Authorization', 'USER')
+        .send({
+          privateFiles: [url2],
+          publicFiles: [url1],
+        })
+        .expect(200);
+
+      const answer = await formsDbConnection
+        .collection('answers')
+        .findOne({ report: template.insertedId });
+      expect(answer).toBeDefined();
+      expect(answer).toHaveProperty('reportName', mockAnswer.reportName);
+      expect(answer).toHaveProperty('responses');
+      expect(answer?.responses[0]).toHaveProperty('name', 'question-1');
+      expect(answer?.responses[0].value).toMatchObject([
+        { url: url1, isPublic: true },
+        { url: url2, isPublic: false },
+        { url: url3, isPublic: true },
+        { url: url4, isPublic: false },
+      ]);
+    });
+
+    it('should update multiple question responses', async () => {
+      const url1 = faker.internet.url();
+      const url2 = faker.internet.url();
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate });
+      const mockAnswer = {
+        report: template.insertedId,
+        reportName: faker.lorem.word(),
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.USER.id),
+        responses: [
+          {
+            name: 'question-1',
+            value: [{ url: url1, isPublic: false }],
+          },
+          {
+            name: 'question-2',
+            value: { url: url2, isPublic: true },
+          },
+        ],
+      };
+      const userAnswer1 = await formsDbConnection
+        .collection('answers')
+        .insertOne(mockAnswer);
+      await request(app.getHttpServer())
+        .patch(
+          `/templates/${template.insertedId.toString()}/answers/${userAnswer1.insertedId.toString()}`,
+        )
+        .set('Authorization', 'USER')
+        .send({
+          privateFiles: [url2],
+          publicFiles: [url1],
+        })
+        .expect(200);
+
+      const answer = await formsDbConnection
+        .collection('answers')
+        .findOne({ report: template.insertedId });
+      expect(answer).toBeDefined();
+      expect(answer).toHaveProperty('reportName', mockAnswer.reportName);
+      expect(answer).toHaveProperty('responses');
+      expect(answer?.responses[0]).toHaveProperty('name', 'question-1');
+      expect(answer?.responses[0].value).toMatchObject([
+        { url: url1, isPublic: true },
+      ]);
+      expect(answer?.responses[1]).toHaveProperty('name', 'question-2');
+      expect(answer?.responses[1].value).toMatchObject({
+        url: url2,
+        isPublic: false,
+      });
+    });
+
+    it('should return 404 if answer doesnt exist', async () => {
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate });
+      await request(app.getHttpServer())
+        .patch(
+          `/templates/${template.insertedId.toString()}/answers/${template.insertedId.toString()}`,
+        )
+        .set('Authorization', 'USER')
+        .send({
+          privateFiles: [],
+          publicFiles: [],
+        })
+        .expect(404);
+    });
+
+    it('should return 403 if user doesnt own answer', async () => {
+      const url1 = faker.internet.url();
+      const template = await formsDbConnection
+        .collection('reports')
+        .insertOne({ ...constants.userTemplate });
+      const mockAnswer = {
+        report: template.insertedId,
+        reportName: faker.lorem.word(),
+        language: 'en',
+        user: new mongoose.Types.ObjectId(ROLES.MANAGER.id),
+        responses: [
+          { name: 'question-1', value: { url: url1, isPublic: false } },
+        ],
+      };
+      const userAnswer1 = await formsDbConnection
+        .collection('answers')
+        .insertOne(mockAnswer);
+      await request(app.getHttpServer())
+        .patch(
+          `/templates/${template.insertedId.toString()}/answers/${userAnswer1.insertedId.toString()}`,
+        )
+        .set('Authorization', 'USER')
+        .send({
+          privateFiles: [],
+          publicFiles: [url1],
+        })
+        .expect(403);
     });
   });
 
