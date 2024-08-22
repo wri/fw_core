@@ -40,7 +40,7 @@ export class StatisticsController {
   async reportStats(@AuthUser() user: IUser): Promise<any> {
     if (
       this.configService.get('ENV') === 'production' &&
-      user.role !== 'ADMIN'
+      !['ADMIN', 'MANAGER'].includes(user.role)
     ) {
       throw new UnauthorizedException('Only an admin can access this data');
     }
