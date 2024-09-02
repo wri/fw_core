@@ -68,20 +68,21 @@ export class StatisticsService {
       months: { month: string; count: number }[];
     }[] = [];
     dates.forEach((dateString) => {
-      const date = new Date(dateString);
+      let date = new Date(dateString);
+      if (typeof Number(dateString) === 'number' && !isNaN(Number(dateString)))
+        date = new Date(Number(dateString));
       const year = date.getFullYear().toString();
-      if (year === 'NaN') console.log(date, dateString);
       const month = date.toLocaleString('default', { month: 'long' });
       const yearObjIndex = stats.findIndex(
         (yearStat) => yearStat.year === year,
       );
-      if (yearObjIndex === -1)
+      if (yearObjIndex === -1) {
         stats.push({
           year,
           count: 1,
           months: [{ month, count: 1 }],
         });
-      else {
+      } else {
         const yearObj = stats[yearObjIndex];
         const months = yearObj.months;
         const monthObjIndex = months.findIndex(
