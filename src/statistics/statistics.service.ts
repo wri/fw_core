@@ -70,7 +70,7 @@ export class StatisticsService {
     dates.forEach((dateString) => {
       const date = new Date(dateString);
       const year = date.getFullYear().toString();
-      if(year === "NaN") console.log(date, dateString)
+      if (year === 'NaN') console.log(date, dateString);
       const month = date.toLocaleString('default', { month: 'long' });
       const yearObjIndex = stats.findIndex(
         (yearStat) => yearStat.year === year,
