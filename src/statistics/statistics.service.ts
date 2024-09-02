@@ -69,7 +69,7 @@ export class StatisticsService {
     }[] = [];
     dates.forEach((dateString) => {
       let date = new Date(dateString);
-      if (typeof Number(dateString) === 'number')
+      if (typeof Number(dateString) === 'number' && !isNaN(Number(dateString)))
         date = new Date(Number(dateString));
       const year = date.getFullYear().toString();
       const month = date.toLocaleString('default', { month: 'long' });
