@@ -77,10 +77,6 @@ export class StatisticsService {
         (yearStat) => yearStat.year === year,
       );
       if (yearObjIndex === -1) {
-        console.log(year);
-        if (year === 'NaN' || date.getFullYear() === Number.NaN)
-          console.log(date, dateString, Number(dateString));
-        console.log(typeof Number(dateString));
         stats.push({
           year,
           count: 1,
