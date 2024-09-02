@@ -68,7 +68,6 @@ export class StatisticsService {
       months: { month: string; count: number }[];
     }[] = [];
     dates.forEach((dateString) => {
-
       let date = new Date(dateString);
       if(typeof Number(dateString) === 'number') date = new Date(Number(dateString));
       const year = date.getFullYear().toString();
