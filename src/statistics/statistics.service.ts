@@ -74,16 +74,16 @@ export class StatisticsService {
       const yearObjIndex = stats.findIndex(
         (yearStat) => yearStat.year === year,
       );
-      if (yearObjIndex === -1){
-        console.log(year)
-        if (year === 'NaN' || date.getFullYear() === Number.NaN) console.log(date, dateString);
+      if (yearObjIndex === -1) {
+        console.log(year);
+        if (year === 'NaN' || date.getFullYear() === Number.NaN)
+          console.log(date, dateString);
         stats.push({
           year,
           count: 1,
           months: [{ month, count: 1 }],
         });
-      }
-      else {
+      } else {
         const yearObj = stats[yearObjIndex];
         const months = yearObj.months;
         const monthObjIndex = months.findIndex(
