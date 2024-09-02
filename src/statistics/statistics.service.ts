@@ -68,7 +68,7 @@ export class StatisticsService {
       months: { month: string; count: number }[];
     }[] = [];
     dates.forEach((dateString) => {
-      const date = new Date(dateString);
+      const date = new Date(dateString.toString());
       const year = date.getFullYear().toString();
       const month = date.toLocaleString('default', { month: 'long' });
       const yearObjIndex = stats.findIndex(
