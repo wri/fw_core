@@ -6,6 +6,7 @@ on:
       - dev
       - staging
       - production
+  workflow_dispatch:
 
 jobs:
   build:
