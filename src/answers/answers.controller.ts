@@ -58,8 +58,11 @@ export class AnswersController {
     const userPosition = fields.userPosition ?? [];
 
     this.logger.log('CREATING REPORT');
-    this.logger.log('FIELDS', fields)
-    this.logger.log('FILE ARRAY', fileArray?.map(file => file.fieldname))
+    this.logger.log('FIELDS', fields);
+    this.logger.log(
+      'FILE ARRAY',
+      fileArray?.map((file) => file.fieldname),
+    );
     this.logger.log(
       'TEMPLATE',
       template.id,
