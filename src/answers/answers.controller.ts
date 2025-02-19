@@ -57,6 +57,8 @@ export class AnswersController {
 
     const userPosition = fields.userPosition ?? [];
 
+    this.logger.log("CREATING REPORT")
+
     // This groups the file uploads by fieldname
     const fileGroups = fileArray?.reduce((acc, file) => {
       const questionName = file.fieldname;
@@ -122,13 +124,16 @@ export class AnswersController {
       }
 
       if (question.type === QuestionType.AUDIO) {
+        this.logger.log("QUESTION TYPE IS AUDIO")
         const [file] = files;
         const isPublic = fields.publicFiles?.includes(file.originalname);
+        this.logger.log("UPLOADING FILE", file.path, file.originalname, isPublic)
         const fileUrl = await this.s3Service.uploadFile({
           filePath: file.path,
           fullFileName: file.originalname,
           isPublic,
         });
+        this.logger.log("UPLOADED FILE", fileUrl)
         return answer.responses.push({
           name: question.name,
           value: { url: fileUrl, isPublic },

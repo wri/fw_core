@@ -58,10 +58,10 @@ export class S3Service {
 
     try{
       const upload = await this.s3.upload(uploadParams).promise();
-      console.log("UPLOADED", upload)
+      this.logger.log("UPLOADED", upload)
       return upload.Location;
     } catch(err) {
-      console.log("ERROR IN UPLOADING", err)
+      this.logger.log("ERROR IN UPLOADING", err)
       throw err
     }
   }
