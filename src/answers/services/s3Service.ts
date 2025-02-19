@@ -55,14 +55,13 @@ export class S3Service {
       ACL: opts.isPublic ? 'public-read' : 'private',
     };
 
-
-    try{
+    try {
       const upload = await this.s3.upload(uploadParams).promise();
-      console.log("UPLOADED", upload)
+      console.log('UPLOADED', upload);
       return upload.Location;
-    } catch(err) {
-      console.log("ERROR IN UPLOADING", err)
-      throw err
+    } catch (err) {
+      console.log('ERROR IN UPLOADING', err);
+      throw err;
     }
   }
 
