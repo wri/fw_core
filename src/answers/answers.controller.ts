@@ -60,7 +60,7 @@ export class AnswersController {
     this.logger.log('CREATING REPORT');
     this.logger.log('FIELDS', JSON.stringify(fields));
     this.logger.log(
-      'FILE ARRAY',
+      'FILE ARRAY', fileArray?.length,
       fileArray?.map((file) => file.fieldname),
     );
     this.logger.log(
