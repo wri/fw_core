@@ -172,7 +172,7 @@ export class AnswersController {
           `${question.label[answer.language]} (${question.name}) required`,
         );
 
-      this.logger.log("ANSWERING QUESTION", name)
+      this.logger.log('ANSWERING QUESTION', name);
 
       await addResponseOrFail(question);
 
