@@ -58,7 +58,11 @@ export class AnswersController {
     const userPosition = fields.userPosition ?? [];
 
     this.logger.log('CREATING REPORT');
-    this.logger.log('TEMPLATE', template.id, template.questions?.map(question => question.name))
+    this.logger.log(
+      'TEMPLATE',
+      template.id,
+      template.questions?.map((question) => question.name),
+    );
 
     // This groups the file uploads by fieldname
     const fileGroups = fileArray?.reduce((acc, file) => {
