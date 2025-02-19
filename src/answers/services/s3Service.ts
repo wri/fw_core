@@ -55,8 +55,15 @@ export class S3Service {
       ACL: opts.isPublic ? 'public-read' : 'private',
     };
 
-    const upload = await this.s3.upload(uploadParams).promise();
-    return upload.Location;
+
+    try{
+      const upload = await this.s3.upload(uploadParams).promise();
+      console.log("UPLOADED", upload)
+      return upload.Location;
+    } catch(err) {
+      console.log("ERROR IN UPLOADING", err)
+      throw err
+    }
   }
 
   async generatePresignedUrl(input: {
