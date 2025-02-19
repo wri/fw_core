@@ -58,7 +58,7 @@ export class AnswersController {
     const userPosition = fields.userPosition ?? [];
 
     this.logger.log('CREATING REPORT');
-    this.logger.log('FIELDS', fields);
+    this.logger.log('FIELDS', JSON.stringify(fields));
     this.logger.log(
       'FILE ARRAY',
       fileArray?.map((file) => file.fieldname),
