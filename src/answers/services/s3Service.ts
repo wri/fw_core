@@ -55,8 +55,7 @@ export class S3Service {
       ACL: opts.isPublic ? 'public-read' : 'private',
     };
 
-
-    try{
+    try {
       const upload = await this.s3.upload(uploadParams).promise();
       this.logger.log("UPLOADED", upload)
       return upload.Location;
