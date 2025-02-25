@@ -30,7 +30,6 @@ async function bootstrap() {
 
   app.use(async (req, res, next) => {
     try {
-      console.log("RAW FILES",req.file, req.files, req.body);
       await next();
     } catch (inErr: any) {
       let error = inErr;
