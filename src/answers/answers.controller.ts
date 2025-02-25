@@ -72,7 +72,7 @@ export class AnswersController {
       template.questions?.map((question) => question.name),
     );
     this.logger.log(`File is ${request.file?.fieldname}`);
-    this.logger.log(`Files are ${request.files?.length}`)
+    this.logger.log(`Files are ${request.files?.length}`);
 
     // This groups the file uploads by fieldname
     const fileGroups = fileArray?.reduce((acc, file) => {
