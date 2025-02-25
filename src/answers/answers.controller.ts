@@ -55,24 +55,7 @@ export class AnswersController {
   ) {
     const { template } = request;
 
-    this.logger.log('REQUEST', JSON.stringify(request.readableObjectMode));
-
     const userPosition = fields.userPosition ?? [];
-
-    this.logger.log('CREATING REPORT');
-    this.logger.log('FIELDS', JSON.stringify(fields));
-    this.logger.log(
-      'FILE ARRAY',
-      fileArray?.length,
-      fileArray?.map((file) => file.fieldname),
-    );
-    this.logger.log(
-      'TEMPLATE',
-      template.id,
-      template.questions?.map((question) => question.name),
-    );
-    this.logger.log(`File is ${request.file?.fieldname}`);
-    this.logger.log(`Files are ${request.files?.length}`);
 
     // This groups the file uploads by fieldname
     const fileGroups = fileArray?.reduce((acc, file) => {
@@ -139,21 +122,13 @@ export class AnswersController {
       }
 
       if (question.type === QuestionType.AUDIO) {
-        this.logger.log('QUESTION TYPE IS AUDIO');
         const [file] = files;
         const isPublic = fields.publicFiles?.includes(file.originalname);
-        this.logger.log(
-          'UPLOADING FILE',
-          file.path,
-          file.originalname,
-          isPublic,
-        );
         const fileUrl = await this.s3Service.uploadFile({
           filePath: file.path,
           fullFileName: file.originalname,
           isPublic,
         });
-        this.logger.log('UPLOADED FILE', fileUrl);
         return answer.responses.push({
           name: question.name,
           value: { url: fileUrl, isPublic },
@@ -185,8 +160,6 @@ export class AnswersController {
         throw new BadRequestException(
           `${question.label[answer.language]} (${question.name}) required`,
         );
-
-      this.logger.log('ANSWERING QUESTION', name);
 
       await addResponseOrFail(question);
 
