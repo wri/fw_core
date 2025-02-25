@@ -55,7 +55,7 @@ export class AnswersController {
   ) {
     const { template } = request;
 
-    this.logger.log('REQUEST', JSON.stringify(request));
+    this.logger.log('REQUEST', JSON.stringify(request.readableObjectMode));
 
     const userPosition = fields.userPosition ?? [];
 
