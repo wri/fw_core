@@ -55,6 +55,8 @@ export class AnswersController {
   ) {
     const { template } = request;
 
+    this.logger.log('REQUEST', JSON.stringify(request))
+
     const userPosition = fields.userPosition ?? [];
 
     this.logger.log('CREATING REPORT');
