@@ -53,7 +53,10 @@ export class AreasService {
       return data && data.data;
     } catch (e: any) {
       if (e.response.status === 404) return null;
-      this.logger.error(`Error while fetching area ${areaId}`, e.response.status);
+      this.logger.error(
+        `Error while fetching area ${areaId}`,
+        e.response.status,
+      );
       throw e;
     }
   }
