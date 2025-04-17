@@ -42,7 +42,6 @@ export class UserService {
           authorization: `Bearer ${this.configService.get('service.token')}`,
         },
       };
-      this.logger.log(`Fetching user with id ${userId}`, url, getUserDetailsRequestConfig);
       const response = await axios.get(url, getUserDetailsRequestConfig);
       const user = response.data;
       if (!user || !user.data) return null;
