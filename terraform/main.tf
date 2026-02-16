@@ -1,5 +1,14 @@
 # Require TF version to be same as or greater than 0.12.24
 terraform {
+  required_version = ">= 0.12.24"
+  
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 4.22.0"
+    }
+  }
+  
   backend "s3" {
     region  = "us-east-1"
     key     = "wri__fw_core.tfstate"
