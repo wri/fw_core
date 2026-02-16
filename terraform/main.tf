@@ -13,7 +13,7 @@ provider "aws" {
 
 # Docker image for FW Template app
 module "app_docker_image" {
-  source     = "git::https://github.com/wri/gfw-terraform-modules.git//terraform/modules/container_registry?ref=v0.5.1"
+  source     = "git::https://github.com/wri/gfw-terraform-modules.git//terraform/modules/container_registry?ref=v0.4.2.13"
   image_name = lower("${var.project_prefix}-docker-image")
   root_dir   = "${path.root}/../"
   tag        = local.container_tag
