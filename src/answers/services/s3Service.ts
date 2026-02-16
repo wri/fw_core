@@ -44,8 +44,7 @@ export class S3Service {
     isPublic?: boolean;
   }): Promise<string> {
     const ext = this.getExtension(opts.fullFileName);
-    const data = await fs.readFile(opts.filePath);
-    const buffer = Buffer.from(data);
+    const buffer = await fs.readFile(opts.filePath);
     const uuid = v4();
 
     const uploadParams: AWS.S3.PutObjectRequest = {
